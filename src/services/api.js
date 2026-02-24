@@ -18,26 +18,6 @@ export const api = {
     })
     if (!res.ok) throw new Error('Login failed')
     return res.json()
-  },
-  getStudents: async () => {
-    const res = await fetch(`${BASE_URL}/students`)
-    return res.json()
-  },
-  getPracticeLogs: async (studentId) => {
-    const res = await fetch(`${BASE_URL}/practice-logs/${studentId}`)
-    return res.json()
-  },
-  getHomework: async (studentId) => {
-    const res = await fetch(`${BASE_URL}/homework/${studentId}`)
-    return res.json()
-  },
-  chatWithTami: async (message, context) => {
-    const res = await fetch(`${BASE_URL}/tami/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, context })
-    })
-    return res.json()
   }
 }
 
@@ -51,26 +31,26 @@ export async function tamiWeeklyReview(studentId) {
   return res.json()
 }
 
-export async function getPracticeStats(studentId) {
-  const res = await fetch(`${BASE_URL}/practice-stats/${studentId}`)
+export async function getPracticeStats(studentName) {
+  const res = await fetch(`${BASE_URL}/practice-stats/${encodeURIComponent(studentName)}`)
   return res.json()
 }
 
-export async function getStudentHomework(studentId) {
-  const res = await fetch(`${BASE_URL}/homework/${studentId}`)
+export async function getStudentAssignments(studentName) {
+  const res = await fetch(`${BASE_URL}/homework/${encodeURIComponent(studentName)}`)
   return res.json()
 }
 
-export async function submitPracticeLog(data) {
-  const res = await fetch(`${BASE_URL}/practice-logs`, {
+export async function getRecentLogs(studentName) {
+  const res = await fetch(`${BASE_URL}/practice-logs/${encodeURIComponent(studentName)}`)
+  return res.json()
+}
+
+export async function tamiChat(studentName, message, history) {
+  const res = await fetch(`${BASE_URL}/tami/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+    body: JSON.stringify({ student_name: studentName, message, history })
   })
-  return res.json()
-}
-
-export async function getSessionNotes(studentId) {
-  const res = await fetch(`${BASE_URL}/session-notes/${studentId}`)
   return res.json()
 }
