@@ -40,3 +40,13 @@ export const api = {
     return res.json()
   }
 }
+
+export async function getStudentsWithRisk() {
+  const res = await fetch(`${BASE_URL}/students`)
+  return res.json()
+}
+
+export async function tamiWeeklyReview(studentId) {
+  const res = await fetch(`${BASE_URL}/tami/weekly-review/${studentId}`)
+  return res.json()
+}
