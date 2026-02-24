@@ -50,3 +50,27 @@ export async function tamiWeeklyReview(studentId) {
   const res = await fetch(`${BASE_URL}/tami/weekly-review/${studentId}`)
   return res.json()
 }
+
+export async function getPracticeStats(studentId) {
+  const res = await fetch(`${BASE_URL}/practice-stats/${studentId}`)
+  return res.json()
+}
+
+export async function getStudentHomework(studentId) {
+  const res = await fetch(`${BASE_URL}/homework/${studentId}`)
+  return res.json()
+}
+
+export async function submitPracticeLog(data) {
+  const res = await fetch(`${BASE_URL}/practice-logs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  return res.json()
+}
+
+export async function getSessionNotes(studentId) {
+  const res = await fetch(`${BASE_URL}/session-notes/${studentId}`)
+  return res.json()
+}
