@@ -72,22 +72,13 @@ export default function Login({ onLogin }) {
       <div style={styles.glowBottom} />
       <div style={styles.glowLeft} />
 
-      {/* Logo with laser glow */}
       <div style={styles.logoWrapper}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', width: '195px', height: '195px', borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#d946ef', borderRightColor: '#a855f7', animation: 'laserSpin 3s linear infinite', filter: 'drop-shadow(0 0 8px rgba(217,70,239,0.6)) drop-shadow(0 0 20px rgba(168,85,247,0.3))' }} />
         <div style={{ position: 'absolute', top: '50%', left: '50%', width: '205px', height: '205px', borderRadius: '50%', border: '1px solid transparent', borderBottomColor: '#06b6d4', borderLeftColor: '#8b5cf6', animation: 'laserSpin 5s linear infinite reverse', filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.4)) drop-shadow(0 0 15px rgba(139,92,246,0.2))' }} />
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '240px', height: '240px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.3) 0%, rgba(139,92,246,0.1) 40%, transparent 70%)', filter: 'blur(15px)', pointerEvents: 'none', animation: 'glowPulse 4s ease-in-out infinite' }} />
         <div style={styles.logoCircle}>
-          <video ref={videoRef} src="/logo-anim.mp4" muted playsInline
-            style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
-            onError={(e) => {
-              e.target.style.display = 'none'
-              const img = document.createElement('img')
-              img.src = '/logo.png'
-              img.style.cssText = 'width:100%;height:100%;object-fit:cover;'
-              img.onerror = () => { e.target.parentElement.innerHTML = '<span style="font-size:56px">🎵</span>' }
-              e.target.parentElement.appendChild(img)
-            }} />
+          <video ref={videoRef} src="/logo-anim.mp4" muted playsInline style={styles.logoVideo}
+            onError={(e) => { e.target.style.display = 'none'; const img = document.createElement('img'); img.src = '/logo.png'; img.style.cssText = 'width:90%;height:90%;object-fit:contain;'; img.onerror = () => { e.target.parentElement.innerHTML = '<span style=\"font-size:48px\">🎵</span>' }; e.target.parentElement.appendChild(img) }} />
         </div>
       </div>
 
@@ -135,6 +126,7 @@ const styles = {
   glowLeft: { position: 'absolute', top: '30%', left: '-100px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(217,70,239,0.06) 0%, transparent 70%)', pointerEvents: 'none' },
   logoWrapper: { position: 'relative', marginBottom: '24px', width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   logoCircle: { position: 'relative', width: '180px', height: '180px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(168,85,247,0.3), 0 0 80px rgba(168,85,247,0.15)', overflow: 'hidden', zIndex: 2 },
+  logoVideo: { width: '92%', height: '92%', objectFit: 'contain', background: '#fff' },
   title: { color: '#fff', fontSize: '34px', fontWeight: '700', marginBottom: '4px', letterSpacing: '-0.5px', textAlign: 'center', animation: 'fadeInUp 0.6s ease-out' },
   titleAccent: { color: '#d946ef', textShadow: '0 0 30px rgba(217,70,239,0.3)' },
   subtitle: { color: 'rgba(255,255,255,0.45)', fontSize: '14px', marginBottom: '32px', letterSpacing: '2px', textAlign: 'center', textTransform: 'uppercase', animation: 'fadeInUp 0.6s ease-out 0.1s both' },
