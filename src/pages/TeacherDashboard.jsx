@@ -17,9 +17,17 @@ export default function TeacherDashboard() {
   const [review, setReview] = useState(null)
 
   useEffect(() => {
-    getStudentsWithRisk()
-      .then(data => { setStudents(data); setLoading(false) })
-      .catch(() => { setStudents(DEMO_STUDENTS); setLoading(false) })
+    // Load demo students immediately, try API in background
+    setStudents(DEMO_STUDENTS)
+    setLoading(false)
+    // Try API with timeout — update if successful
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+    fetch((import.meta.env?.VITE_API_URL || 'http://localhost:8000') + '/students', { signal: controller.signal })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => { if (Array.isArray(data) && data.length > 0) setStudents(data) })
+      .catch(() => {})
+      .finally(() => clearTimeout(timeout))
   }, [])
 
   const filtered = filter === "all" ? students : students.filter(s => s.risk_level === filter)
