@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Emergent Base Styles ── */
+@layer base {
+  body {
+    @apply bg-bg font-sans text-white antialiased;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+
+  /* Placeholder text */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-white/25;
+  }
+}
+
+/* ── Reusable Component Classes ── */
+@layer components {
+
+  /* Glass card — the core Emergent card */
+  .glass-card {
+    @apply bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-card;
+  }
+  .glass-card-hover {
+    @apply glass-card hover:bg-white/[0.10] hover:border-white/20 transition-all duration-300 cursor-pointer;
+  }
+
+  /* Gradient backgrounds */
+  .bg-emergent {
+    background: linear-gradient(180deg, #0f0a1a 0%, #1a1035 40%, #120e2a 70%, #0a0612 100%);
+  }
+
+  /* Buttons */
+  .btn-teal {
+    @apply bg-gradient-to-r from-teal-500 to-teal-400 text-white font-semibold py-3 px-6 rounded-btn
+           hover:from-teal-400 hover:to-teal-300 transition-all duration-200 shadow-glow-teal;
+  }
+  .btn-purple {
+    @apply bg-gradient-to-r from-brand-purple to-purple-500 text-white font-semibold py-3 px-6 rounded-btn
+           hover:from-purple-400 hover:to-purple-400 transition-all duration-200 shadow-glow-purple;
+  }
+  .btn-pink {
+    @apply bg-gradient-to-r from-brand-pink to-pink-400 text-white font-semibold py-3 px-6 rounded-btn
+           hover:from-pink-400 hover:to-pink-300 transition-all duration-200 shadow-glow-pink;
+  }
+  .btn-outline {
+    @apply border border-white/20 text-white/70 font-medium py-3 px-6 rounded-btn
+           hover:border-white/40 hover:text-white transition-all duration-200;
+  }
+
+  /* Inputs */
+  .input-dark {
+    @apply bg-white/[0.08] border border-white/15 rounded-btn px-4 py-3 text-white text-sm
+           placeholder:text-white/25 focus:outline-none focus:border-brand-purple/60 focus:ring-1 focus:ring-brand-purple/30
+           transition-all duration-200;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge-critical {
+    @apply badge bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+  .badge-warning {
+    @apply badge bg-amber-500/20 text-amber-400 border border-amber-500/30;
+  }
+  .badge-success {
+    @apply badge bg-green-500/20 text-green-400 border border-green-500/30;
+  }
+  .badge-info {
+    @apply badge bg-blue-500/20 text-blue-400 border border-blue-500/30;
+  }
+  .badge-purple {
+    @apply badge bg-purple-500/20 text-purple-400 border border-purple-500/30;
+  }
+  .badge-teal {
+    @apply badge bg-teal-500/20 text-teal-400 border border-teal-500/30;
+  }
+
+  /* Ambient glow orbs (background decoration) */
+  .glow-orb {
+    @apply absolute rounded-full blur-3xl pointer-events-none;
+  }
+
+  /* Section titles */
+  .section-title {
+    @apply text-lg font-bold text-white/90 mb-4;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-bg/95 backdrop-blur-lg border-t border-white/10
+           flex justify-around items-center py-2 px-4 z-40;
+  }
+  .nav-item {
+    @apply flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl text-[10px] font-medium
+           text-white/40 transition-all duration-200;
+  }
+  .nav-item-active {
+    @apply nav-item text-brand-teal bg-teal-500/10;
+  }
+}
+
+/* ── Utility Animations ── */
+@layer utilities {
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
+  .animate-delay-400 { animation-delay: 400ms; }
+  .animate-delay-500 { animation-delay: 500ms; }
+  .animate-delay-600 { animation-delay: 600ms; }
+}
