@@ -16,7 +16,7 @@ export default function Login({ onLogin }) {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${BASE}/auth/login`, {
+      const res = await fetch(`${BASE}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -35,7 +35,7 @@ export default function Login({ onLogin }) {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${BASE}/auth/register`, {
+      const res = await fetch(`${BASE}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role })
