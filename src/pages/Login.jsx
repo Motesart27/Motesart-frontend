@@ -1,139 +1,111 @@
 import { useState } from 'react'
+import { api } from '../services/api'
 
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-export default function Login({ onLogin }) {
+export default function Login() {
+  const [tab, setTab] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [role, setRole] = useState('Student')
-  const [tab, setTab] = useState('signin')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState('')
 
   const handleSignIn = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-     const res = await fetch(`${BASE}/api/users/by-email/${encodeURIComponent(email)}`)
-      if (!res.ok) throw new Error('Login failed')
-      const data = await res.json()
-      onLogin(data.user || data)
+      const result = await api.login(email, password)
+      if (result.success) {
+        localStorage.setItem('user', JSON.stringify(result.user))
+        const roles = result.user.role || []
+        if (roles.includes('Teacher') || roles.includes('Admin')) {
+          window.location.href = '/teacher'
+        } else {
+          window.location.href = '/student'
+        }
+      }
     } catch (err) {
-      setError('Login failed. Check your email and try again.')
+      setError(err.message || 'Login failed. Check your email and password.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const handleRegister = async (e) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
     setLoading(true)
     try {
-      const res = await fetch(`${BASE}/api/users/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role })
-      })
-      if (!res.ok) throw new Error('Registration failed')
-      const data = await res.json()
-      onLogin(data.user || data)
+      const result = await api.register({ name, email, password, role })
+      if (result.success) {
+        setSuccess('Account created! You can now sign in.')
+        setTab('signin')
+        setName('')
+        setPassword('')
+      }
     } catch (err) {
-      setError('Registration failed. Try again.')
+      setError(err.message || 'Registration failed. Try again.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0d0d1a 0%, #1a1035 50%, #0d0d1a 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: "'DM Sans', -apple-system, sans-serif",
-      padding: 20,
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: 420,
-        background: '#151520',
-        borderRadius: 20,
-        border: '1px solid rgba(255,255,255,0.08)',
-        padding: '40px 32px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-      }}>
+    <div style={styles.page}>
+      <div style={styles.card}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{
-            width: 64, height: 64, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 32, marginBottom: 12,
-            boxShadow: '0 0 30px rgba(168,85,247,0.4)',
-          }}>🎵</div>
-          <h1 style={{
-            color: '#fff', fontSize: 24, fontWeight: 800,
-            margin: '0 0 4px 0', letterSpacing: '-0.5px',
-          }}>School of Motesart</h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, margin: 0 }}>
-            Powered by T.A.M.i
-          </p>
+        <div style={styles.logoWrap}>
+          <div style={styles.logoCircle}>
+            <span style={styles.logoEmoji}>🎵</span>
+          </div>
         </div>
+
+        <h1 style={styles.title}>School of Motesart</h1>
+        <p style={styles.subtitle}>Your musical journey starts here</p>
 
         {/* Tabs */}
-        <div style={{
-          display: 'flex', gap: 0, marginBottom: 24,
-          background: 'rgba(255,255,255,0.04)',
-          borderRadius: 12, padding: 4,
-        }}>
-          <button onClick={() => { setTab('signin'); setError('') }} style={{
-            flex: 1, padding: '10px 0', borderRadius: 10,
-            border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14,
-            background: tab === 'signin' ? 'rgba(168,85,247,0.2)' : 'transparent',
-            color: tab === 'signin' ? '#a855f7' : 'rgba(255,255,255,0.4)',
-            transition: 'all 0.2s',
-          }}>Sign In</button>
-          <button onClick={() => { setTab('register'); setError('') }} style={{
-            flex: 1, padding: '10px 0', borderRadius: 10,
-            border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14,
-            background: tab === 'register' ? 'rgba(168,85,247,0.2)' : 'transparent',
-            color: tab === 'register' ? '#a855f7' : 'rgba(255,255,255,0.4)',
-            transition: 'all 0.2s',
-          }}>Register</button>
+        <div style={styles.tabs}>
+          <button
+            style={tab === 'signin' ? styles.tabActive : styles.tab}
+            onClick={() => { setTab('signin'); setError(''); setSuccess('') }}
+          >
+            Sign In
+          </button>
+          <button
+            style={tab === 'register' ? styles.tabActive : styles.tab}
+            onClick={() => { setTab('register'); setError(''); setSuccess('') }}
+          >
+            Register
+          </button>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div style={{
-            padding: '10px 14px', borderRadius: 10, marginBottom: 16,
-            background: 'rgba(255,77,106,0.1)', color: '#ff4d6a',
-            fontSize: 13, textAlign: 'center',
-          }}>{error}</div>
-        )}
+        {/* Error / Success */}
+        {error && <div style={styles.error}>{error}</div>}
+        {success && <div style={styles.success}>{success}</div>}
 
         {/* Sign In Form */}
         {tab === 'signin' && (
-          <form onSubmit={handleSignIn}>
-            <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Email</label>
+          <form onSubmit={handleSignIn} style={styles.form}>
             <input
               type="email"
+              placeholder="Email address"
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              onChange={(e) => setEmail(e.target.value)}
               required
-              style={inputStyle}
+              style={styles.input}
             />
-            <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Password</label>
             <input
               type="password"
+              placeholder="Password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              style={inputStyle}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={styles.input}
             />
-            <button type="submit" disabled={loading} style={btnStyle}>
+            <button type="submit" disabled={loading} style={styles.button}>
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
@@ -141,97 +113,228 @@ export default function Login({ onLogin }) {
 
         {/* Register Form */}
         {tab === 'register' && (
-          <form onSubmit={handleRegister}>
-            <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Full Name</label>
+          <form onSubmit={handleRegister} style={styles.form}>
             <input
               type="text"
+              placeholder="Full name"
               value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Your full name"
+              onChange={(e) => setName(e.target.value)}
               required
-              style={inputStyle}
+              style={styles.input}
             />
-            <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Email</label>
             <input
               type="email"
+              placeholder="Email address"
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              onChange={(e) => setEmail(e.target.value)}
               required
-              style={inputStyle}
+              style={styles.input}
             />
-            <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Password</label>
             <input
               type="password"
+              placeholder="Create password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              onChange={(e) => setPassword(e.target.value)}
               required
-              style={inputStyle}
+              minLength={6}
+              style={styles.input}
             />
-            <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Role</label>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 20, marginTop: 6 }}>
-              {['Student', 'Teacher', 'Parent'].map(r => (
-                <button key={r} type="button" onClick={() => setRole(r)} style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10,
-                  border: role === r ? '1px solid #a855f7' : '1px solid rgba(255,255,255,0.08)',
-                  background: role === r ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.03)',
-                  color: role === r ? '#a855f7' : 'rgba(255,255,255,0.5)',
-                  fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                }}>{r}</button>
-              ))}
+
+            {/* Role Selection */}
+            <div style={styles.roleSection}>
+              <p style={styles.roleLabel}>I am a:</p>
+              <div style={styles.roleGrid}>
+                {['Student', 'Teacher', 'Parent'].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(r)}
+                    style={role === r ? styles.roleActive : styles.roleBtn}
+                  >
+                    {r === 'Student' ? '🎹' : r === 'Teacher' ? '🎼' : '👨‍👩‍👧'} {r}
+                  </button>
+                ))}
+              </div>
             </div>
-            <button type="submit" disabled={loading} style={btnStyle}>
+
+            <button type="submit" disabled={loading} style={styles.button}>
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
         )}
 
-        {/* Google SSO placeholder */}
-        <div style={{
-          textAlign: 'center', marginTop: 20,
-          paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          <button style={{
-            width: '100%', padding: '12px 0', borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.04)',
-            color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 14,
-            cursor: 'pointer', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', gap: 8,
-          }}>
-            <span style={{ fontSize: 18 }}>G</span>
-            Continue with Google
-          </button>
-        </div>
+        <p style={styles.footer}>
+          Powered by T.A.M.i — Teaching Assistant for Musical intelligence
+        </p>
       </div>
     </div>
   )
 }
 
-const inputStyle = {
-  width: '100%',
-  padding: '12px 14px',
-  borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.08)',
-  background: 'rgba(255,255,255,0.04)',
-  color: '#fff',
-  fontSize: 15,
-  marginTop: 6,
-  marginBottom: 16,
-  outline: 'none',
-  boxSizing: 'border-box',
-}
 
-const btnStyle = {
-  width: '100%',
-  padding: '14px 0',
-  borderRadius: 12,
-  border: 'none',
-  background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-  color: '#fff',
-  fontWeight: 700,
-  fontSize: 16,
-  cursor: 'pointer',
-  boxShadow: '0 4px 20px rgba(168,85,247,0.3)',
+const styles = {
+  page: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 30%, #2d1b69 60%, #1a0a3e 100%)',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    padding: '20px',
+  },
+  card: {
+    background: 'rgba(255, 255, 255, 0.05)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '24px',
+    padding: '40px',
+    maxWidth: '420px',
+    width: '100%',
+    textAlign: 'center',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+  },
+  logoWrap: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '16px',
+  },
+  logoCircle: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 0 30px rgba(99, 102, 241, 0.5)',
+  },
+  logoEmoji: {
+    fontSize: '36px',
+  },
+  title: {
+    color: '#ffffff',
+    fontSize: '28px',
+    fontWeight: '700',
+    margin: '0 0 4px 0',
+  },
+  subtitle: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: '14px',
+    margin: '0 0 24px 0',
+  },
+  tabs: {
+    display: 'flex',
+    gap: '4px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '12px',
+    padding: '4px',
+    marginBottom: '24px',
+  },
+  tab: {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    borderRadius: '10px',
+    background: 'transparent',
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+  },
+  tabActive: {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    color: '#ffffff',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  input: {
+    padding: '14px 16px',
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    background: 'rgba(255, 255, 255, 0.08)',
+    color: '#ffffff',
+    fontSize: '15px',
+    outline: 'none',
+    transition: 'border 0.2s',
+  },
+  button: {
+    padding: '14px',
+    borderRadius: '12px',
+    border: 'none',
+    background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+    color: '#ffffff',
+    fontSize: '16px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    marginTop: '8px',
+    boxShadow: '0 4px 15px rgba(6, 182, 212, 0.4)',
+  },
+  roleSection: {
+    textAlign: 'left',
+  },
+  roleLabel: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: '13px',
+    margin: '0 0 8px 0',
+  },
+  roleGrid: {
+    display: 'flex',
+    gap: '8px',
+  },
+  roleBtn: {
+    flex: 1,
+    padding: '10px 8px',
+    borderRadius: '10px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    background: 'rgba(255, 255, 255, 0.05)',
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: '12px',
+    cursor: 'pointer',
+  },
+  roleActive: {
+    flex: 1,
+    padding: '10px 8px',
+    borderRadius: '10px',
+    border: '1px solid #06b6d4',
+    background: 'rgba(6, 182, 212, 0.15)',
+    color: '#06b6d4',
+    fontSize: '12px',
+    cursor: 'pointer',
+    fontWeight: '700',
+  },
+  error: {
+    background: 'rgba(239, 68, 68, 0.15)',
+    border: '1px solid rgba(239, 68, 68, 0.3)',
+    color: '#fca5a5',
+    padding: '10px 14px',
+    borderRadius: '10px',
+    fontSize: '13px',
+    marginBottom: '12px',
+  },
+  success: {
+    background: 'rgba(34, 197, 94, 0.15)',
+    border: '1px solid rgba(34, 197, 94, 0.3)',
+    color: '#86efac',
+    padding: '10px 14px',
+    borderRadius: '10px',
+    fontSize: '13px',
+    marginBottom: '12px',
+  },
+  footer: {
+    color: 'rgba(255, 255, 255, 0.3)',
+    fontSize: '11px',
+    marginTop: '24px',
+    marginBottom: '0',
+  },
 }
