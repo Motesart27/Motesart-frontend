@@ -52,7 +52,7 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div style={{ padding: "0 32px 32px", maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ padding: "0 32px 32px", maxWidth: 1200, margin: "0 auto", fontFamily: "'DM Sans', sans-serif", background: "#0a0a0f", minHeight: "100vh", color: "#fff" }}>
 
       {/* ═══ TEACHER HEADER — Matches Student Dashboard Structure ═══ */}
       <div style={{
