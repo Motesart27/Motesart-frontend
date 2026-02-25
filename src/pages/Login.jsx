@@ -38,21 +38,26 @@ export default function Login({ onLogin }) {
     setError('')
     try {
       const user = await api.login(email)
-      onLogin(user)
-    } catch (err) {
-      // Demo fallback — check known accounts
-      const lower = email.toLowerCase().trim()
-      const known = KNOWN_ACCOUNTS[lower]
-      if (known) {
-        onLogin({ id: 'demo-' + Date.now(), name: known.name, email: lower, role: known.role })
-      } else if (lower.includes('teacher') || lower.includes('motesart')) {
-        onLogin({ id: 'demo-' + Date.now(), name: 'Demo Teacher', email: lower, role: 'Teacher' })
-      } else {
-        setError('Email not found. Please check and try again.')
+      // Check if backend returned a valid user (not a 404 or error)
+      if (user && user.name && user.role) {
+        onLogin(user)
+        return
       }
-    } finally {
-      setLoading(false)
+      throw new Error('Invalid response')
+    } catch (err) {
+      // intentional fall-through to demo fallback
     }
+    // Demo fallback — check known accounts
+    const lower = email.toLowerCase().trim()
+    const known = KNOWN_ACCOUNTS[lower]
+    if (known) {
+      onLogin({ id: 'demo-' + Date.now(), name: known.name, email: lower, role: known.role })
+    } else if (lower.includes('teacher') || lower.includes('motesart')) {
+      onLogin({ id: 'demo-' + Date.now(), name: 'Demo Teacher', email: lower, role: 'Teacher' })
+    } else {
+      setError('Email not found. Please check and try again.')
+    }
+    setLoading(false)
   }
 
   const handleRegister = async (e) => {
