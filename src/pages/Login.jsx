@@ -16,11 +16,7 @@ export default function Login({ onLogin }) {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${BASE}/api/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
+     const res = await fetch(`${BASE}/api/users/by-email/${encodeURIComponent(email)}`)
       if (!res.ok) throw new Error('Login failed')
       const data = await res.json()
       onLogin(data.user || data)
