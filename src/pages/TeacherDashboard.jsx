@@ -44,16 +44,71 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div style={{ padding: "32px", maxWidth: 1200, margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>
-          Teacher Dashboard
-        </h1>
-        <p style={{ color: "rgba(255,255,255,0.4)", marginTop: 6, fontSize: 15 }}>
-          {students.length} students · T.A.M.i risk monitoring active
-        </p>
+    <div style={{ padding: "0 32px 32px", maxWidth: 1200, margin: "0 auto" }}>
+
+      {/* ═══ TEACHER HEADER — Matches Student Dashboard Structure ═══ */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "16px 0",
+        marginBottom: 24,
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+      }}>
+        {/* Left: Avatar + Name + Tag + Subtitle */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* Gold Glow Avatar */}
+          <div style={{
+            width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
+            background: "linear-gradient(135deg, #6366f1, #a855f7)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontWeight: 700, fontSize: 18,
+            boxShadow: "0 0 12px rgba(245,158,11,0.5), 0 0 24px rgba(245,158,11,0.2)",
+            border: "2px solid #f59e0b",
+          }}>
+            M
+          </div>
+
+          {/* Name row + Subtitle */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ color: "#fff", fontSize: 20, fontWeight: 700, letterSpacing: "-0.3px" }}>
+                Motesart
+              </span>
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 6,
+                letterSpacing: "0.04em",
+                background: "rgba(245,158,11,0.15)",
+                color: "#f59e0b",
+                border: "1px solid rgba(245,158,11,0.3)",
+              }}>
+                Teacher View
+              </span>
+            </div>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontWeight: 500 }}>
+              T.A.M.i <span style={{ color: "#f59e0b" }}>⚡</span> Risk Monitor Active
+            </span>
+          </div>
+
+          {/* Bell */}
+          <span style={{
+            fontSize: 22, marginLeft: 8, cursor: "pointer",
+            filter: "drop-shadow(0 0 4px rgba(245,158,11,0.4))",
+          }}>🔔</span>
+        </div>
+
+        {/* Right: Nav Buttons */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <HeaderNavBtn accent="teal">👤 View as Student</HeaderNavBtn>
+          <HeaderNavBtn>⚙️ Settings</HeaderNavBtn>
+          <HeaderNavBtn accent="gold">🌐 T.A.M.i</HeaderNavBtn>
+          <HeaderNavBtn>📋 Dashboard</HeaderNavBtn>
+          <HeaderNavBtn>📅 Calendar</HeaderNavBtn>
+          <HeaderNavBtn accent="purple">🎮 Game</HeaderNavBtn>
+          <HeaderNavBtn muted>Logout</HeaderNavBtn>
+        </div>
       </div>
+      {/* ═══ END HEADER ═══ */}
 
       {/* Risk Summary Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32 }}>
@@ -108,6 +163,30 @@ export default function TeacherDashboard() {
         )}
       </div>
     </div>
+  )
+}
+
+/* ─── Header Nav Button (matches student dash style) ─── */
+function HeaderNavBtn({ children, accent, muted }) {
+  const styles = {
+    teal: { color: "#2dd4bf", bg: "rgba(45,212,191,0.08)", border: "rgba(45,212,191,0.3)" },
+    gold: { color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.3)" },
+    purple: { color: "#c084fc", bg: "rgba(168,85,247,0.2)", border: "rgba(168,85,247,0.4)" },
+  }
+  const s = accent ? styles[accent] : {}
+  return (
+    <button style={{
+      display: "flex", alignItems: "center", gap: 6,
+      padding: "8px 14px", borderRadius: 10, cursor: "pointer",
+      fontSize: 13, fontWeight: 600,
+      fontFamily: "'DM Sans', sans-serif",
+      color: muted ? "rgba(255,255,255,0.4)" : (s.color || "rgba(255,255,255,0.75)"),
+      background: s.bg || "rgba(255,255,255,0.04)",
+      border: `1px solid ${s.border || "rgba(255,255,255,0.12)"}`,
+      transition: "all 0.2s",
+    }}>
+      {children}
+    </button>
   )
 }
 
