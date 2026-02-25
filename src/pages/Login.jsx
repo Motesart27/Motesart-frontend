@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
-import { api } from '../services/api.js'
+import { useNavigate } from 'react-router-dom'
 
 // Known accounts for demo fallback when backend auth is down
 const KNOWN_ACCOUNTS = {
-  'motesproductions1@gmail.com': { name: 'Motesart', role: 'Teacher' },
-  'motesarttech@gmail.com': { name: 'Damion Admin', role: 'Teacher' },
-  'reneetaylor88@gmail.com': { name: 'Renee Taylor', role: 'Student' },
-  'damotes@gmail.com': { name: 'Dwain M', role: 'Student' },
-  'evaldez28@gmail.com': { name: 'Evelyn Valdez', role: 'Student' },
+  'motesproductions1@gmail.com': { name: 'Motesart', role: 'teacher' },
+  'motesarttech@gmail.com': { name: 'Damion Admin', role: 'teacher' },
+  'reneetaylor88@gmail.com': { name: 'Renee Taylor', role: 'student' },
+  'damotes@gmail.com': { name: 'Dwain M', role: 'student' },
+  'evaldez28@gmail.com': { name: 'Evelyn Valdez', role: 'student' },
 }
 
-export default function Login({ onLogin }) {
+export default function Login() {
+  const navigate = useNavigate()
   const [tab, setTab] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,6 +33,11 @@ export default function Login({ onLogin }) {
     return () => clearInterval(interval)
   }, [])
 
+  const loginAndRedirect = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData))
+    navigate('/' + userData.role)
+  }
+
   const handleSignIn = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -40,11 +46,11 @@ export default function Login({ onLogin }) {
     const lower = email.toLowerCase().trim()
     const known = KNOWN_ACCOUNTS[lower]
     if (known) {
-      onLogin({ id: 'demo-' + Date.now(), name: known.name, email: lower, role: known.role })
+      loginAndRedirect({ id: 'demo-' + Date.now(), name: known.name, email: lower, role: known.role })
     } else if (lower.includes('teacher') || lower.includes('motesart')) {
-      onLogin({ id: 'demo-' + Date.now(), name: 'Demo Teacher', email: lower, role: 'Teacher' })
+      loginAndRedirect({ id: 'demo-' + Date.now(), name: 'Demo Teacher', email: lower, role: 'teacher' })
     } else if (lower.includes('@')) {
-      onLogin({ id: 'demo-' + Date.now(), name: 'Demo Student', email: lower, role: 'Student' })
+      loginAndRedirect({ id: 'demo-' + Date.now(), name: 'Demo Student', email: lower, role: 'student' })
     } else {
       setError('Please enter a valid email.')
     }
@@ -55,19 +61,14 @@ export default function Login({ onLogin }) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    try {
-      const user = await api.register({ name, email, password, role })
-      onLogin(user)
-    } catch (err) {
-      // Demo fallback for registration
-      if (name && email) {
-        onLogin({ id: 'demo-' + Date.now(), name, email, role })
-      } else {
-        setError('Registration failed. Please try again.')
-      }
-    } finally {
-      setLoading(false)
+    // Demo fallback for registration
+    if (name && email) {
+      const r = role.toLowerCase()
+      loginAndRedirect({ id: 'demo-' + Date.now(), name, email, role: r })
+    } else {
+      setError('Please fill in all fields.')
     }
+    setLoading(false)
   }
 
   return (
