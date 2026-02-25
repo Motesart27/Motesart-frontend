@@ -36,26 +36,43 @@ export default function Login({ onLogin }) {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Try API with 5 second timeout, fallback to demo accounts
+    let loggedIn = false
     try {
-      const user = await api.login(email)
-      // Check if backend returned a valid user (not a 404 or error)
-      if (user && user.name && user.role) {
-        onLogin(user)
-        return
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 5000)
+      const res = await fetch(
+        (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/auth/login',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+          signal: controller.signal,
+        }
+      )
+      clearTimeout(timeout)
+      if (res.ok) {
+        const user = await res.json()
+        if (user && user.name && user.role) {
+          onLogin(user)
+          loggedIn = true
+        }
       }
-      throw new Error('Invalid response')
     } catch (err) {
-      // intentional fall-through to demo fallback
+      // API failed or timed out — fall through to demo
     }
-    // Demo fallback — check known accounts
-    const lower = email.toLowerCase().trim()
-    const known = KNOWN_ACCOUNTS[lower]
-    if (known) {
-      onLogin({ id: 'demo-' + Date.now(), name: known.name, email: lower, role: known.role })
-    } else if (lower.includes('teacher') || lower.includes('motesart')) {
-      onLogin({ id: 'demo-' + Date.now(), name: 'Demo Teacher', email: lower, role: 'Teacher' })
-    } else {
-      setError('Email not found. Please check and try again.')
+
+    if (!loggedIn) {
+      const lower = email.toLowerCase().trim()
+      const known = KNOWN_ACCOUNTS[lower]
+      if (known) {
+        onLogin({ id: 'demo-' + Date.now(), name: known.name, email: lower, role: known.role })
+      } else if (lower.includes('teacher') || lower.includes('motesart')) {
+        onLogin({ id: 'demo-' + Date.now(), name: 'Demo Teacher', email: lower, role: 'Teacher' })
+      } else {
+        setError('Email not found. Please check and try again.')
+      }
     }
     setLoading(false)
   }
