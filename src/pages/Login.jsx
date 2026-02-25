@@ -57,13 +57,27 @@ export default function Login() {
       <div className="glow-orb w-96 h-96 bg-brand-fuchsia/15 top-1/3 -right-40" />
       <div className="glow-orb w-64 h-64 bg-brand-teal/10 bottom-10 left-1/3" />
 
+      {/* Logo - enlarged with laser glow */}
       <div className="relative mb-6 animate-fade-up">
-        <div className="w-36 h-36 rounded-full bg-white flex items-center justify-center relative z-10">
-          <img src="/logo.png" alt="School of Motesart" className="w-28 h-28 object-contain"
-            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }} />
-          <span className="text-6xl hidden items-center justify-center">🎵</span>
+        {/* Glow behind - z-index 1 */}
+        <div className="absolute -inset-3 rounded-full bg-brand-purple/25 blur-[30px] animate-pulse-glow z-[1]" />
+        {/* Laser ring 1 */}
+        <div className="absolute -inset-2 rounded-full border-2 border-transparent animate-spin-slow z-[5]"
+          style={{ borderTopColor: '#a855f7', borderRightColor: '#d946ef' }} />
+        {/* Laser ring 2 */}
+        <div className="absolute -inset-4 rounded-full border border-transparent animate-spin-reverse opacity-60 z-[5]"
+          style={{ borderBottomColor: '#06b6d4', borderLeftColor: '#7c3aed' }} />
+        {/* White circle with logo */}
+        <div className="w-44 h-44 rounded-full bg-white flex items-center justify-center relative z-10 overflow-hidden"
+          style={{ boxShadow: '0 0 40px rgba(168,85,247,0.3)' }}>
+          <img
+            src="/logo.png"
+            alt="School of Motesart"
+            className="w-32 h-32 object-contain"
+            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+          />
+          <span className="text-7xl hidden items-center justify-center">🎵</span>
         </div>
-        <div className="absolute inset-0 w-36 h-36 rounded-full bg-brand-purple/20 blur-2xl animate-pulse-glow" />
       </div>
 
       <h1 className="text-2xl font-bold text-white mb-1 animate-fade-up animate-delay-100">
