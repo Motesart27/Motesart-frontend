@@ -17,7 +17,7 @@ const S = {
     color: '#e2e8f0',
   },
   title: {
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontSize: '16px',
     fontWeight: 700,
     textAlign: 'center',
@@ -35,7 +35,7 @@ const S = {
     boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
   },
   stepLabel: {
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontSize: '9px',
     letterSpacing: '2px',
     textTransform: 'uppercase',
@@ -49,7 +49,7 @@ const S = {
     justifyContent: 'center',
   },
   stepTitle: {
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontSize: '22px',
     fontWeight: 800,
     marginBottom: '4px',
@@ -90,7 +90,7 @@ const S = {
     border: 'none',
     background: 'linear-gradient(135deg, #38b2ac, #4ecdc4)',
     color: '#0d1117',
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontWeight: 700,
     fontSize: '13px',
     cursor: 'pointer',
@@ -102,7 +102,7 @@ const S = {
     border: '1px solid rgba(99,179,237,0.15)',
     background: '#1c2333',
     color: '#718096',
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontWeight: 600,
     fontSize: '13px',
     cursor: 'pointer',
@@ -114,7 +114,7 @@ const S = {
     border: 'none',
     background: 'linear-gradient(135deg, #38b2ac, #4ecdc4)',
     color: '#0d1117',
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontWeight: 700,
     fontSize: '13px',
     cursor: 'pointer',
@@ -393,7 +393,7 @@ export default function Register() {
 
       // Save user to localStorage and navigate
       localStorage.setItem('user', JSON.stringify(data.user));
-      navigate(form.role === 'teacher' ? '/teacher' : '/student');
+      const routes = { teacher: '/teacher', admin: '/admin', ambassador: '/ambassador', parent: '/parent', student: '/student' }; navigate(routes[form.role] || '/student');
     } catch (e) {
       setError(e.message);
     } finally {
@@ -457,15 +457,15 @@ export default function Register() {
         <>
           <div style={S.stepTitle}>Choose your role</div>
           <div style={S.stepSub}>How will you use School of Motesart?</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+          {/* Main 4 roles */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
             {[
-              { id: 'student', icon: '🎹', name: 'Student', desc: 'Learn & practice music' },
-              { id: 'parent',  icon: '👨‍👩‍👧', name: 'Parent',  desc: 'Monitor your child' },
-              { id: 'teacher', icon: '👩‍🏫', name: 'Teacher', desc: 'Manage students' },
+              { id: 'student',    icon: '🎹', name: 'Student',    desc: 'Learn & practice music' },
+              { id: 'parent',     icon: '👨‍👩‍👧', name: 'Parent',     desc: 'Monitor your child' },
+              { id: 'teacher',    icon: '👩‍🏫', name: 'Teacher',    desc: 'Manage students' },
               { id: 'ambassador', icon: '⭐', name: 'Ambassador', desc: 'Grow the community' },
             ].map(r => (
               <div key={r.id} onClick={() => set('role', r.id)} style={{
-                background: '#1c2333',
                 border: `2px solid ${form.role === r.id ? '#4ecdc4' : 'rgba(99,179,237,0.15)'}`,
                 borderRadius: '14px',
                 padding: '14px 12px',
@@ -473,14 +473,35 @@ export default function Register() {
                 background: form.role === r.id ? 'rgba(78,205,196,0.07)' : '#1c2333',
               }}>
                 <div style={{ fontSize: '22px', marginBottom: '6px' }}>{r.icon}</div>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '13px', fontWeight: 700 }}>{r.name}</div>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '13px', fontWeight: 700 }}>{r.name}</div>
                 <div style={{ fontSize: '10px', color: '#718096', marginTop: '2px' }}>{r.desc}</div>
               </div>
             ))}
           </div>
+
+          {/* Admin — small, tucked below */}
+          <div onClick={() => set('role', 'admin')} style={{
+            border: `2px solid ${form.role === 'admin' ? '#9f7aea' : 'rgba(159,122,234,0.15)'}`,
+            borderRadius: '12px',
+            padding: '10px 14px',
+            cursor: 'pointer',
+            background: form.role === 'admin' ? 'rgba(159,122,234,0.07)' : '#1c2333',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '14px',
+          }}>
+            <span style={{ fontSize: '18px' }}>🛡️</span>
+            <div>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', fontWeight: 700, color: form.role === 'admin' ? '#9f7aea' : '#e2e8f0' }}>Admin</div>
+              <div style={{ fontSize: '9px', color: '#718096' }}>Read-only access to all dashboards & data</div>
+            </div>
+            {form.role === 'admin' && <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#9f7aea' }}>✓</div>}
+          </div>
+
           {isStudent && (
             <div style={{ fontSize: '10px', color: '#718096', textAlign: 'center', marginBottom: '12px', lineHeight: '1.6' }}>
-              🎹 Selecting <strong style={{ color: '#e2e8f0' }}>Student</strong> — the WYL Assessment on the next steps will be optional
+              🎹 Selecting <strong style={{ color: '#e2e8f0' }}>Student</strong> — the WYL Assessment will be optional
             </div>
           )}
           {error && <div style={S.error}>{error}</div>}
@@ -558,9 +579,9 @@ export default function Register() {
                 padding: '3px 12px',
                 borderRadius: '20px',
                 marginBottom: '12px',
-                fontFamily: "'Syne', sans-serif",
+                fontFamily: "'Outfit', sans-serif",
               }}>Optional</div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '17px', fontWeight: 800, marginBottom: '10px' }}>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '17px', fontWeight: 800, marginBottom: '10px' }}>
                 Way You Learn Assessment
               </div>
               <div style={{ fontSize: '12px', color: '#718096', lineHeight: '1.7', marginBottom: '18px' }}>
@@ -587,8 +608,8 @@ export default function Register() {
               padding: '14px',
               marginBottom: '14px',
             }}>
-              <div style={{ fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#f6ad55', marginBottom: '6px', fontFamily: "'Syne', sans-serif" }}>Required by your teacher</div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '14px', fontWeight: 700, marginBottom: '4px' }}>Way You Learn Assessment</div>
+              <div style={{ fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#f6ad55', marginBottom: '6px', fontFamily: "'Outfit', sans-serif" }}>Required by your teacher</div>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '14px', fontWeight: 700, marginBottom: '4px' }}>Way You Learn Assessment</div>
               <div style={{ fontSize: '11px', color: '#718096' }}>Your teacher needs this to personalize your lessons. It only takes 2 minutes!</div>
             </div>
           )}
@@ -687,7 +708,7 @@ export default function Register() {
                   <div style={{ position: 'absolute', top: '7px', right: '9px', fontSize: '9px', color: '#4ecdc4', fontWeight: 700 }}>✓</div>
                 )}
                 <div style={{ fontSize: '36px', marginBottom: '7px' }}>{av.emoji}</div>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '12px', fontWeight: 700 }}>{av.name}</div>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', fontWeight: 700 }}>{av.name}</div>
                 <div style={{ fontSize: '9px', color: '#718096', marginTop: '2px' }}>{av.role}</div>
               </div>
             ))}
@@ -708,14 +729,14 @@ export default function Register() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
                 <img src={form.avatarCustom} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} alt="custom" />
                 <div>
-                  <div style={{ fontSize: '12px', color: '#4ecdc4', fontFamily: "'Syne', sans-serif", fontWeight: 600 }}>Custom image selected ✓</div>
+                  <div style={{ fontSize: '12px', color: '#4ecdc4', fontFamily: "'Outfit', sans-serif", fontWeight: 600 }}>Custom image selected ✓</div>
                   <div style={{ fontSize: '10px', color: '#718096', marginTop: '2px' }}>Click to change</div>
                 </div>
               </div>
             ) : (
               <>
                 <div style={{ fontSize: '22px', marginBottom: '5px' }}>📷</div>
-                <div style={{ fontSize: '12px', color: '#4ecdc4', fontFamily: "'Syne', sans-serif", fontWeight: 600, marginBottom: '2px' }}>Upload your own photo or image</div>
+                <div style={{ fontSize: '12px', color: '#4ecdc4', fontFamily: "'Outfit', sans-serif", fontWeight: 600, marginBottom: '2px' }}>Upload your own photo or image</div>
                 <div style={{ fontSize: '9px', color: '#718096' }}>JPG, PNG or GIF · Max 5MB</div>
               </>
             )}
@@ -745,17 +766,17 @@ export default function Register() {
                 : <div style={{ fontSize: '42px' }}>{selectedAvatar?.emoji || '🎹'}</div>
               }
               <div>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '16px', fontWeight: 800 }}>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '16px', fontWeight: 800 }}>
                   {form.displayName || `${form.firstName} ${form.lastName}`}
                 </div>
                 <div style={{ fontSize: '11px', color: '#718096', marginTop: '2px' }}>{form.email}</div>
-                <div style={{ display: 'inline-block', background: 'rgba(78,205,196,0.15)', color: '#4ecdc4', fontSize: '10px', padding: '2px 8px', borderRadius: '20px', marginTop: '5px', fontFamily: "'Syne', sans-serif", textTransform: 'capitalize' }}>{form.role}</div>
+                <div style={{ display: 'inline-block', background: 'rgba(78,205,196,0.15)', color: '#4ecdc4', fontSize: '10px', padding: '2px 8px', borderRadius: '20px', marginTop: '5px', fontFamily: "'Outfit', sans-serif", textTransform: 'capitalize' }}>{form.role}</div>
               </div>
             </div>
 
             {/* Music */}
             <div style={{ background: '#1c2333', borderRadius: '12px', padding: '12px', marginBottom: '8px', fontSize: '11px', color: '#718096', lineHeight: '1.9' }}>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🎵 Music Profile</div>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🎵 Music Profile</div>
               Instrument: {form.instrument} · Level: {form.level}<br />
               Weekly Goal: {form.weeklyTarget} min · Favorite: {form.genre}
             </div>
@@ -763,12 +784,12 @@ export default function Register() {
             {/* WYL result */}
             {wylResult ? (
               <div style={{ background: '#1c2333', borderRadius: '12px', padding: '12px', marginBottom: '8px', fontSize: '11px', color: '#718096', lineHeight: '1.9' }}>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🧠 Learning Style</div>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🧠 Learning Style</div>
                 Primary style: <span style={{ color: '#4ecdc4' }}>{wylLabels[wylResult]}</span> learner
               </div>
             ) : (
               <div style={{ background: '#1c2333', borderRadius: '12px', padding: '12px', marginBottom: '8px', fontSize: '11px', color: '#718096' }}>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🧠 Learning Style</div>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🧠 Learning Style</div>
                 WYL Assessment skipped — complete later from your dashboard
               </div>
             )}
@@ -791,7 +812,7 @@ export default function Register() {
   return (
     <div style={S.page}>
       {/* Google Fonts */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
 
       <div style={S.title}>
         School of <span style={S.titleAccent}>Motesart</span>
