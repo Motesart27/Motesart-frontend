@@ -302,6 +302,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [wylStarted, setWylStarted] = useState(false);
+  const [showWylModal, setShowWylModal] = useState(false);
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', displayName: '',
@@ -781,10 +782,17 @@ export default function Register() {
               Weekly Goal: {form.weeklyTarget} min · Favorite: {form.genre}
             </div>
 
-            {/* WYL result */}
+            {/* WYL result — clickable to open modal */}
             {wylResult ? (
-              <div style={{ background: '#1c2333', borderRadius: '12px', padding: '12px', marginBottom: '8px', fontSize: '11px', color: '#718096', lineHeight: '1.9' }}>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: '#e2e8f0', marginBottom: '4px', fontWeight: 700 }}>🧠 Learning Style</div>
+              <div onClick={() => setShowWylModal(true)} style={{
+                background: '#1c2333', borderRadius: '12px', padding: '12px',
+                marginBottom: '8px', fontSize: '11px', color: '#718096', lineHeight: '1.9',
+                cursor: 'pointer', border: '1px solid rgba(78,205,196,0.15)',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: '#e2e8f0', fontWeight: 700 }}>🧠 Learning Style</div>
+                  <div style={{ fontSize: '9px', color: '#4ecdc4', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'Outfit', sans-serif" }}>Tap to learn more →</div>
+                </div>
                 Primary style: <span style={{ color: '#4ecdc4' }}>{wylLabels[wylResult]}</span> learner
               </div>
             ) : (
@@ -808,11 +816,161 @@ export default function Register() {
     }
   };
 
+  // ── WYL Modal content ────────────────────────────────────────────────────────
+  const WYL_INFO = {
+    visual: {
+      emoji: '👁️',
+      label: 'Visual Learner',
+      color: '#63b3ed',
+      tagline: 'You learn best by seeing.',
+      description: 'Visual learners process information most effectively through images, diagrams, written notes, and seeing patterns. When you read sheet music, watch a teacher demonstrate technique, or follow along with a video, your brain is firing on all cylinders.',
+      howTami: [
+        'Show you visual diagrams of hand positions and music theory concepts',
+        'Use color-coded sheet music and notation breakdowns',
+        'Send you video references and visual practice guides',
+        'Present progress charts so you can literally see yourself improving',
+        'Use written step-by-step instructions alongside demonstrations',
+      ],
+      tip: 'Try writing down what you\'re learning after each session — your brain loves turning sound into something you can see on paper.',
+    },
+    kinesthetic: {
+      emoji: '🤸',
+      label: 'Kinesthetic Learner',
+      color: '#4ecdc4',
+      tagline: 'You learn best by doing.',
+      description: 'Kinesthetic learners retain information through physical movement, hands-on practice, and real experience. You don\'t just want to hear about a chord — you want to feel it under your fingers. Repetition through action is how knowledge becomes instinct for you.',
+      howTami: [
+        'Break every new concept into small, immediately playable exercises',
+        'Prioritize "muscle memory" drills and finger pattern repetition',
+        'Give you challenges to try before explaining the theory behind them',
+        'Track your practice minutes closely — your progress comes from doing',
+        'Suggest physical warm-ups and finger exercises before each session',
+      ],
+      tip: 'Don\'t skip the practice log! For kinesthetic learners, tracking physical reps is one of the most powerful motivators. Every minute counts.',
+    },
+    auditory: {
+      emoji: '👂',
+      label: 'Auditory Learner',
+      color: '#f6ad55',
+      tagline: 'You learn best by hearing.',
+      description: 'Auditory learners absorb information most powerfully through sound, rhythm, verbal explanation, and listening. You probably find yourself humming melodies without thinking, picking up songs by ear, and remembering music after hearing it just once or twice.',
+      howTami: [
+        'Explain theory and technique through verbal descriptions and analogies',
+        'Encourage you to sing or hum along while you play',
+        'Use rhythm patterns and counting out loud as learning tools',
+        'Play reference recordings so you can hear what you\'re working toward',
+        'Give verbal feedback that connects what you hear to what you\'re playing',
+      ],
+      tip: 'Record yourself playing often and listen back. Your ear is your superpower — use it to self-correct and celebrate how far you\'ve come.',
+    },
+  };
+
+  const wylResult = Object.keys(form.wylAnswers).length > 0 ? computeWYL(form.wylAnswers) : null;
+  const wylInfo = wylResult ? WYL_INFO[wylResult] : null;
+
+  // ── WYL Modal ────────────────────────────────────────────────────────────────
+  const WylModal = () => {
+    if (!showWylModal || !wylInfo) return null;
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.75)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
+        backdropFilter: 'blur(4px)',
+      }} onClick={() => setShowWylModal(false)}>
+        <div onClick={e => e.stopPropagation()} style={{
+          width: '100%', maxWidth: '420px',
+          background: '#161b26',
+          borderRadius: '24px',
+          border: `1px solid ${wylInfo.color}33`,
+          padding: '28px 24px',
+          boxShadow: `0 24px 60px rgba(0,0,0,0.6), 0 0 40px ${wylInfo.color}15`,
+          maxHeight: '85vh',
+          overflowY: 'auto',
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '10px' }}>{wylInfo.emoji}</div>
+            <div style={{
+              display: 'inline-block',
+              background: `${wylInfo.color}20`,
+              color: wylInfo.color,
+              fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase',
+              padding: '3px 12px', borderRadius: '20px', marginBottom: '10px',
+              fontFamily: "'Outfit', sans-serif",
+            }}>Your Learning Style</div>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '22px', fontWeight: 800, marginBottom: '6px' }}>
+              {wylInfo.label}
+            </div>
+            <div style={{ fontSize: '14px', color: wylInfo.color, fontWeight: 600 }}>
+              {wylInfo.tagline}
+            </div>
+          </div>
+
+          <div style={{ height: '1px', background: 'rgba(99,179,237,0.1)', marginBottom: '18px' }} />
+
+          {/* Description */}
+          <div style={{ fontSize: '12px', color: '#a0aec0', lineHeight: '1.8', marginBottom: '20px' }}>
+            {wylInfo.description}
+          </div>
+
+          {/* How T.A.M.i will use this */}
+          <div style={{
+            background: '#1c2333',
+            borderRadius: '14px',
+            padding: '16px',
+            marginBottom: '16px',
+            border: `1px solid ${wylInfo.color}22`,
+          }}>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: '#e2e8f0' }}>
+              🤖 How T.A.M.i will teach you
+            </div>
+            {wylInfo.howTami.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', fontSize: '11px', color: '#718096', lineHeight: '1.6' }}>
+                <div style={{ color: wylInfo.color, flexShrink: 0, marginTop: '1px' }}>✦</div>
+                <div>{item}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pro tip */}
+          <div style={{
+            background: `${wylInfo.color}10`,
+            border: `1px solid ${wylInfo.color}30`,
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '20px',
+          }}>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '11px', fontWeight: 700, color: wylInfo.color, marginBottom: '6px' }}>
+              💡 Pro Tip for {wylInfo.label}s
+            </div>
+            <div style={{ fontSize: '11px', color: '#a0aec0', lineHeight: '1.7' }}>
+              {wylInfo.tip}
+            </div>
+          </div>
+
+          <button onClick={() => setShowWylModal(false)} style={{
+            width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
+            background: `linear-gradient(135deg, ${wylInfo.color}cc, ${wylInfo.color})`,
+            color: '#0d1117', fontFamily: "'Outfit', sans-serif",
+            fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+          }}>
+            Got it — back to my profile ✓
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // ── Page render ─────────────────────────────────────────────────────────────
   return (
     <div style={S.page}>
       {/* Google Fonts */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
+
+      {/* WYL Info Modal */}
+      <WylModal />
 
       <div style={S.title}>
         School of <span style={S.titleAccent}>Motesart</span>
