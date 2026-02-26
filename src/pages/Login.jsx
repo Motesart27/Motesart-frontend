@@ -29,7 +29,7 @@ export default function Login() {
         navigate('/dashboard')
       }
     } catch (err) {
-      setError(isLogin ? 'setError(err.message || 'Login failed. Please try again.')' : 'Registration failed. Please try again.')
+      setError(isLogin ? err?.message || 'Login failed. Please try again.' : err?.message || 'Registration failed. Please try again.')
     } finally {
       setLoading(false)
     }
