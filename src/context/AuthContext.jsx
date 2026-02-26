@@ -14,10 +14,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('motesart_user', JSON.stringify(user))
       const role = (user.role || 'User').toLowerCase()
       if (role === 'teacher') setCurrentPage('teacher-dashboard')
-      else if (role === 'student') setCurrentPage('student-dashboard')
       else if (role === 'parent') setCurrentPage('parent-dashboard')
-      else if (role === 'admin') setCurrentPage('student-dashboard')
-      else if (role === 'ambassador') setCurrentPage('student-dashboard')
       else setCurrentPage('student-dashboard')
     } else {
       localStorage.removeItem('motesart_user')
@@ -26,16 +23,18 @@ export function AuthProvider({ children }) {
   }, [user])
 
   const login = (userData) => setUser(userData)
-
-  const logout = () => {
-    setUser(null)
-    setCurrentPage('login')
-  }
-
+  const logout = () => { setUser(null); setCurrentPage('login') }
   const navigate = (page) => setCurrentPage(page)
 
+  const getHomePage = () => {
+    const role = (user?.role || 'User').toLowerCase()
+    if (role === 'teacher') return 'teacher-dashboard'
+    if (role === 'parent') return 'parent-dashboard'
+    return 'student-dashboard'
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, navigate, currentPage }}>
+    <AuthContext.Provider value={{ user, login, logout, navigate, currentPage, getHomePage }}>
       {children}
     </AuthContext.Provider>
   )
