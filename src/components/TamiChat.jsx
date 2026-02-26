@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
-import api from '../services/api.js'
+import { api } from '../services/api.js'
 
 export default function TamiChat() {
   const { user } = useAuth()
