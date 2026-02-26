@@ -1,111 +1,170 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
-const css = `
-.settings-page{min-height:100vh;background:#0d0f1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff}
-.set-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
-.set-header-left{display:flex;align-items:center;gap:12px}
-.set-back{color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;background:none;border:none}
-.set-logout{padding:8px 18px;border-radius:8px;border:1px solid rgba(139,92,246,.4);background:transparent;color:#a78bfa;font-size:13px;font-weight:600;cursor:pointer}
-.set-main{max-width:640px;margin:0 auto;padding:24px 16px 120px}
-.set-card{background:rgba(22,26,40,.8);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 24px;margin-bottom:24px}
-.set-title{font-size:18px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:8px}
-.av-area{display:flex;flex-direction:column;align-items:center;margin-bottom:28px}
-.av-ring{width:160px;height:160px;border-radius:50%;padding:4px;background:linear-gradient(135deg,#a855f7,#7c3aed,#6d28d9);box-shadow:0 0 30px rgba(139,92,246,.35);margin-bottom:16px;display:flex;align-items:center;justify-content:center}
-.av-inner{width:100%;height:100%;border-radius:50%;background:#1e2235;display:flex;align-items:center;justify-content:center;font-size:64px;border:3px solid #0d0f1a}
-.av-btns{display:flex;gap:12px;margin-bottom:10px}
-.av-btn{padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;gap:6px}
-.av-change{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
-.av-remove{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
-.set-field{margin-bottom:20px}
-.set-field label{display:block;font-size:14px;font-weight:600;color:rgba(255,255,255,.8);margin-bottom:8px}
-.set-field input{width:100%;padding:14px 18px;background:rgba(30,34,53,.9);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:15px;outline:none}
-.set-field input:focus{border-color:rgba(139,92,246,.5)}
-.set-field input[readonly]{opacity:.6;cursor:not-allowed}
-.field-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:6px}
-.contact-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
-.contact-opt{padding:16px;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:rgba(30,34,53,.5);cursor:pointer;display:flex;align-items:center;gap:10px}
-.contact-opt.selected{border-color:#a855f7;background:rgba(139,92,246,.08)}
-.radio-circle{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.contact-opt.selected .radio-circle{border-color:#a855f7;background:rgba(139,92,246,.15)}
-.radio-dot{width:10px;height:10px;border-radius:50%;background:#a855f7;transform:scale(0);transition:.2s}
-.contact-opt.selected .radio-dot{transform:scale(1)}
-.role-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-.role-chip{padding:8px 18px;border-radius:9999px;font-size:13px;font-weight:600;cursor:pointer;border:2px solid transparent}
-.role-chip.admin{background:rgba(234,179,8,.15);color:#fbbf24;border-color:rgba(234,179,8,.3)}
-.role-chip.teacher{background:rgba(34,197,94,.15);color:#4ade80;border-color:rgba(34,197,94,.3)}
-.role-chip.ambassador{background:rgba(249,115,22,.15);color:#fb923c;border-color:rgba(249,115,22,.3)}
-.role-chip.student{background:rgba(148,163,184,.1);color:#94a3b8;border-color:rgba(148,163,184,.2)}
-.role-chip.parent{background:rgba(236,72,153,.15);color:#f472b6;border-color:rgba(236,72,153,.3)}
-.role-chip.selected{box-shadow:0 0 12px rgba(139,92,246,.3)}
-.save-btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;margin-top:8px;box-shadow:0 4px 20px rgba(168,85,247,.3)}
-.pw-btn{width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;background:rgba(30,34,53,.9);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);margin-top:8px}
-`
+export default function Settings({ user, onLogout }) {
+  const { logout } = useAuth()
+  const doLogout = onLogout || logout
 
-export default function SettingsPage() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+  const [name, setName] = useState(user?.name || '')
+  const [email, setEmail] = useState(user?.email || '')
+  const [phone, setPhone] = useState(user?.phone || '')
   const [contactMethod, setContactMethod] = useState('phone')
-  const [selectedRole, setSelectedRole] = useState(user?.role || 'Student')
+  const [currentRole, setCurrentRole] = useState(user?.role || 'Student')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
   const roles = [
-    { key:'Admin', cls:'admin' }, { key:'Teacher', cls:'teacher' },
-    { key:'Ambassador', cls:'ambassador' }, { key:'Student', cls:'student' }, { key:'Parent', cls:'parent' }
+    { value: 'Admin', color: '#eab308', bg: 'rgba(234,179,8,0.15)', border: 'rgba(234,179,8,0.4)' },
+    { value: 'Teacher', color: '#22c55e', bg: 'rgba(34,197,94,0.15)', border: 'rgba(34,197,94,0.4)' },
+    { value: 'Ambassador', color: '#f97316', bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.4)' },
+    { value: 'Student', color: 'rgba(255,255,255,0.6)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.2)' },
+    { value: 'Parent', color: '#ec4899', bg: 'rgba(236,72,153,0.15)', border: 'rgba(236,72,153,0.4)' },
+    { value: 'User', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.4)' },
   ]
 
+  const handleSave = async () => {
+    setSaving(true)
+    // TODO Phase 2: POST to Airtable
+    await new Promise(r => setTimeout(r, 800))
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
   return (
-    <div className="settings-page">
-      <style>{css}</style>
-      <div className="set-header">
-        <div className="set-header-left">
-          <button className="set-back" onClick={()=>navigate('/')}>‹</button>
-          <h1 style={{fontSize:20,fontWeight:700}}>Settings</h1>
+    <div style={{ padding: '24px 20px', maxWidth: 700, margin: '0 auto' }}>
+      <h2 style={{ color: '#fff', fontSize: 24, fontWeight: 800, marginBottom: 4 }}>Settings</h2>
+      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 32 }}>Manage your profile and preferences</p>
+
+      {/* Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: '50%', overflow: 'hidden',
+          background: 'linear-gradient(135deg, #e84b8a, #f97316)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 28, fontWeight: 800, color: '#fff',
+        }}>
+          {user?.avatar ? (
+            <img src={user.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            user?.name?.[0] || 'U'
+          )}
         </div>
-        <button className="set-logout" onClick={()=>{logout();navigate('/login')}}>Logout</button>
+        <button style={{
+          padding: '8px 16px', borderRadius: 10,
+          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+          color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer',
+          fontFamily: "'DM Sans', sans-serif",
+        }}>Change Photo</button>
       </div>
-      <div className="set-main">
-        <div className="set-card">
-          <div className="set-title">👤 Profile</div>
-          <div className="av-area">
-            <div className="av-ring"><div className="av-inner">🧑‍🎨</div></div>
-            <div className="av-btns">
-              <button className="av-btn av-change">📷 Change Photo</button>
-              <button className="av-btn av-remove">🗑️ Remove</button>
-            </div>
-            <div style={{fontSize:12,color:'rgba(255,255,255,.35)'}}>Click photo or button to upload</div>
+
+      {/* Form Fields */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Field label="Full Name" value={name} onChange={setName} />
+        <Field label="Email" value={email} onChange={setEmail} type="email" />
+        <Field label="Phone Number" value={phone} onChange={setPhone} type="tel" />
+
+        {/* Preferred Contact Method */}
+        <div>
+          <label style={labelStyle}>Preferred Contact Method</label>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <ContactOption
+              icon="📱" label="Phone/SMS" desc="Receive messages via text"
+              active={contactMethod === 'phone'} onClick={() => setContactMethod('phone')}
+            />
+            <ContactOption
+              icon="📧" label="Email" desc="Receive messages via email"
+              active={contactMethod === 'email'} onClick={() => setContactMethod('email')}
+            />
           </div>
-          <div className="set-field"><label>Full Name</label><input defaultValue={user?.name || 'Motesart'} /></div>
-          <div className="set-field"><label>Email</label><input readOnly value={user?.email || 'motesartproductions1@gmail.com'} /><div className="field-hint">Email cannot be changed</div></div>
-          <div className="set-field"><label>Phone Number</label><input defaultValue="631-741-8189" /></div>
-          <div className="set-field">
-            <label>Preferred Contact Method</label>
-            <div className="contact-row">
-              <div className={`contact-opt ${contactMethod==='phone'?'selected':''}`} onClick={()=>setContactMethod('phone')}>
-                <div className="radio-circle"><div className="radio-dot"/></div>
-                <div><div style={{fontSize:14,fontWeight:600}}>📱 Phone/SMS</div><div style={{fontSize:11,color:'rgba(255,255,255,.4)',marginTop:2}}>Receive messages via text</div></div>
-              </div>
-              <div className={`contact-opt ${contactMethod==='email'?'selected':''}`} onClick={()=>setContactMethod('email')}>
-                <div className="radio-circle"><div className="radio-dot"/></div>
-                <div><div style={{fontSize:14,fontWeight:600}}>📧 Email</div><div style={{fontSize:11,color:'rgba(255,255,255,.4)',marginTop:2}}>Receive messages via email</div></div>
-              </div>
-            </div>
-          </div>
-          <div className="set-field">
-            <label>Role</label>
-            <div className="role-chips">
-              {roles.map(r => <span key={r.key} className={`role-chip ${r.cls} ${selectedRole===r.key?'selected':''}`} onClick={()=>setSelectedRole(r.key)}>{r.key}</span>)}
-            </div>
-          </div>
-          <button className="save-btn">Save Profile</button>
         </div>
-        <div className="set-card">
-          <div className="set-title">🔒 Change Password</div>
-          <div className="set-field"><label>Current Password</label><input type="password" placeholder="Enter current password" /></div>
-          <div className="set-field"><label>New Password</label><input type="password" placeholder="Enter new password" /></div>
-          <div className="set-field"><label>Confirm New Password</label><input type="password" placeholder="Confirm new password" /></div>
-          <button className="pw-btn">Change Password</button>
+
+        {/* Role — now includes User */}
+        <div>
+          <label style={labelStyle}>Role</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {roles.map(r => (
+              <button key={r.value} onClick={() => setCurrentRole(r.value)} style={{
+                padding: '8px 18px', borderRadius: 20, cursor: 'pointer',
+                background: currentRole === r.value ? r.bg : 'transparent',
+                border: `1.5px solid ${currentRole === r.value ? r.border : 'rgba(255,255,255,0.1)'}`,
+                color: currentRole === r.value ? r.color : 'rgba(255,255,255,0.4)',
+                fontWeight: currentRole === r.value ? 600 : 400, fontSize: 14,
+                fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s',
+              }}>{r.value}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <button onClick={handleSave} disabled={saving} style={{
+        width: '100%', marginTop: 32, padding: '16px',
+        background: saved ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'linear-gradient(135deg, #e84b8a, #f97316)',
+        border: 'none', borderRadius: 14, color: '#fff', fontSize: 17, fontWeight: 700,
+        cursor: saving ? 'wait' : 'pointer', fontFamily: "'DM Sans', sans-serif",
+        transition: 'all 0.3s',
+      }}>
+        {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Save Profile'}
+      </button>
+
+      {/* Danger Zone */}
+      <div style={{ marginTop: 40, padding: '20px', borderRadius: 14, border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+        <h3 style={{ color: '#ef4444', fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Danger Zone</h3>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button style={{
+            padding: '8px 16px', borderRadius: 8, background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)',
+            fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+          }}>Change Password</button>
+          <button style={{
+            padding: '8px 16px', borderRadius: 8, background: 'transparent',
+            border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444',
+            fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+          }}>Delete Account</button>
         </div>
       </div>
     </div>
+  )
+}
+
+const labelStyle = {
+  display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600, marginBottom: 8,
+}
+
+function Field({ label, value, onChange, type = 'text' }) {
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <input type={type} value={value} onChange={e => onChange(e.target.value)} style={{
+        width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff',
+        fontSize: 15, boxSizing: 'border-box', fontFamily: "'DM Sans', sans-serif", outline: 'none',
+      }} />
+    </div>
+  )
+}
+
+function ContactOption({ icon, label, desc, active, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      flex: 1, padding: '14px 18px', borderRadius: 12, cursor: 'pointer',
+      background: active ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.03)',
+      border: active ? '2px solid rgba(168,85,247,0.5)' : '1px solid rgba(255,255,255,0.08)',
+      textAlign: 'left', fontFamily: "'DM Sans', sans-serif",
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <div style={{
+        width: 20, height: 20, borderRadius: '50%',
+        border: active ? '6px solid #a855f7' : '2px solid rgba(255,255,255,0.2)',
+        boxSizing: 'border-box',
+      }} />
+      <div>
+        <div style={{ color: '#fff', fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {icon} {label}
+        </div>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{desc}</div>
+      </div>
+    </button>
   )
 }
