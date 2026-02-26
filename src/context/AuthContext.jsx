@@ -4,34 +4,45 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('som_user')
-      return saved ? JSON.parse(saved) : null
-    } catch { return null }
+    const saved = localStorage.getItem('motesart_user')
+    return saved ? JSON.parse(saved) : null
   })
+  const [currentPage, setCurrentPage] = useState('login')
 
   useEffect(() => {
-    if (user) localStorage.setItem('som_user', JSON.stringify(user))
-    else localStorage.removeItem('som_user')
+    if (user) {
+      localStorage.setItem('motesart_user', JSON.stringify(user))
+      const role = (user.role || 'User').toLowerCase()
+      if (role === 'teacher') setCurrentPage('teacher-dashboard')
+      else if (role === 'student') setCurrentPage('student-dashboard')
+      else if (role === 'parent') setCurrentPage('parent-dashboard')
+      else if (role === 'admin') setCurrentPage('student-dashboard')
+      else if (role === 'ambassador') setCurrentPage('student-dashboard')
+      else setCurrentPage('student-dashboard')
+    } else {
+      localStorage.removeItem('motesart_user')
+      setCurrentPage('login')
+    }
   }, [user])
 
-  const login = (userData) => {
-    // Default role to "User" if not set (per memory)
-    const u = { ...userData, role: userData.role || 'User' }
-    setUser(u)
+  const login = (userData) => setUser(userData)
+
+  const logout = () => {
+    setUser(null)
+    setCurrentPage('login')
   }
 
-  const logout = () => setUser(null)
+  const navigate = (page) => setCurrentPage(page)
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, navigate, currentPage }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
+  const context = useContext(AuthContext)
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
+  return context
 }
