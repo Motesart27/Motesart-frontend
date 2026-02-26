@@ -1,256 +1,247 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { api } from '../services/api.js'
 
-export default function StudentDashboard() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const [mode, setMode] = useState('academic') // academic | game
-  const userName = user?.name || user?.email?.split('@')[0] || 'Student'
-  const initial = userName.charAt(0).toUpperCase()
+export default function StudentDashboard({ user, onNavigate }) {
+  const { navigate } = useAuth()
+  const nav = onNavigate || navigate
+
+  // DPM data (will pull from Airtable in Phase 2)
+  const [dpm, setDpm] = useState({ drive: 1, passion: 27, motivation: 0, overall: 9 })
+  const [weeklyStats, setWeeklyStats] = useState({ minutes: 0, sessions: 0, accuracy: 0, streak: 0 })
+  const [practiceGoal, setPracticeGoal] = useState({ target: 60, current: 0 })
+  const [currentDay] = useState(new Date().toLocaleDateString('en-US', { weekday: 'short' }))
+
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
   return (
-    <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#111827,#111827,#1f2937)', color:'#fff', fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", overflowX:'hidden' }}>
-      {/* Header */}
-      <div style={{ borderBottom:'1px solid #1f2937', position:'sticky', top:0, background:'rgba(17,24,39,0.95)', backdropFilter:'blur(12px)', zIndex:10, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{ width:40, height:40, borderRadius:'50%', background:'linear-gradient(135deg,#a855f7,#ec4899)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:16 }}>{initial}</div>
-          <div>
-            <div style={{ fontSize:16, fontWeight:700 }}>{userName}</div>
-            <div style={{ fontSize:10, color:'#9ca3af' }}>T.A.M.i Dashboard</div>
-          </div>
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          <div style={{ display:'flex', background:'#1f2937', borderRadius:8, padding:2 }}>
-            <button onClick={() => navigate('/teacher')} style={{ padding:'6px 12px', fontSize:10, fontWeight:600, border:'none', borderRadius:6, cursor:'pointer', color:'#9ca3af', background:'transparent' }}>🎹 Teacher</button>
-            <button onClick={() => setMode('academic')} style={{ padding:'6px 12px', fontSize:10, fontWeight:600, border:'none', borderRadius:6, cursor:'pointer', color: mode==='academic' ? '#fff' : '#9ca3af', background: mode==='academic' ? '#2563eb' : 'transparent' }}>✨ Academic</button>
-            <button onClick={() => setMode('game')} style={{ padding:'6px 12px', fontSize:10, fontWeight:600, border:'none', borderRadius:6, cursor:'pointer', color: mode==='game' ? '#fff' : '#9ca3af', background: mode==='game' ? '#9333ea' : 'transparent' }}>🎮 Game</button>
-          </div>
-          <button onClick={() => navigate('/game')} style={{ padding:'6px 12px', background:'#0d9488', color:'#fff', border:'none', borderRadius:8, fontSize:10, fontWeight:600, cursor:'pointer' }}>▶ Play</button>
-        </div>
+    <div style={{ padding: '16px 20px', maxWidth: 1400, margin: '0 auto' }}>
+      {/* Action Buttons Row — NO default highlight */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+        <ActionButton icon="●" label="Log Practice" color="#22c55e" onClick={() => nav('practice')} />
+        <ActionButton icon="📚" label="Homework" color="transparent" borderColor="rgba(255,255,255,0.1)" onClick={() => nav('homework')} />
+        <ActionButton icon="🏆" label="Leaders" color="transparent" borderColor="rgba(255,255,255,0.1)" onClick={() => nav('leaderboard')} />
       </div>
 
-      {/* Quick Actions */}
-      <div style={{ display:'flex', gap:8, padding:'12px 16px', overflowX:'auto' }}>
-        <button onClick={() => navigate('/practice')} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 16px', borderRadius:12, fontSize:13, fontWeight:600, border:'none', cursor:'pointer', whiteSpace:'nowrap', color:'#fff', background:'linear-gradient(135deg,#0d9488,#059669)' }}>● Log Practice</button>
-        <button onClick={() => navigate('/homework')} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 16px', borderRadius:12, fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', color:'#fff', background:'#1f2937', border:'1px solid #374151' }}>📚 Homework</button>
-        <button onClick={() => navigate('/leaderboard')} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 16px', borderRadius:12, fontSize:13, fontWeight:600, border:'none', cursor:'pointer', whiteSpace:'nowrap', color:'#fff', background:'#1f2937', borderColor:'#374151', borderWidth:1, borderStyle:'solid' }}>🏆 Leaders</button>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ maxWidth:1280, margin:'0 auto', padding:16 }}>
-        {mode === 'academic' ? <AcademicView navigate={navigate} /> : <GameView navigate={navigate} />}
-      </div>
-
-      {/* Footer Nav */}
-      <div style={{ borderTop:'1px solid #1f2937', marginTop:'auto', padding:'12px 16px', display:'flex', justifyContent:'center', gap:8, flexWrap:'wrap' }}>
-        <button onClick={() => navigate('/practice')} style={{ padding:'10px 20px', border:'none', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer', color:'#fff', background:'linear-gradient(135deg,#0d9488,#06b6d4)' }}>🎵 Practice</button>
-        <button onClick={() => navigate('/homework')} style={{ padding:'10px 20px', border:'none', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer', color:'#fff', background:'linear-gradient(135deg,#2563eb,#4f46e5)' }}>📚 Homework</button>
-        <button onClick={() => navigate('/leaderboard')} style={{ padding:'10px 20px', border:'none', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer', color:'#fff', background:'linear-gradient(135deg,#9333ea,#ec4899)' }}>🏆 Leaders</button>
-      </div>
-    </div>
-  )
-}
-
-/* ─── CARD COMPONENT ─── */
-function Card({ title, children, headerRight }) {
-  return (
-    <div style={{ background:'rgba(31,41,55,0.8)', backdropFilter:'blur(8px)', borderRadius:12, border:'1px solid rgba(55,65,81,0.5)', overflow:'hidden' }}>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(55,65,81,0.5)' }}>
-        <span style={{ fontSize:14, fontWeight:600 }}>{title}</span>
-        {headerRight}
-      </div>
-      <div style={{ padding:16 }}>{children}</div>
-    </div>
-  )
-}
-
-/* ─── ACADEMIC VIEW ─── */
-function AcademicView({ navigate }) {
-  return (
-    <>
-      {/* Row 1: DPM + Weekly Progress */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      {/* Main Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        {/* DPM Score Card */}
         <Card title="DPM Score">
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:24, flexWrap:'wrap' }}>
-            {/* DPM Donut */}
-            <div style={{ position:'relative' }}>
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(55,65,81,0.5)" strokeWidth="8"/>
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#14b8a6" strokeWidth="8" strokeDasharray="263.9" strokeDashoffset="240" strokeLinecap="round" transform="rotate(-90 50 50)"/>
-              </svg>
-              <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center' }}>
-                <div style={{ fontSize:22, fontWeight:800 }}>9%</div>
-                <div style={{ fontSize:10, color:'#9ca3af' }}>DPM</div>
-              </div>
-            </div>
-            {/* Legend */}
-            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-              {[{c:'#3b82f6',l:'Drive',v:'1%'},{c:'#f97316',l:'Passion',v:'27%'},{c:'#22c55e',l:'Motivation',v:'0%'}].map(d => (
-                <div key={d.l} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12 }}>
-                  <div style={{ width:8, height:8, borderRadius:4, background:d.c }}/>
-                  <span style={{ color:'#9ca3af' }}>{d.l}</span>
-                  <span style={{ color:'#fff', fontWeight:700 }}>{d.v}</span>
-                </div>
-              ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '16px 0' }}>
+            <DPMDonut value={dpm.overall} size={140} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <LegendItem color="#6366f1" label="Drive" value={`${dpm.drive}%`} />
+              <LegendItem color="#f97316" label="Passion" value={`${dpm.passion}%`} />
+              <LegendItem color="#22c55e" label="Motivation" value={`${dpm.motivation}%`} />
             </div>
           </div>
-          {/* Sub metrics */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginTop:16, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)' }}>
-            {[{v:'1%',l:'Drive',c:'#3b82f6'},{v:'27%',l:'Passion',c:'#f97316'},{v:'0%',l:'Motivation',c:'#22c55e'}].map(m => (
-              <div key={m.l} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:18, fontWeight:700, color:m.c }}>{m.v}</div>
-                <div style={{ fontSize:10, color:'#9ca3af', marginTop:2 }}>{m.l}</div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'space-around', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
+            <StatItem value={`${dpm.drive}%`} label="Drive" color="#6366f1" />
+            <StatItem value={`${dpm.passion}%`} label="Passion" color="#f97316" />
+            <StatItem value={`${dpm.motivation}%`} label="Motivation" color="#22c55e" />
           </div>
         </Card>
 
-        <Card title="Weekly Progress" headerRight={
-          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-            <button style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center', background:'none', border:'none', color:'#9ca3af', cursor:'pointer', borderRadius:4 }}>‹</button>
-            <span style={{ fontSize:11, color:'#9ca3af', minWidth:120, textAlign:'center' }}>Feb 22 - Feb 28</span>
-            <button style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center', background:'none', border:'none', color:'#9ca3af', cursor:'pointer', borderRadius:4 }}>›</button>
-          </div>
-        }>
-          {/* Day dots */}
-          <div style={{ display:'flex', justifyContent:'space-around', padding:'6px 0' }}>
-            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i) => (
-              <div key={d} style={{ textAlign:'center' }}>
-                <div style={{ width:12, height:12, borderRadius:'50%', border: d==='Wed' ? 'none' : '2px solid #6b7280', background: d==='Wed' ? '#14b8a6' : 'transparent', margin:'0 auto' }}/>
-                <div style={{ fontSize:10, color: d==='Wed' ? '#14b8a6' : '#6b7280', marginTop:4, fontWeight: d==='Wed' ? 700 : 400 }}>{d}</div>
+        {/* Weekly Progress Card */}
+        <Card title="Weekly Progress" extra={<WeekNav />}>
+          <div style={{ display: 'flex', justifyContent: 'space-around', margin: '20px 0' }}>
+            {days.map(d => (
+              <div key={d} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%', margin: '0 auto 6px',
+                  border: d === currentDay.slice(0,3) ? '2px solid #22c55e' : '2px solid rgba(255,255,255,0.1)',
+                  background: d === currentDay.slice(0,3) ? '#22c55e' : 'transparent',
+                }} />
+                <span style={{ color: d === currentDay.slice(0,3) ? '#22c55e' : 'rgba(255,255,255,0.4)', fontSize: 12 }}>{d}</span>
               </div>
             ))}
           </div>
-          {/* Stats */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:4, marginTop:12, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)' }}>
-            {[{i:'🎵',v:'0',l:'Minutes'},{i:'🎯',v:'0',l:'Sessions'},{i:'✓',v:'0%',l:'Accuracy'},{i:'🔥',v:'0',l:'Streak'}].map(s => (
-              <div key={s.l} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:14 }}>{s.i}</div>
-                <div style={{ fontSize:18, fontWeight:700 }}>{s.v}</div>
-                <div style={{ fontSize:10, color:'#9ca3af' }}>{s.l}</div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: 16 }}>
+            <WeekStat icon="📋" value={weeklyStats.minutes} label="Minutes" />
+            <WeekStat icon="🎯" value={weeklyStats.sessions} label="Sessions" />
+            <WeekStat icon="✓" value={`${weeklyStats.accuracy}%`} label="Accuracy" />
+            <WeekStat icon="🔥" value={weeklyStats.streak} label="Streak" />
           </div>
         </Card>
       </div>
 
-      {/* Row 2: Practice Goals + Goal vs Actual + Intensity */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginTop:12 }}>
+      {/* Bottom Row — 3 columns */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+        {/* Practice Goals */}
         <Card title="Practice Goals">
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', background:'rgba(55,65,81,0.3)', borderRadius:8, marginBottom:12 }}>
-            <span style={{ color:'#9ca3af', fontSize:13 }}>Weekly Goal</span>
-            <span style={{ fontWeight:700, fontSize:13, color:'#14b8a6' }}>60 min</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0 8px' }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>Weekly Goal</span>
+            <span style={{ color: '#22c55e', fontWeight: 700, fontSize: 16 }}>{practiceGoal.target} min</span>
           </div>
-          <div style={{ height:12, background:'#374151', borderRadius:8, overflow:'hidden' }}>
-            <div style={{ height:'100%', width:'0%', borderRadius:8, background:'linear-gradient(90deg,#14b8a6,#06b6d4)' }}/>
+          <div style={{ height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{
+              height: '100%', borderRadius: 4,
+              background: 'linear-gradient(90deg, #6366f1, #22c55e)',
+              width: `${Math.min(100, (practiceGoal.current / practiceGoal.target) * 100)}%`,
+              transition: 'width 0.5s',
+            }} />
           </div>
-          <div style={{ display:'flex', justifyContent:'space-between', marginTop:4, fontSize:12 }}>
-            <span style={{ color:'#9ca3af' }}>0 / 60 min</span>
-            <span style={{ fontWeight:700 }}>0%</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{practiceGoal.current} / {practiceGoal.target} min</span>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{Math.round((practiceGoal.current / practiceGoal.target) * 100)}%</span>
           </div>
-          <p style={{ fontSize:11, color:'#9ca3af', marginTop:8 }}>60 min remaining this week</p>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginTop: 8 }}>
+            {practiceGoal.target - practiceGoal.current} min remaining this week
+          </p>
         </Card>
 
+        {/* Goal vs Actual */}
         <Card title="Goal vs Actual">
-          <div style={{ textAlign:'center', padding:20, color:'#9ca3af', fontSize:12 }}>
-            <p>Avg: 0 min/day · Goal: 9 min/day</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 120, color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
+            Avg: {Math.round(practiceGoal.current / 7)} min/day · Goal: {Math.round(practiceGoal.target / 7)} min/day
           </div>
         </Card>
 
+        {/* Practice Intensity */}
         <Card title="Practice Intensity">
-          <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:4, padding:'0 4px', height:80 }}>
-            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
-              <div key={d} style={{ display:'flex', flexDirection:'column', alignItems:'center', flex:1 }}>
-                <div style={{ width:'100%', maxWidth:24, height:0, borderRadius:'3px 3px 0 0', background:'#374151' }}/>
-                <div style={{ fontSize:9, color:'#6b7280', marginTop:4 }}>{d}</div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: 120, paddingBottom: 8 }}>
+            {days.map(d => {
+              const h = Math.random() * 60 + 10
+              return (
+                <div key={d} style={{ textAlign: 'center' }}>
+                  <div style={{ width: 20, height: h, background: 'rgba(99,102,241,0.3)', borderRadius: 4 }} />
+                  <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, marginTop: 4, display: 'block' }}>{d}</span>
+                </div>
+              )
+            })}
           </div>
         </Card>
       </div>
 
-      {/* Row 3: Homework + Achievements + Leaders */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginTop:12 }}>
-        <Card title="Homework">
-          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            <div style={{ padding:10, borderRadius:8, border:'1px solid rgba(59,130,246,0.3)', background:'rgba(59,130,246,0.1)', display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
-              <div>
-                <div style={{ fontSize:12, fontWeight:600 }}>Level 3 Mastery</div>
-                <div style={{ fontSize:10, color:'#9ca3af', marginTop:2 }}>Practice · 2026-01-20</div>
-              </div>
-              <span style={{ fontSize:9, padding:'2px 8px', borderRadius:4, background:'#374151', whiteSpace:'nowrap' }}>In Progress</span>
+      {/* T.A.M.i Leaders Mini Card */}
+      <Card title="T.A.M.i Leaders">
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 16px', margin: '12px 0',
+          background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(232,75,138,0.2))',
+          border: '1px solid rgba(168,85,247,0.3)', borderRadius: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>👑</span>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%', overflow: 'hidden',
+              background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 700,
+            }}>
+              {user?.avatar ? (
+                <img src={user.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user?.name?.[0] || 'M'
+              )}
             </div>
+            <span style={{ color: '#fff', fontWeight: 600 }}>{user?.name || 'Motesart'} (You)</span>
           </div>
-          <button onClick={() => navigate('/homework')} style={{ width:'100%', padding:10, marginTop:8, background:'linear-gradient(135deg,rgba(37,99,235,0.2),rgba(79,70,229,0.2))', border:'1px solid rgba(59,130,246,0.3)', color:'#60a5fa', borderRadius:8, fontSize:12, fontWeight:600, cursor:'pointer' }}>View Full Homework →</button>
-        </Card>
-
-        <Card title="Achievements">
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6 }}>
-            {[{i:'🔥',l:'5 Streak',e:true},{i:'🔥🔥',l:'10 Streak',e:true},{i:'🕐',l:'1 Hour',e:false},{i:'🏆',l:'Level 3',e:false},{i:'🏆',l:'Level 4',e:false},{i:'🏅',l:'Master',e:false},{i:'🎯',l:'10 Sessions',e:false},{i:'⭐',l:'DPM 80+',e:false}].map((a,i) => (
-              <div key={i} style={{ padding:'10px 6px', borderRadius:8, textAlign:'center', background: a.e ? 'linear-gradient(135deg,rgba(120,53,15,0.4),rgba(154,52,18,0.4))' : 'rgba(55,65,81,0.2)', border: a.e ? '1px solid rgba(234,179,8,0.4)' : '1px solid rgba(55,65,81,0.3)', opacity: a.e ? 1 : 0.4 }}>
-                <div style={{ fontSize:20 }}>{a.i}</div>
-                <span style={{ fontSize:8, color:'#d1d5db', marginTop:4, display:'block' }}>{a.l}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card title="T.A.M.i Leaders">
-          <div style={{ display:'flex', alignItems:'center', gap:10, padding:8, background:'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border:'1px solid rgba(147,51,234,0.3)', borderRadius:8 }}>
-            <span style={{ width:20, fontSize:12, fontWeight:700, textAlign:'center' }}>👑</span>
-            <div style={{ width:28, height:28, borderRadius:'50%', background:'#374151', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:600 }}>🎵</div>
-            <span style={{ flex:1, fontSize:12, color:'#a855f7', fontWeight:700 }}>Motesart Mo (You)</span>
-            <span style={{ fontSize:12, fontWeight:700, color:'#22c55e' }}>287</span>
-          </div>
-          <button onClick={() => navigate('/leaderboard')} style={{ width:'100%', marginTop:12, padding:10, background:'linear-gradient(135deg,rgba(147,51,234,0.2),rgba(236,72,153,0.2))', border:'1px solid rgba(147,51,234,0.3)', color:'#a855f7', borderRadius:8, fontSize:12, fontWeight:600, cursor:'pointer' }}>View Full Leaderboard →</button>
-        </Card>
-      </div>
-    </>
+          <span style={{ color: '#22c55e', fontWeight: 800, fontSize: 18 }}>287</span>
+        </div>
+        <button onClick={() => nav('leaderboard')} style={{
+          width: '100%', padding: '12px', textAlign: 'center',
+          background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(232,75,138,0.15))',
+          border: '1px solid rgba(168,85,247,0.2)', borderRadius: 12,
+          color: 'rgba(255,255,255,0.7)', fontSize: 14, cursor: 'pointer',
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          View Full Leaderboard →
+        </button>
+      </Card>
+    </div>
   )
 }
 
-/* ─── GAME VIEW ─── */
-function GameView({ navigate }) {
+/* ---- Sub-components ---- */
+
+function Card({ title, extra, children }) {
   return (
-    <>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-        <Card title="🎮 Game Stats">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
-            {[{i:'🔥',v:'0',l:'Best Streak',c:'#f97316'},{i:'💀',v:'0',l:'Lives Lost',c:'#a855f7'},{i:'⚡',v:'0',l:'On Fire Runs',c:'#14b8a6'}].map(s => (
-              <div key={s.l} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:14 }}>{s.i}</div>
-                <div style={{ fontSize:18, fontWeight:700, color:s.c }}>{s.v}</div>
-                <div style={{ fontSize:10, color:'#9ca3af', marginTop:2 }}>{s.l}</div>
-              </div>
-            ))}
-          </div>
-        </Card>
-        <Card title="🎯 DPM Game Scores">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
-            {[{v:'0%',l:'Drive',c:'#3b82f6'},{v:'0%',l:'Passion',c:'#f97316'},{v:'0%',l:'Motivation',c:'#22c55e'}].map(s => (
-              <div key={s.l} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:18, fontWeight:700, color:s.c }}>{s.v}</div>
-                <div style={{ fontSize:10, color:'#9ca3af', marginTop:2 }}>{s.l}</div>
-              </div>
-            ))}
-          </div>
-        </Card>
+    <div style={{
+      background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 16, padding: '18px 20px',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700, margin: 0 }}>{title}</h3>
+        {extra}
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:12 }}>
-        <Card title="Game Sessions">
-          <p style={{ color:'#9ca3af', fontSize:12 }}>No game sessions yet. Hit Play to start!</p>
-        </Card>
-        <Card title="🏆 Game Leaderboard">
-          <div style={{ display:'flex', alignItems:'center', gap:10, padding:8, background:'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border:'1px solid rgba(147,51,234,0.3)', borderRadius:8 }}>
-            <span style={{ width:20, fontSize:12, fontWeight:700, textAlign:'center' }}>👑</span>
-            <div style={{ width:28, height:28, borderRadius:'50%', background:'#374151', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:600 }}>🎵</div>
-            <span style={{ flex:1, fontSize:12, color:'#a855f7', fontWeight:700 }}>Motesart Mo (You)</span>
-            <span style={{ fontSize:12, fontWeight:700, color:'#22c55e' }}>0</span>
-          </div>
-          <button onClick={() => navigate('/leaderboard')} style={{ width:'100%', marginTop:12, padding:10, background:'linear-gradient(135deg,rgba(147,51,234,0.2),rgba(236,72,153,0.2))', border:'1px solid rgba(147,51,234,0.3)', color:'#a855f7', borderRadius:8, fontSize:12, fontWeight:600, cursor:'pointer' }}>View Full Leaderboard →</button>
-        </Card>
-      </div>
-    </>
+      {children}
+    </div>
+  )
+}
+
+function ActionButton({ icon, label, color, borderColor, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: '10px 20px', borderRadius: 12, cursor: 'pointer',
+      background: color === 'transparent' ? 'rgba(255,255,255,0.04)' : color,
+      border: borderColor ? `1px solid ${borderColor}` : color !== 'transparent' ? 'none' : '1px solid rgba(255,255,255,0.1)',
+      color: '#fff', fontSize: 14, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8,
+      fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s',
+    }}>
+      {icon} {label}
+    </button>
+  )
+}
+
+function DPMDonut({ value, size = 140 }) {
+  const r = (size - 14) / 2
+  const circ = 2 * Math.PI * r
+  const offset = circ - (value / 100) * circ
+  const color = value >= 70 ? '#22c55e' : value >= 40 ? '#eab308' : '#14b8a6'
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0 }}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={7} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={7}
+        strokeDasharray={circ} strokeDashoffset={offset}
+        strokeLinecap="round" transform={`rotate(-90 ${size/2} ${size/2})`} />
+      <text x={size/2} y={size/2 - 4} textAnchor="middle" fill="#fff" fontSize={32} fontWeight="800">{value}%</text>
+      <text x={size/2} y={size/2 + 18} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize={13}>DPM</text>
+    </svg>
+  )
+}
+
+function LegendItem({ color, label, value }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{label}</span>
+      <span style={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>{value}</span>
+    </div>
+  )
+}
+
+function StatItem({ value, label, color }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ color, fontSize: 22, fontWeight: 800 }}>{value}</div>
+      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{label}</div>
+    </div>
+  )
+}
+
+function WeekNav() {
+  const now = new Date()
+  const start = new Date(now)
+  start.setDate(now.getDate() - now.getDay() + 1)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>‹</span>
+      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{fmt(start)} - {fmt(end)}</span>
+      <span style={{ color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>›</span>
+    </div>
+  )
+}
+
+function WeekStat({ icon, value, label }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+      <div style={{ color: '#fff', fontSize: 20, fontWeight: 800 }}>{value}</div>
+      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{label}</div>
+    </div>
   )
 }
