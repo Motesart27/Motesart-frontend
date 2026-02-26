@@ -27,25 +27,24 @@ export default function TamiChat({ user }) {
     setLoading(false)
   }
 
-  // Floating bubble — T.A.M.i avatar instead of emoji
+  /* === FLOATING BUBBLE — clean pink/purple gradient, no emoji === */
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} style={{
-        position: 'fixed', bottom: 20, right: 20, width: 60, height: 60, borderRadius: '50%',
-        background: 'linear-gradient(135deg, #6366f1, #e84b8a)', border: 'none', cursor: 'pointer',
-        boxShadow: '0 4px 24px rgba(99,102,241,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 1000, transition: 'transform 0.2s', overflow: 'hidden', padding: 0,
-      }}
-        onMouseEnter={e => e.target.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-      >
-        <img src="/tami-avatar.png" alt="T.A.M.i" style={{
-          width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%',
-        }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style="font-size:28px;color:#fff">🤖</span>' }} />
-      </button>
+        position: 'fixed', bottom: 20, right: 20, width: 56, height: 56, borderRadius: '50%',
+        background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+        border: '2px solid rgba(168,85,247,0.4)',
+        cursor: 'pointer',
+        boxShadow: '0 4px 24px rgba(168,85,247,0.4)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, transition: 'transform 0.2s', padding: 0,
+        color: '#fff', fontSize: 20, fontWeight: 800,
+        fontFamily: "'DM Sans', sans-serif",
+      }}>T</button>
     )
   }
 
+  /* === POPUP CHAT — T.A.M.i avatar in header (this part already works) === */
   return (
     <div style={{
       position: 'fixed', bottom: 20, right: 20, width: 370, height: 500,
@@ -63,11 +62,10 @@ export default function TamiChat({ user }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 38, height: 38, borderRadius: '50%', overflow: 'hidden',
-            border: '2px solid rgba(99,102,241,0.4)',
+            border: '2px solid rgba(168,85,247,0.4)',
           }}>
-            <img src="/tami-avatar.png" alt="T.A.M.i" style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-            }} onError={(e) => { e.target.style.display = 'none' }} />
+            <img src="/tami-avatar.png" alt="T.A.M.i" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#a855f7,#ec4899)'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;width:100%;height:100%">T</span>' }} />
           </div>
           <div>
             <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>T.A.M.i</div>
@@ -87,7 +85,7 @@ export default function TamiChat({ user }) {
           <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 40, lineHeight: 1.6 }}>
             <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 12px' }}>
               <img src="/tami-avatar.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => { e.target.parentElement.innerHTML = '<span style="font-size:32px">🤖</span>' }} />
+                onError={(e) => { e.target.parentElement.innerHTML='<div style="width:100%;height:100%;background:linear-gradient(135deg,#a855f7,#ec4899);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:800">T</div>' }} />
             </div>
             Hi{user?.name ? ` ${user.name.split(' ')[0]}` : ''}! I'm T.A.M.i, your AI music assistant.<br/>
             Ask me anything about practice, theory, or your progress!
@@ -96,20 +94,11 @@ export default function TamiChat({ user }) {
         {messages.map((msg, i) => (
           <div key={i} style={{
             alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-            background: msg.role === 'user'
-              ? 'linear-gradient(135deg, #6366f1, #818cf8)'
-              : 'rgba(255,255,255,0.06)',
-            color: '#fff', padding: '10px 14px', borderRadius: 14,
-            maxWidth: '80%', fontSize: 13, lineHeight: 1.6,
-          }}>
-            {msg.text}
-          </div>
+            background: msg.role === 'user' ? 'linear-gradient(135deg, #6366f1, #818cf8)' : 'rgba(255,255,255,0.06)',
+            color: '#fff', padding: '10px 14px', borderRadius: 14, maxWidth: '80%', fontSize: 13, lineHeight: 1.6,
+          }}>{msg.text}</div>
         ))}
-        {loading && (
-          <div style={{ alignSelf: 'flex-start', color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '10px 14px' }}>
-            T.A.M.i is thinking...
-          </div>
-        )}
+        {loading && <div style={{ alignSelf: 'flex-start', color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '10px 14px' }}>T.A.M.i is thinking...</div>}
         <div ref={bottomRef} />
       </div>
 
@@ -124,7 +113,7 @@ export default function TamiChat({ user }) {
             fontSize: 13, outline: 'none', fontFamily: "'DM Sans', sans-serif",
           }} />
         <button onClick={sendMessage} disabled={loading} style={{
-          padding: '10px 18px', background: 'linear-gradient(135deg, #6366f1, #e84b8a)',
+          padding: '10px 18px', background: 'linear-gradient(135deg, #a855f7, #ec4899)',
           border: 'none', borderRadius: 10, color: '#fff', cursor: loading ? 'wait' : 'pointer',
           fontWeight: 600, fontSize: 13, fontFamily: "'DM Sans', sans-serif",
         }}>Send</button>
