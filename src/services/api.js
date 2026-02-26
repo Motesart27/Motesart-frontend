@@ -1,44 +1,58 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-async function request(path, options = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Request failed' }))
-    throw new Error(err.detail || 'Request failed')
+export const api = {
+  register: async ({ name, email, password, role }) => {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, role })
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || 'Registration failed')
+    }
+    return res.json()
+  },
+  login: async (email, password) => {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || 'Login failed')
+    }
+    return res.json()
+  },
+  getStudents: async () => {
+    const res = await fetch(`${BASE_URL}/students`)
+    return res.json()
+  },
+  getPracticeLogs: async (studentId) => {
+    const res = await fetch(`${BASE_URL}/practice-logs/${studentId}`)
+    return res.json()
+  },
+  getHomework: async (studentId) => {
+    const res = await fetch(`${BASE_URL}/homework/${studentId}`)
+    return res.json()
+  },
+  chatWithTami: async (message, context) => {
+    const res = await fetch(`${BASE_URL}/tami/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, context })
+    })
+    return res.json()
   }
+}
+
+export async function getStudentsWithRisk() {
+  const res = await fetch(`${BASE_URL}/students`)
   return res.json()
 }
 
-export const api = {
-  // Auth
-  login: (email) => request(`/login?email=${encodeURIComponent(email)}`),
-  register: (data) => request('/register', { method: 'POST', body: JSON.stringify(data) }),
-
-  // Students
-  getStudents: () => request('/students'),
-  getStudentByEmail: (email) => request(`/student?email=${encodeURIComponent(email)}`),
-
-  // Practice
-  getPracticeLogs: (studentId) => request(`/practice-logs?student_id=${encodeURIComponent(studentId)}`),
-  logPractice: (data) => request('/practice-logs', { method: 'POST', body: JSON.stringify(data) }),
-
-  // Homework
-  getHomework: (studentId) => request(`/homework?student_id=${encodeURIComponent(studentId)}`),
-
-  // Sessions
-  getSessions: (studentId) => request(`/sessions?student_id=${encodeURIComponent(studentId)}`),
-
-  // T.A.M.i Chat
-  chatWithTami: (message, context) => request('/tami/chat', {
-    method: 'POST',
-    body: JSON.stringify({ message, context }),
-  }),
-
-  // Health check
-  wake: () => fetch(`${API_URL}/`).then(r => r.json()),
+export async function tamiWeeklyReview(studentId) {
+  const res = await fetch(`${BASE_URL}/tami/weekly-review/${studentId}`)
+  return res.json()
 }
-
-export default api
