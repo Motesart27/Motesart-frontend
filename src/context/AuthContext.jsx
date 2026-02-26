@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
 
   // Primary role from user's role array — first match wins
   const getRole = () => {
-    if (!user?.role) return null
+    if (!user?.role) return 'User'
     const roles = Array.isArray(user.role) ? user.role : [user.role]
     // Priority: Admin > Teacher > Parent > Student > User
     const priority = ['Admin', 'Teacher', 'Parent', 'Student', 'User']
