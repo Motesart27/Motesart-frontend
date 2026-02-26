@@ -1,142 +1,134 @@
 import { useState, useRef, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../services/api.js'
 
-export default function TamiChat() {
-  const { user } = useAuth()
-  const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm T.A.M.i — your AI music assistant. How can I help you today? 🎵" }
-  ])
+export default function TamiChat({ user }) {
+  const [open, setOpen] = useState(false)
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef(null)
+  const bottomRef = useRef(null)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return
-    const userMsg = { role: 'user', content: input.trim() }
-    setMessages(prev => [...prev, userMsg])
+    const userMsg = input.trim()
     setInput('')
+    setMessages(prev => [...prev, { role: 'user', text: userMsg }])
     setLoading(true)
     try {
-      const res = await api.chatWithTami(input.trim(), user?.id)
-      setMessages(prev => [...prev, { role: 'assistant', content: res.response || res.message || "I'm not sure how to help with that." }])
+      const res = await api.chatWithTami(userMsg, { userName: user?.name, userRole: user?.role })
+      setMessages(prev => [...prev, { role: 'assistant', text: res.response || res.message || "I'm here to help!" }])
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting. Try again in a moment! 🎶" }])
+      setMessages(prev => [...prev, { role: 'assistant', text: "Sorry, I'm having trouble connecting. Try again in a moment!" }])
     }
     setLoading(false)
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
-  }
-
-  const s = {
-    fab: {
-      position: 'fixed', bottom: 24, right: 24, width: 60, height: 60,
-      borderRadius: '50%', border: 'none', cursor: 'pointer', zIndex: 9999,
-      background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 4px 20px rgba(6,182,212,0.4)', transition: 'transform 0.2s',
-      fontSize: 28
-    },
-    panel: {
-      position: 'fixed', bottom: 96, right: 24, width: 360, maxHeight: 500,
-      background: '#1f2937', borderRadius: 16, zIndex: 9998,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column',
-      border: '1px solid rgba(6,182,212,0.3)', overflow: 'hidden'
-    },
-    header: {
-      padding: '14px 16px', background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-    },
-    headerTitle: { color: '#fff', fontWeight: 700, fontSize: 16, margin: 0 },
-    closeBtn: {
-      background: 'none', border: 'none', color: '#fff', fontSize: 20,
-      cursor: 'pointer', padding: '0 4px'
-    },
-    body: {
-      flex: 1, overflowY: 'auto', padding: 12, display: 'flex',
-      flexDirection: 'column', gap: 8, maxHeight: 340, minHeight: 200
-    },
-    msgUser: {
-      alignSelf: 'flex-end', background: 'rgba(6,182,212,0.2)',
-      borderRadius: '12px 12px 4px 12px', padding: '8px 12px',
-      color: '#e5e7eb', fontSize: 14, maxWidth: '80%'
-    },
-    msgBot: {
-      alignSelf: 'flex-start', background: 'rgba(139,92,246,0.15)',
-      borderRadius: '12px 12px 12px 4px', padding: '8px 12px',
-      color: '#e5e7eb', fontSize: 14, maxWidth: '80%'
-    },
-    inputRow: {
-      display: 'flex', padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.1)',
-      gap: 8, background: '#111827'
-    },
-    input: {
-      flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-      borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 14,
-      outline: 'none', resize: 'none', fontFamily: 'inherit'
-    },
-    sendBtn: {
-      background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)', border: 'none',
-      borderRadius: 8, padding: '8px 14px', color: '#fff', fontWeight: 600,
-      cursor: 'pointer', fontSize: 14
-    }
+  // Floating bubble — T.A.M.i avatar instead of emoji
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} style={{
+        position: 'fixed', bottom: 20, right: 20, width: 60, height: 60, borderRadius: '50%',
+        background: 'linear-gradient(135deg, #6366f1, #e84b8a)', border: 'none', cursor: 'pointer',
+        boxShadow: '0 4px 24px rgba(99,102,241,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, transition: 'transform 0.2s', overflow: 'hidden', padding: 0,
+      }}
+        onMouseEnter={e => e.target.style.transform = 'scale(1.1)'}
+        onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+      >
+        <img src="/tami-avatar.png" alt="T.A.M.i" style={{
+          width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%',
+        }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style="font-size:28px;color:#fff">🤖</span>' }} />
+      </button>
+    )
   }
 
   return (
-    <>
-      {isOpen && (
-        <div style={s.panel}>
-          <div style={s.header}>
-            <span style={s.headerTitle}>🎵 T.A.M.i</span>
-            <button style={s.closeBtn} onClick={() => setIsOpen(false)}>✕</button>
+    <div style={{
+      position: 'fixed', bottom: 20, right: 20, width: 370, height: 500,
+      background: '#12121a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+      display: 'flex', flexDirection: 'column', zIndex: 1000,
+      boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+    }}>
+      {/* Header with T.A.M.i avatar */}
+      <div style={{
+        padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(232,75,138,0.1))',
+        borderRadius: '20px 20px 0 0',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: '50%', overflow: 'hidden',
+            border: '2px solid rgba(99,102,241,0.4)',
+          }}>
+            <img src="/tami-avatar.png" alt="T.A.M.i" style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+            }} onError={(e) => { e.target.style.display = 'none' }} />
           </div>
-          <div style={s.body}>
-            {messages.map((m, i) => (
-              <div key={i} style={m.role === 'user' ? s.msgUser : s.msgBot}>
-                {m.content}
-              </div>
-            ))}
-            {loading && (
-              <div style={s.msgBot}>
-                <span style={{ opacity: 0.6 }}>T.A.M.i is thinking...</span>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <div style={s.inputRow}>
-            <textarea
-              style={s.input}
-              rows={1}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask T.A.M.i anything..."
-            />
-            <button style={s.sendBtn} onClick={sendMessage} disabled={loading}>
-              Send
-            </button>
+          <div>
+            <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>T.A.M.i</div>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>Your AI Music Coach</div>
           </div>
         </div>
-      )}
-      <button
-        style={s.fab}
-        onClick={() => setIsOpen(!isOpen)}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-        title="Chat with T.A.M.i"
-      >
-        {isOpen ? '✕' : '🎵'}
-      </button>
-    </>
+        <button onClick={() => setOpen(false)} style={{
+          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 8, width: 30, height: 30, cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
+          fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>✕</button>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 40, lineHeight: 1.6 }}>
+            <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 12px' }}>
+              <img src="/tami-avatar.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => { e.target.parentElement.innerHTML = '<span style="font-size:32px">🤖</span>' }} />
+            </div>
+            Hi{user?.name ? ` ${user.name.split(' ')[0]}` : ''}! I'm T.A.M.i, your AI music assistant.<br/>
+            Ask me anything about practice, theory, or your progress!
+          </div>
+        )}
+        {messages.map((msg, i) => (
+          <div key={i} style={{
+            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+            background: msg.role === 'user'
+              ? 'linear-gradient(135deg, #6366f1, #818cf8)'
+              : 'rgba(255,255,255,0.06)',
+            color: '#fff', padding: '10px 14px', borderRadius: 14,
+            maxWidth: '80%', fontSize: 13, lineHeight: 1.6,
+          }}>
+            {msg.text}
+          </div>
+        ))}
+        {loading && (
+          <div style={{ alignSelf: 'flex-start', color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '10px 14px' }}>
+            T.A.M.i is thinking...
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 8 }}>
+        <input value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && sendMessage()}
+          placeholder="Ask T.A.M.i..."
+          style={{
+            flex: 1, padding: '10px 14px', background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff',
+            fontSize: 13, outline: 'none', fontFamily: "'DM Sans', sans-serif",
+          }} />
+        <button onClick={sendMessage} disabled={loading} style={{
+          padding: '10px 18px', background: 'linear-gradient(135deg, #6366f1, #e84b8a)',
+          border: 'none', borderRadius: 10, color: '#fff', cursor: loading ? 'wait' : 'pointer',
+          fontWeight: 600, fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+        }}>Send</button>
+      </div>
+    </div>
   )
 }
