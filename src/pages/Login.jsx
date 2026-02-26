@@ -20,7 +20,7 @@ export default function Login() {
     setError('')
     try {
       if (isLogin) {
-        const user = await api.login(email)
+        const user = await api.login(email, password)
         login(user)
         navigate('/dashboard')
       } else {
