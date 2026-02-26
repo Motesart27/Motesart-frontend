@@ -1,18 +1,8 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export const api = {
-  register: async ({ name, email, password, role }) => {
-    const res = await fetch(`${BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, role })
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail || 'Registration failed')
-    }
-    return res.json()
-  },
+  baseUrl: BASE_URL,
+
   login: async (email, password) => {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
@@ -20,23 +10,40 @@ export const api = {
       body: JSON.stringify({ email, password })
     })
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail || 'Login failed')
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.detail || 'Login failed')
     }
     return res.json()
   },
+
+  register: async ({ name, email, password, role }) => {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, role })
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.detail || 'Registration failed')
+    }
+    return res.json()
+  },
+
   getStudents: async () => {
     const res = await fetch(`${BASE_URL}/students`)
     return res.json()
   },
+
   getPracticeLogs: async (studentId) => {
     const res = await fetch(`${BASE_URL}/practice-logs/${studentId}`)
     return res.json()
   },
+
   getHomework: async (studentId) => {
     const res = await fetch(`${BASE_URL}/homework/${studentId}`)
     return res.json()
   },
+
   chatWithTami: async (message, context) => {
     const res = await fetch(`${BASE_URL}/tami/chat`, {
       method: 'POST',
