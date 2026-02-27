@@ -12,6 +12,7 @@ import PracticeTracking from './pages/PracticeTracking.jsx'
 import SessionSummary from './pages/SessionSummary.jsx'
 import Settings from './pages/Settings.jsx'
 import TamiChat from './components/TamiChat.jsx'
+import TamiDashboard from './pages/TamiDashboard.jsx'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
@@ -35,6 +36,7 @@ export default function App() {
       <Route path="/register" element={<Registration />} />
       <Route path="/dashboard" element={<DashboardRedirect />} />
       <Route path="/student" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+      <Route path="/tami" element={<ProtectedRoute><TamiDashboard /></ProtectedRoute>} />
       <Route path="/teacher" element={<ProtectedRoute><TeacherDashboard /></ProtectedRoute>} />
       <Route path="/parent" element={<ProtectedRoute><ParentDashboard /></ProtectedRoute>} />
       <Route path="/game" element={<ProtectedRoute><GamePage /></ProtectedRoute>} />
