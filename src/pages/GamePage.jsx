@@ -61,14 +61,12 @@ function getPianoKeys(level) {
   for (let o = 0; o < oct; o++) {
     for (let n = 0; n < 7; n++) {
       const globalIdx = o * 7 + n
-      let num
-      if (o === 0) num = n + 1
-      else num = n === 0 ? 8 : n + 1
-      keys.push({ num, name: NOTE_NAMES[globalIdx], freq: NOTE_FREQS[globalIdx], idx: globalIdx, isOctaveC: n === 0 && o > 0 })
+      keys.push({ num: n + 1, name: NOTE_NAMES[globalIdx], freq: NOTE_FREQS[globalIdx], idx: globalIdx, isOctaveC: false })
     }
-    const finalIdx = o * 7 + 7
-    keys.push({ num: 8, name: 'C', freq: NOTE_FREQS[finalIdx], idx: finalIdx, isOctaveC: true })
   }
+  // Final high C only once
+  const finalIdx = oct * 7
+  keys.push({ num: 8, name: "C", freq: NOTE_FREQS[finalIdx], idx: finalIdx, isOctaveC: true })
   return keys
 }
 
@@ -505,15 +503,20 @@ export default function GamePage() {
       sessionRef.current.attempts++
       const allCorrect = next.every((n, i) => n === mystery[i])
       const newStates = {}
+      // For each note in the answer, light up the staff position of the expected note
       next.forEach((n, i) => {
-        // Highlight the staff position of the expected note (mystery[i])
-        // correct = green on expected position, wrong = red on expected position
-        newStates[mystery[i]] = n === mystery[i] ? 'correct' : 'wrong'
-        if (n !== mystery[i]) {
+        const staffPos = mystery[i]  // which staff note was expected
+        const isCorrect = n === mystery[i]
+        newStates[staffPos] = isCorrect ? 'correct' : 'wrong'
+        if (!isCorrect) {
           sessionRef.current.noteErrors[SCALE_NOTES[mystery[i]].name] =
             (sessionRef.current.noteErrors[SCALE_NOTES[mystery[i]].name] || 0) + 1
         }
       })
+      // If all correct, mark ALL mystery positions green
+      if (next.every((n, i) => n === mystery[i])) {
+        mystery.forEach(pos => { newStates[pos] = 'correct' })
+      }
       setNoteStates(newStates)
 
       if (allCorrect) {
@@ -560,12 +563,11 @@ export default function GamePage() {
       setTimeout(() => {
         setAnswers([])
         setNoteStates({})
-        if (allCorrect) {
-          const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
-          setMystery(seq)
-          setScaleReplays(maxReplays)
-          setFindReplays(maxReplays)
-        }
+        // Always generate new mystery — whether correct or wrong
+        const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
+        setMystery(seq)
+        setScaleReplays(maxReplays)
+        setFindReplays(maxReplays)
       }, 1600)
     }
   }, [answers, isPlaying, mystery, noteCount, maxReplays, mode, maxLives, logSession, level, doLevelUp])
