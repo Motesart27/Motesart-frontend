@@ -446,7 +446,7 @@ export default function GamePage() {
     setScaleReplays(r => r - 1)
     sessionRef.current.replaysUsed++
     playSequence([0,1,2,3,4,5,6,7], () => {
-      setTimeout(() => playSequence(mystery), 600)
+      setTimeout(() => playSequenceHidden(mystery), 600)
     })
   }
 
@@ -504,7 +504,9 @@ export default function GamePage() {
       const allCorrect = next.every((n, i) => n === mystery[i])
       const newStates = {}
       next.forEach((n, i) => {
-        newStates[i] = n === mystery[i] ? 'correct' : 'wrong'
+        // Highlight the staff position of the expected note (mystery[i])
+        // correct = green on expected position, wrong = red on expected position
+        newStates[mystery[i]] = n === mystery[i] ? 'correct' : 'wrong'
         if (n !== mystery[i]) {
           sessionRef.current.noteErrors[SCALE_NOTES[mystery[i]].name] =
             (sessionRef.current.noteErrors[SCALE_NOTES[mystery[i]].name] || 0) + 1
