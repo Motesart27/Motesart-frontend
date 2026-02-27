@@ -24,7 +24,7 @@ export default function StudentDashboard() {
           {/* T.A.M.i Dash Button */}
           <button onClick={() => navigate('/tami')} style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 12px 5px 5px', background:'linear-gradient(135deg,rgba(232,75,138,0.2),rgba(249,115,22,0.2))', border:'1px solid rgba(249,115,22,0.5)', borderRadius:20, cursor:'pointer' }}>
             <div style={{ width:28, height:28, borderRadius:'50%', overflow:'hidden', border:'1.5px solid rgba(249,115,22,0.6)', flexShrink:0 }}>
-              <img src="/TAMi_2.PNG" alt="T.A.M.i" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+              <img src="/tami-avatar.png" alt="T.A.M.i" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
             </div>
             <div style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', flexShrink:0 }}/>
             <span style={{ fontSize:11, fontWeight:700, color:'#fb923c', whiteSpace:'nowrap' }}>T.A.M.i Dash</span>
