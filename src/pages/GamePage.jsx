@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
-// ─── NOTE DATA ───────────────────────────────────────────────────────────────
+// ─── NOTE DATA ────────────────────────────────────────────────────────────────
 const NOTE_FREQS = [
   261.63,293.66,329.63,349.23,392.00,440.00,493.88,
   523.25,587.33,659.25,698.46,783.99,880.00,987.77,
@@ -11,22 +11,18 @@ const NOTE_FREQS = [
 ]
 const NOTE_NAMES = ['C','D','E','F','G','A','B','C','D','E','F','G','A','B','C','D','E','F']
 
-// C Major scale: 8 notes, real treble clef vertical positions (px from top of 130px staff area)
-// Lines: E4=88, G4=72, B4=56, D5=40, F5=24
-// Spaces: F4=80, A4=64, C5=48, E5=32
-// C4 = 96 (below staff, ledger line at 104)
 const SCALE_NOTES = [
-  { name:'C', freq:261.63, top:96,  hasLedger:true  },
-  { name:'D', freq:293.66, top:88,  hasLedger:false },
-  { name:'E', freq:329.63, top:81,  hasLedger:false },
-  { name:'F', freq:349.23, top:73,  hasLedger:false },
-  { name:'G', freq:392.00, top:65,  hasLedger:false },
-  { name:'A', freq:440.00, top:57,  hasLedger:false },
-  { name:'B', freq:493.88, top:49,  hasLedger:false },
-  { name:'C', freq:523.25, top:41,  hasLedger:false },
+  { name:'C', freq:261.63, top:96, hasLedger:true },
+  { name:'D', freq:293.66, top:88, hasLedger:false },
+  { name:'E', freq:329.63, top:81, hasLedger:false },
+  { name:'F', freq:349.23, top:73, hasLedger:false },
+  { name:'G', freq:392.00, top:65, hasLedger:false },
+  { name:'A', freq:440.00, top:57, hasLedger:false },
+  { name:'B', freq:493.88, top:49, hasLedger:false },
+  { name:'C', freq:523.25, top:41, hasLedger:false },
 ]
 
-// ─── LEVEL HELPERS ───────────────────────────────────────────────────────────
+// ─── LEVEL HELPERS ────────────────────────────────────────────────────────────
 function getOctaves(level) {
   if (level <= 3) return 1
   if (level <= 9) return 2
@@ -43,67 +39,125 @@ function getOctaveLabel(level) {
   return o === 1 ? 'One octave' : o === 2 ? 'Two octaves' : 'Three octaves'
 }
 
-// Piano keys per octave count — numbers cycle 1-8, 2-8, 2-8
+// White keys per octave = 8 (C D E F G A B C)
+// Black key positions within an octave group (% from left of that group):
+//   C# after C, D# after D, skip E, F# after F, G# after G, A# after A, skip B
+// Correct CSS approach: absolute positioning relative to piano container
+
 function getPianoKeys(level) {
   const oct = getOctaves(level)
   const keys = []
   for (let o = 0; o < oct; o++) {
     for (let n = 0; n < 7; n++) {
       const globalIdx = o * 7 + n
-      // number: first octave = 1-7, octave start C = 8, then repeats 2-8
       let num
-      if (o === 0) num = n + 1          // 1–7
-      else num = n === 0 ? 8 : n + 1   // octave C = 8, then D=2,E=3...
+      if (o === 0) num = n + 1
+      else num = n === 0 ? 8 : n + 1
       keys.push({ num, name: NOTE_NAMES[globalIdx], freq: NOTE_FREQS[globalIdx], idx: globalIdx, isOctaveC: n === 0 && o > 0 })
     }
-    // final C of each octave
     const finalIdx = o * 7 + 7
     keys.push({ num: 8, name: 'C', freq: NOTE_FREQS[finalIdx], idx: finalIdx, isOctaveC: true })
   }
   return keys
 }
 
-// Black key layout — 5 per octave, repeated
-function BlackKeys({ octaves }) {
-  const groups = []
-  for (let o = 0; o < octaves; o++) {
-    groups.push(
-      <div key={o} style={{display:'flex',flex:8,position:'relative'}}>
-        <div style={{flex:1}}/>
-        <div className="gp-bkey"/>
-        <div style={{flex:.6}}/>
-        <div className="gp-bkey"/>
-        <div style={{flex:1.4}}/>
-        <div className="gp-bkey"/>
-        <div style={{flex:.6}}/>
-        <div className="gp-bkey"/>
-        <div style={{flex:.6}}/>
-        <div className="gp-bkey"/>
-        <div style={{flex:1}}/>
-      </div>
-    )
-  }
+// ─── PIANO COMPONENT (fixed proportions + black keys) ─────────────────────────
+function Piano({ keys, octaves, pressed, onKeyPress }) {
+  // White keys count
+  const whiteKeys = keys // all keys in our array are white
+  const totalWhite = whiteKeys.length
+
+  // Black key positions: within each octave of 8 white keys,
+  // black keys sit between: 0-1(C#), 1-2(D#), skip 2-3, 3-4(F#), 4-5(G#), 5-6(A#), skip 6-7
+  // Pattern indices (0-based within octave): after key 0,1, skip, after 3,4,5, skip
+  const BLACK_OFFSETS = [0,1,3,4,5] // which white key index has a black key to its right (within an 8-key octave)
+
   return (
-    <div className="gp-bkeys">
-      {groups}
+    <div style={{
+      width:'100%', maxWidth:960, position:'relative', height:140,
+      background:'linear-gradient(180deg,#1e293b,#0f172a)',
+      borderRadius:'0 0 8px 8px', border:'2px solid #334155',
+      borderTop:'4px solid #475569', overflow:'visible',
+      display:'flex'
+    }}>
+      {/* White keys */}
+      {whiteKeys.map((k,i) => (
+        <div
+          key={i}
+          onClick={() => onKeyPress(k.idx, i)}
+          style={{
+            flex:1,
+            background: pressed===i
+              ? 'linear-gradient(180deg,#93c5fd,#bfdbfe)'
+              : k.isOctaveC
+                ? 'linear-gradient(180deg,#dbeafe,#bfdbfe)'
+                : 'linear-gradient(180deg,#e2e8f0,#f8fafc)',
+            borderLeft: '1px solid #cbd5e1',
+            borderRight: i === totalWhite-1 ? '1px solid #cbd5e1' : 'none',
+            borderBottom: '3px solid ' + (pressed===i ? '#3b82f6' : '#94a3b8'),
+            display:'flex', flexDirection:'column', alignItems:'center',
+            justifyContent:'flex-end', paddingBottom:6,
+            cursor:'pointer', position:'relative', zIndex:1,
+            borderRadius:'0 0 4px 4px', minWidth:0,
+            transform: pressed===i ? 'translateY(2px)' : 'none',
+            transition:'all .1s',
+          }}
+        >
+          <span style={{fontSize:10,fontWeight:700,color: k.isOctaveC ? '#1d4ed8' : '#94a3b8',pointerEvents:'none'}}>{k.num}</span>
+          <span style={{fontSize:10,fontWeight:700,color: k.isOctaveC ? '#1d4ed8' : '#475569',pointerEvents:'none'}}>{k.name}</span>
+        </div>
+      ))}
+
+      {/* Black keys — absolutely positioned */}
+      {Array.from({length: octaves}, (_,o) => {
+        const octaveStart = o * 8 // index of first white key in this octave
+        return BLACK_OFFSETS.map(offset => {
+          const whiteIdx = octaveStart + offset
+          if (whiteIdx >= totalWhite - 1) return null
+          // Position: center of gap between whiteIdx and whiteIdx+1
+          // Each white key = 100/totalWhite %
+          const keyWidth = 100 / totalWhite
+          const leftPct = (whiteIdx + 1) * keyWidth - (keyWidth * 0.3)
+          return (
+            <div
+              key={`b-${o}-${offset}`}
+              style={{
+                position:'absolute',
+                left: leftPct + '%',
+                top:0,
+                width: keyWidth * 0.6 + '%',
+                height:'60%',
+                background:'linear-gradient(180deg,#1e293b,#0f172a)',
+                border:'1px solid #334155',
+                borderRadius:'0 0 4px 4px',
+                zIndex:2,
+                boxShadow:'0 4px 8px rgba(0,0,0,.5)',
+                cursor:'pointer',
+                pointerEvents:'none', // decorative only for now
+              }}
+            />
+          )
+        })
+      })}
     </div>
   )
 }
 
-// ─── STREAK CONFIG ────────────────────────────────────────────────────────────
+// ─── STREAK CONFIG ─────────────────────────────────────────────────────────────
 function getStreakStyle(streak) {
   if (streak === 0) return { border:'#374151', bg:'rgba(55,65,81,.2)', color:'#6b7280', label:'', emoji:'' }
-  if (streak < 3)   return { border:'#f97316', bg:'rgba(249,115,22,.1)', color:'#fb923c', label:'Warming Up', emoji:'🔥' }
-  if (streak < 5)   return { border:'#f97316', bg:'rgba(249,115,22,.12)', color:'#fb923c', label:'Warming Up!', emoji:'🔥' }
-  if (streak < 10)  return { border:'#ef4444', bg:'rgba(239,68,68,.15)', color:'#fbbf24', label:'ON FIRE!', emoji:'🔥' }
-  if (streak < 15)  return { border:'#fbbf24', bg:'rgba(251,191,36,.2)', color:'#fbbf24', label:'INFERNO!', emoji:'🌋' }
-  return              { border:'#a855f7', bg:'rgba(168,85,247,.2)', color:'#e879f9', label:'LEGENDARY!', emoji:'⚡' }
+  if (streak < 3) return { border:'#f97316', bg:'rgba(249,115,22,.1)', color:'#fb923c', label:'Warming Up', emoji:'🔥' }
+  if (streak < 5) return { border:'#f97316', bg:'rgba(249,115,22,.12)', color:'#fb923c', label:'Warming Up!', emoji:'🔥' }
+  if (streak < 10) return { border:'#ef4444', bg:'rgba(239,68,68,.15)', color:'#fbbf24', label:'ON FIRE!', emoji:'🔥' }
+  if (streak < 15) return { border:'#fbbf24', bg:'rgba(251,191,36,.2)', color:'#fbbf24', label:'INFERNO!', emoji:'🌋' }
+  return { border:'#a855f7', bg:'rgba(168,85,247,.2)', color:'#e879f9', label:'LEGENDARY!', emoji:'⚡' }
 }
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 let audioCtx = null
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  if (audioCtx.state === 'suspended') audioCtx.resume()
   return audioCtx
 }
 function playTone(freq, dur = 0.5) {
@@ -117,7 +171,7 @@ function playTone(freq, dur = 0.5) {
     gain.gain.setValueAtTime(0.4, ctx.currentTime)
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur)
     osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur)
-  } catch(e) {}
+  } catch(e) { console.warn('Audio error:', e) }
 }
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -135,10 +189,8 @@ const css = `
 .gp-streak-label{font-size:9px;font-weight:700;margin-top:3px;letter-spacing:.5px}
 .gp-prog-wrap{display:flex;align-items:center;gap:6px}
 .gp-prog-bar{width:64px;height:10px;background:#374151;border-radius:9999px;overflow:hidden;border:1px solid #4b5563}
-.gp-prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7);border-radius:9999px}
+.gp-prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7);border-radius:9999px;transition:width .3s}
 .gp-mid{padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px}
-
-/* ── TREBLE STAFF ── */
 .gp-staff-wrap{width:100%;max-width:640px;background:rgba(30,41,59,.8);border:2px solid rgba(100,116,139,.4);border-radius:12px;padding:16px 12px 10px}
 .gp-staff-outer{position:relative;height:130px}
 .gp-staff-line{position:absolute;left:52px;right:8px;height:2px;background:rgba(148,163,184,.5);border-radius:1px}
@@ -155,7 +207,6 @@ const css = `
 .gp-note-lbl{position:absolute;font-size:9px;font-weight:700;top:113px;color:#475569;text-align:center;width:16px;pointer-events:none}
 .gp-note-lbl-lit{color:#60a5fa}
 .gp-staff-hint{font-size:10px;color:#475569;text-align:center;padding-top:4px}
-
 .gp-title h1{font-size:24px;font-weight:700;font-family:Georgia,serif;background:linear-gradient(135deg,#e2e8f0,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .gp-info{width:28px;height:28px;border-radius:50%;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#60a5fa;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700}
 .gp-action-row{display:flex;gap:8px;width:100%;max-width:384px}
@@ -171,34 +222,16 @@ const css = `
 .gp-mbtn-game{background:#9333ea;color:#fff;box-shadow:0 2px 8px rgba(147,51,234,.3)}
 .gp-mbtn-academic{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;box-shadow:0 2px 8px rgba(14,165,233,.3)}
 .gp-dpm-bar{width:100%;max-width:384px;background:rgba(30,41,59,.8);border:1px solid rgba(14,165,233,.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px}
-
-/* ── KEYBOARD ── */
 .gp-kb{flex:1;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
 .gp-lvl-badge{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border-radius:10px;padding:8px 14px;text-align:center;box-shadow:0 4px 12px rgba(37,99,235,.3)}
 .gp-lvl-num{font-size:24px;font-weight:900}
 .gp-lvl-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
 .gp-piano-wrap{width:100%;max-width:960px;padding:0 4px}
-.gp-piano{display:flex;position:relative;height:140px;background:linear-gradient(180deg,#1e293b,#0f172a);border-radius:0 0 8px 8px;border:2px solid #334155;border-top:4px solid #475569;overflow:hidden}
-.gp-wkey{flex:1;background:linear-gradient(180deg,#e2e8f0,#f8fafc);border-left:1px solid #cbd5e1;border-right:1px solid #cbd5e1;border-bottom:3px solid #94a3b8;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;cursor:pointer;transition:all .1s;position:relative;z-index:1;border-radius:0 0 4px 4px;min-width:0}
-.gp-wkey:hover{background:linear-gradient(180deg,#dbeafe,#eff6ff)}
-.gp-wkey.pressed{background:linear-gradient(180deg,#93c5fd,#bfdbfe);border-bottom-color:#3b82f6;transform:translateY(2px)}
-.gp-wkey.octave-c{background:linear-gradient(180deg,#dbeafe,#bfdbfe)}
-.gp-wkey.octave-c:hover{background:linear-gradient(180deg,#bfdbfe,#93c5fd)}
-.gp-wkey-label{font-size:10px;font-weight:700;color:#475569;pointer-events:none}
-.gp-wkey-label.octave-c-label{color:#1d4ed8}
-.gp-wkey-num{font-size:10px;color:#94a3b8;pointer-events:none;font-weight:700}
-.gp-wkey-num.octave-c-num{color:#2563eb;font-weight:900}
-.gp-bkeys{position:absolute;top:0;left:0;right:0;height:85px;display:flex;pointer-events:none;z-index:2}
-.gp-bkey{width:8%;max-width:44px;background:linear-gradient(180deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:0 0 4px 4px;pointer-events:auto;cursor:pointer;margin-left:-4%;margin-right:-4%;box-shadow:0 4px 8px rgba(0,0,0,.5);z-index:3}
 .gp-answer{background:rgba(30,41,59,.8);border:1px solid rgba(59,130,246,.3);border-radius:8px;padding:6px 16px;display:flex;align-items:center;gap:8px}
-
-/* ── FOOTER ── */
 .gp-footer{padding:8px 12px;border-top:1px solid #1e293b;background:rgba(15,23,42,.95);display:flex;justify-content:center;gap:8px}
 .gp-fbtn{padding:6px 16px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
 .gp-fbtn-dash{background:linear-gradient(135deg,#a855f7,#3b82f6);color:#fff}
 .gp-fbtn-gray{background:#4b5563;color:#fff}
-
-/* ── MODALS ── */
 .gp-modal-bg{display:none;position:fixed;inset:0;z-index:50;align-items:center;justify-content:center;padding:16px}
 .gp-modal-bg.show{display:flex}
 .gp-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)}
@@ -221,8 +254,6 @@ const css = `
 .gp-tami-card{background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(6,182,212,.08));border:1px solid rgba(20,184,166,.3);border-radius:12px;padding:14px;margin-bottom:14px}
 .gp-tami-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#14b8a6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
 .gp-tami-tag{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:700;margin:2px}
-
-/* ── STREAK MILESTONE TOAST ── */
 .gp-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:100;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;opacity:0;transition:all .4s;pointer-events:none;white-space:nowrap}
 .gp-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 `
@@ -231,76 +262,98 @@ const css = `
 export default function GamePage() {
   const navigate = useNavigate()
   const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
-const LEVEL = storedUser.level || 1
+  const LEVEL = storedUser.level || 1
   const keys = getPianoKeys(LEVEL)
   const noteCount = getNoteCount(LEVEL)
   const maxReplays = getMaxReplays(LEVEL)
   const octaveLabel = getOctaveLabel(LEVEL)
 
-  const [answers, setAnswers]       = useState([])
-  const [litNote, setLitNote]       = useState(null)   // single index 0-7 or null
-  const [noteStates, setNoteStates] = useState({})     // {idx: 'correct'|'wrong'}
-  const [pressed, setPressed]       = useState(null)
-  const [showHtp, setShowHtp]       = useState(false)
+  // Game state
+  const [answers, setAnswers] = useState([])
+  const [litNote, setLitNote] = useState(null)
+  const [noteStates, setNoteStates] = useState({})
+  const [pressed, setPressed] = useState(null)
+  const [showHtp, setShowHtp] = useState(false)
   const [showGameOver, setShowGameOver] = useState(false)
-  const [replaysLeft, setReplaysLeft]   = useState(maxReplays)
-  const [mystery, setMystery]       = useState([])
-  const [mode, setMode]             = useState('game')
-  const [isPlaying, setIsPlaying]   = useState(false)
-  const [streak, setStreak]         = useState(7)
-  const [toast, setToast]           = useState(null)
-  const playingRef = useRef(false)
-  const [sessionLogged, setSessionLogged] = useState(false)
+  const [replaysLeft, setReplaysLeft] = useState(maxReplays)
+  const [mystery, setMystery] = useState([])
+  const [mode, setMode] = useState('game')
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [streak, setStreak] = useState(0)
+  const [toast, setToast] = useState(null)
 
-  // Game session stats for TAMi/WYL
+  // Lives: start at 3, max 6 (only if earned)
+  const [lives, setLives] = useState(3)
+  const [maxLives] = useState(6) // cap
+
+  // Progress: total correct answers this session (for progress bar)
+  const [sessionCorrect, setSessionCorrect] = useState(0)
+  const SESSION_TARGET = 10 // 10 correct = 100% progress bar
+
+  const [sessionLogged, setSessionLogged] = useState(false)
+  const [sessionPoints, setSessionPoints] = useState(0)
+
+  const playingRef = useRef(false)
   const sessionRef = useRef({
     correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
     startTime: Date.now(), bestStreak: 0, currentStreak: 0,
   })
 
-  // POST session to Railway — called on Game Over
+  // Log session + leaderboard
   const logSession = useCallback(async () => {
     if (sessionLogged) return
     const s = sessionRef.current
     const user = JSON.parse(localStorage.getItem('som_user') || '{}')
     const durationSeconds = Math.round((Date.now() - s.startTime) / 1000)
     const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
-    const earScore = Math.min(Math.round((accuracy * 0.6) + (s.bestStreak * 2)), 100)
-    const dpmGained = Math.max(0, Math.round(durationSeconds / 60) * 2)
+    const points = (s.correct * 100) + (s.bestStreak * 50)
+    setSessionPoints(points)
+
     try {
       await fetch(`${BACKEND_URL}/session/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user.id || 'anonymous',
-          level: LEVEL,
-          mode,
-          correct: s.correct,
-          attempts: s.attempts,
-          accuracy,
-          best_streak: s.bestStreak,
-          replays_used: s.replaysUsed,
+          user_id: user.id || user.name || 'anonymous',
+          user_name: user.name || 'Player',
+          level: LEVEL, mode,
+          correct: s.correct, attempts: s.attempts, accuracy,
+          best_streak: s.bestStreak, replays_used: s.replaysUsed,
           duration_seconds: durationSeconds,
           note_errors: s.noteErrors,
-          ear_score: earScore,
-          dpm_gained: dpmGained,
+          points,
+          game_name: 'Find the Note',
         })
       })
+
+      // Also log to leaderboard
+      await fetch(`${BACKEND_URL}/leaderboard/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id || user.name || 'anonymous',
+          user_name: user.name || 'Player',
+          game: 'Find the Note',
+          level: LEVEL,
+          points,
+          accuracy,
+          best_streak: s.bestStreak,
+        })
+      })
+
       setSessionLogged(true)
     } catch (e) {
-      console.warn('Session log failed:', e)
+      console.warn('Session/leaderboard log failed:', e)
     }
   }, [sessionLogged, mode, LEVEL])
 
-  // Generate mystery sequence on mount
+  // Generate mystery sequence
   useEffect(() => {
-    const seq = Array.from({ length: noteCount }, () =>
-      Math.floor(Math.random() * 8)
-    )
+    const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
     setMystery(seq)
   }, [LEVEL, noteCount])
 
-  // Play a sequence with one note lit at a time
+  // Play sequence
   const playSequence = useCallback((noteIndices, onDone) => {
     if (playingRef.current) return
     playingRef.current = true
@@ -324,28 +377,36 @@ const LEVEL = storedUser.level || 1
     step()
   }, [])
 
-  // Play Scale — all 8 notes in order
   const playScale = () => {
-    playSequence([0,1,2,3,4,5,6,7])
+    if (replaysLeft <= 0 || isPlaying) return
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
+    setReplaysLeft(r => r - 1)
+    sessionRef.current.replaysUsed++
+    playSequence([0,1,2,3,4,5,6,7], () => {
+      setTimeout(() => playSequence(mystery), 600)
+    })
   }
 
-  // Find Note — play mystery sequence, decrement replays
   const findNote = () => {
     if (replaysLeft <= 0 || !mystery.length || isPlaying) return
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
     setReplaysLeft(r => r - 1)
     sessionRef.current.replaysUsed++
     playSequence(mystery)
   }
 
-  // Show streak toast
-  const showToast = (msg, color, bg, border) => {
+  const showToastMsg = (msg, color, bg, border) => {
     setToast({ msg, color, bg, border })
     setTimeout(() => setToast(null), 2000)
   }
 
-  // Key press handler
+  // Key press
   const pressKey = useCallback((noteIdx, keyPos) => {
     if (isPlaying) return
+    // Resume AudioContext on user gesture
+    if (!audioCtx || audioCtx.state === 'suspended') {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+    }
     setPressed(keyPos)
     setTimeout(() => setPressed(null), 180)
     playTone(NOTE_FREQS[noteIdx], 0.4)
@@ -372,14 +433,33 @@ const LEVEL = storedUser.level || 1
         sessionRef.current.currentStreak = newStreak
         sessionRef.current.bestStreak = Math.max(sessionRef.current.bestStreak, newStreak)
         setStreak(newStreak)
-        // Milestone toasts
-        if (newStreak === 3)  showToast('🔥 TRIPLE! +50 pts', '#fb923c', 'rgba(249,115,22,.15)', 'rgba(249,115,22,.4)')
-        if (newStreak === 5)  showToast('🔥 ON FIRE! Life recovered! ❤️', '#ef4444', 'rgba(239,68,68,.15)', 'rgba(239,68,68,.4)')
-        if (newStreak === 10) showToast('🌋 INFERNO! x2 multiplier!', '#fbbf24', 'rgba(251,191,36,.12)', 'rgba(251,191,36,.4)')
-        if (newStreak === 15) showToast('⚡ LEGENDARY! TAMi is impressed!', '#e879f9', 'rgba(168,85,247,.15)', 'rgba(168,85,247,.5)')
+        setSessionCorrect(c => c + 1)
+
+        // Streak milestones
+        if (newStreak === 3) showToastMsg('🔥 TRIPLE! +50 pts', '#fb923c', 'rgba(249,115,22,.15)', 'rgba(249,115,22,.4)')
+        if (newStreak === 5) {
+          showToastMsg('🔥 ON FIRE! Life recovered! ❤️', '#ef4444', 'rgba(239,68,68,.15)', 'rgba(239,68,68,.4)')
+          // Recover a life up to max
+          if (mode === 'game') setLives(l => Math.min(l + 1, maxLives))
+        }
+        if (newStreak === 10) showToastMsg('🌋 INFERNO! x2 multiplier!', '#fbbf24', 'rgba(251,191,36,.12)', 'rgba(251,191,36,.4)')
+        if (newStreak === 15) showToastMsg('⚡ LEGENDARY! TAMi is impressed!', '#e879f9', 'rgba(168,85,247,.15)', 'rgba(168,85,247,.5)')
       } else {
         sessionRef.current.currentStreak = 0
         setStreak(0)
+        // Lose a life in game mode
+        if (mode === 'game') {
+          setLives(l => {
+            const newLives = l - 1
+            if (newLives <= 0) {
+              setTimeout(() => {
+                logSession()
+                setShowGameOver(true)
+              }, 1800)
+            }
+            return Math.max(0, newLives)
+          })
+        }
       }
 
       setTimeout(() => {
@@ -392,100 +472,98 @@ const LEVEL = storedUser.level || 1
         }
       }, 1600)
     }
-  }, [answers, isPlaying, mystery, noteCount, maxReplays, LEVEL])
+  }, [answers, isPlaying, mystery, noteCount, maxReplays, mode, maxLives, logSession, LEVEL])
+
+  const resetGame = () => {
+    setAnswers([]); setNoteStates({}); setLitNote(null)
+    setReplaysLeft(maxReplays); setStreak(0); setLives(3)
+    setSessionCorrect(0); setSessionLogged(false); setSessionPoints(0)
+    sessionRef.current = {
+      correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
+      startTime: Date.now(), bestStreak: 0, currentStreak: 0,
+    }
+    const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
+    setMystery(seq)
+  }
 
   const streakStyle = getStreakStyle(streak)
-
-  // Ear training stats (derived from session)
   const s = sessionRef.current
   const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
+  const progressPct = Math.min(100, (sessionCorrect / SESSION_TARGET) * 100)
+
+  // Lives display
+  const livesDisplay = Array.from({ length: maxLives }, (_, i) => {
+    if (i < lives) return '❤️'
+    if (i < 3) return '🖤' // always show 3 slots minimum as empty
+    return null // extra slots only shown if earned (lives > 3 means they were recovered)
+  }).filter(Boolean)
 
   return (
     <div className="gp"><style>{css}</style>
 
-      {/* ── STREAK TOAST ── */}
+      {/* TOAST */}
       {toast && (
         <div className="gp-toast show" style={{background:toast.bg, border:`1px solid ${toast.border}`, color:toast.color}}>
           {toast.msg}
         </div>
       )}
 
-      {/* ── TOP BAR ── */}
+      {/* TOP BAR */}
       <div className="gp-top"><div className="gp-top-inner">
-        <div className="gp-pill-pts">💰 1,250</div>
-
+        <div className="gp-pill-pts">💰 {sessionPoints + (s.correct * 100)}</div>
         {mode === 'game'
-          ? <div className="gp-lives">❤️❤️🖤</div>
+          ? <div className="gp-lives">{Array.from({length:3}, (_,i) => i < lives ? '❤️' : '🖤')}</div>
           : <div style={{fontSize:11,color:'#0ea5e9',fontWeight:700}}>📚 Academic</div>
         }
-
-        <div className="gp-bpm">120 BPM</div>
-
-        {/* Streak ring */}
+        <div className="gp-bpm">Lv {LEVEL}</div>
         <div style={{textAlign:'center'}}>
-          <div
-            className={`gp-streak-ring ${streak > 0 ? 'animated' : ''}`}
-            style={{borderColor:streakStyle.border, background:streakStyle.bg, color:streakStyle.color}}
-          >
+          <div className={`gp-streak-ring ${streak > 0 ? 'animated' : ''}`}
+            style={{borderColor:streakStyle.border, background:streakStyle.bg, color:streakStyle.color}}>
             {streakStyle.emoji && <span className="gp-streak-emoji">{streakStyle.emoji}</span>}
             <span style={{fontSize:17,fontWeight:900}}>{streak}</span>
             <span style={{fontSize:7,fontWeight:700,textTransform:'uppercase',letterSpacing:1}}>Streak</span>
           </div>
           {streakStyle.label && <div className="gp-streak-label" style={{color:streakStyle.color}}>{streakStyle.label}</div>}
         </div>
-
         <div className="gp-prog-wrap">
-          <span style={{fontSize:9,color:'#6b7280'}}>Progress</span>
-          <div className="gp-prog-bar"><div className="gp-prog-fill" style={{width:'60%'}}/></div>
-          <span style={{fontSize:12,fontWeight:700,color:'#d1d5db'}}>60%</span>
+          <span style={{fontSize:9,color:'#6b7280'}}>Session</span>
+          <div className="gp-prog-bar"><div className="gp-prog-fill" style={{width:progressPct+'%'}}/></div>
+          <span style={{fontSize:12,fontWeight:700,color:'#d1d5db'}}>{sessionCorrect}/{SESSION_TARGET}</span>
         </div>
       </div></div>
 
-      {/* ── MID ── */}
+      {/* MID */}
       <div className="gp-mid">
-
         {/* TREBLE STAFF */}
         <div className="gp-staff-wrap">
           <div className="gp-staff-outer">
-            {/* Treble clef */}
             <div className="gp-clef">𝄞</div>
-
-            {/* 5 staff lines — bottom to top: E4, G4, B4, D5, F5 */}
             <div className="gp-staff-line" style={{top:88}}/>
             <div className="gp-staff-line" style={{top:72}}/>
             <div className="gp-staff-line" style={{top:56}}/>
             <div className="gp-staff-line" style={{top:40}}/>
             <div className="gp-staff-line" style={{top:24}}/>
-
-            {/* 8 C Major notes spread evenly across staff */}
             {SCALE_NOTES.map((note, i) => {
               const left = 60 + i * 54
               const isLit = litNote === i
               const state = noteStates[i]
               const nhClass = state === 'correct' ? 'gp-nh gp-nh-correct'
-                            : state === 'wrong'   ? 'gp-nh gp-nh-wrong'
-                            : isLit               ? 'gp-nh gp-nh-lit'
-                            :                       'gp-nh gp-nh-idle'
-              const stemClass = isLit ? 'gp-stem gp-stem-lit' : state === 'correct' ? 'gp-stem gp-stem-correct' : 'gp-stem'
-
+                : state === 'wrong' ? 'gp-nh gp-nh-wrong'
+                : isLit ? 'gp-nh gp-nh-lit' : 'gp-nh gp-nh-idle'
+              const stemClass = isLit ? 'gp-stem gp-stem-lit'
+                : state === 'correct' ? 'gp-stem gp-stem-correct' : 'gp-stem'
               return (
                 <div key={i}>
-                  {/* Ledger line for C4 */}
-                  {note.hasLedger && (
-                    <div className="gp-ledger" style={{top: note.top + 6, left: left - 5}}/>
-                  )}
-                  {/* Notehead */}
+                  {note.hasLedger && <div className="gp-ledger" style={{top: note.top + 6, left: left - 5}}/>}
                   <div className={nhClass} style={{left, top: note.top}}>
-                    {/* Stem — up from right of notehead */}
                     <div className={stemClass} style={{left:14, bottom:9, height: Math.max(18, 110 - note.top - 18)}}/>
                   </div>
-                  {/* Note name below staff */}
                   <div className={`gp-note-lbl ${isLit ? 'gp-note-lbl-lit' : ''}`} style={{left}}>{note.name}</div>
                 </div>
               )
             })}
           </div>
-          <div className="gp-staff-hint">C Major Scale · One note lights as it plays · Find Note does not reveal the answer</div>
+          <div className="gp-staff-hint">C Major Scale · One note lights as it plays · Find Note hides which note plays</div>
         </div>
 
         {/* Title */}
@@ -501,33 +579,22 @@ const LEVEL = storedUser.level || 1
 
         {/* Action buttons */}
         <div className="gp-action-row">
-          <button className="gp-abtn gp-abtn-scale" onClick={playScale} disabled={isPlaying}>
-            🎵 Play Scale
+          <button className={`gp-abtn gp-abtn-scale ${replaysLeft<=0?'depleted':''}`}
+            onClick={playScale} disabled={isPlaying || replaysLeft<=0}>
+            🎵 Play Scale ({replaysLeft})
           </button>
-          <button
-            className={`gp-abtn gp-abtn-find ${replaysLeft<=0?'depleted':''}`}
-            onClick={findNote}
-            disabled={isPlaying || replaysLeft<=0}
-          >
+          <button className={`gp-abtn gp-abtn-find ${replaysLeft<=0?'depleted':''}`}
+            onClick={findNote} disabled={isPlaying || replaysLeft<=0}>
             ▶ Find Note ({replaysLeft})
           </button>
         </div>
 
         {/* Mode toggle */}
         <div className="gp-mode-row">
-          <button
-            className={`gp-mbtn ${mode==='academic'?'gp-mbtn-academic':'gp-mbtn-off'}`}
-            onClick={()=>setMode('academic')}
-          >🎓 Academic</button>
-          <button
-            className={`gp-mbtn ${mode==='game'?'gp-mbtn-game':'gp-mbtn-off'}`}
-            onClick={()=>setMode('game')}
-          >🎮 Game</button>
+          <button className={`gp-mbtn ${mode==='academic'?'gp-mbtn-academic':'gp-mbtn-off'}`} onClick={()=>setMode('academic')}>🎓 Academic</button>
+          <button className={`gp-mbtn ${mode==='game'?'gp-mbtn-game':'gp-mbtn-off'}`} onClick={()=>setMode('game')}>🎮 Game</button>
         </div>
-
-        {mode==='game' && (
-          <div style={{fontSize:11,color:'#22c55e',fontWeight:600}}>💚 3 more correct for life recovery!</div>
-        )}
+        {mode==='game' && <div style={{fontSize:11,color:'#22c55e',fontWeight:600}}>💚 5-streak recovers a life!</div>}
         {mode==='academic' && (
           <div className="gp-dpm-bar">
             <span style={{fontSize:18}}>📈</span>
@@ -535,12 +602,12 @@ const LEVEL = storedUser.level || 1
               <div style={{fontSize:11,fontWeight:700,color:'#0ea5e9'}}>DPM Tracking</div>
               <div style={{fontSize:10,color:'#64748b'}}>Extra practice beyond homework raises your DPM</div>
             </div>
-            <div style={{fontSize:13,fontWeight:700,color:'#38bdf8'}}>+12 DPM</div>
+            <div style={{fontSize:13,fontWeight:700,color:'#38bdf8'}}>+{s.correct * 2} DPM</div>
           </div>
         )}
       </div>
 
-      {/* ── KEYBOARD ── */}
+      {/* KEYBOARD */}
       <div className="gp-kb">
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           <div className="gp-lvl-badge">
@@ -553,19 +620,14 @@ const LEVEL = storedUser.level || 1
           </div>
         </div>
 
-        <div className="gp-piano-wrap"><div className="gp-piano">
-          {keys.map((k,i) => (
-            <div
-              key={i}
-              className={`gp-wkey ${pressed===i?'pressed':''} ${k.isOctaveC?'octave-c':''}`}
-              onClick={()=>pressKey(k.idx, i)}
-            >
-              <span className={`gp-wkey-num ${k.isOctaveC?'octave-c-num':''}`}>{k.num}</span>
-              <span className={`gp-wkey-label ${k.isOctaveC?'octave-c-label':''}`}>{k.name}</span>
-            </div>
-          ))}
-          <BlackKeys octaves={getOctaves(LEVEL)} />
-        </div></div>
+        <div className="gp-piano-wrap">
+          <Piano
+            keys={keys}
+            octaves={getOctaves(LEVEL)}
+            pressed={pressed}
+            onKeyPress={pressKey}
+          />
+        </div>
 
         {answers.length > 0 && (
           <div className="gp-answer">
@@ -577,24 +639,20 @@ const LEVEL = storedUser.level || 1
         )}
       </div>
 
-      {/* ── FOOTER ── */}
+      {/* FOOTER */}
       <div className="gp-footer">
         <button className="gp-fbtn gp-fbtn-dash" onClick={()=>navigate('/')}>📊 Dashboard</button>
-        <button className="gp-fbtn gp-fbtn-gray" onClick={()=>{setAnswers([]);setNoteStates({});setLitNote(null);setReplaysLeft(maxReplays)}}>Reset</button>
-        <button className="gp-fbtn gp-fbtn-gray" onClick={()=>{logSession();setShowGameOver(true)}}>Game Over</button>
+        <button className="gp-fbtn gp-fbtn-gray" onClick={resetGame}>Reset</button>
+        <button className="gp-fbtn gp-fbtn-gray" onClick={()=>{logSession();setShowGameOver(true)}}>End Game</button>
       </div>
 
-      {/* ── HOW TO PLAY MODAL ── */}
+      {/* HOW TO PLAY MODAL */}
       <div className={`gp-modal-bg ${showHtp?'show':''}`}>
         <div className="gp-modal-backdrop" onClick={()=>setShowHtp(false)}/>
         <div className="gp-modal gp-htp">
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
             <h2 style={{fontSize:22,fontWeight:700}}>🎵 How to Play</h2>
             <button style={{background:'none',border:'none',color:'#6b7280',fontSize:22,cursor:'pointer'}} onClick={()=>setShowHtp(false)}>✕</button>
-          </div>
-          <div style={{padding:16,borderRadius:12,border:'1px solid rgba(59,130,246,.3)',background:'rgba(59,130,246,.1)',marginBottom:16}}>
-            <h3 style={{fontWeight:700,marginBottom:8,fontSize:14,color:'#60a5fa'}}>🎯 Goal</h3>
-            <p style={{fontSize:13,color:'#cbd5e1',lineHeight:1.6,margin:0}}>Listen to the notes and tap them on the piano keyboard in the correct order!</p>
           </div>
           {[['1','Play Scale','Listen to the C Major scale to tune your ear. Watch the notes light up on the staff!'],
             ['2','Find Note','Listen to the mystery notes. You cannot see which notes play — use your ear!'],
@@ -605,23 +663,9 @@ const LEVEL = storedUser.level || 1
               <div><p style={{fontWeight:600,fontSize:14,margin:'0 0 2px'}}>{t}</p><p style={{fontSize:12,color:'#94a3b8',margin:0,lineHeight:1.5}}>{s}</p></div>
             </div>
           ))}
-          <div style={{padding:14,borderRadius:12,border:'1px solid rgba(168,85,247,.3)',background:'rgba(168,85,247,.1)',margin:'14px 0 12px'}}>
-            <h3 style={{fontWeight:700,marginBottom:10,fontSize:14,color:'#c084fc'}}>💡 Tips</h3>
-            {['Get 4+ in a row to recover a life!','Streaks of 5 earn bonus replays','Higher levels = more notes & more octaves'].map(tip=>(
-              <div key={tip} style={{display:'flex',gap:8,marginBottom:6}}>
-                <span style={{color:'#c084fc'}}>•</span>
-                <span style={{fontSize:13,color:'#c084fc',lineHeight:1.4}}>{tip}</span>
-              </div>
-            ))}
-          </div>
           <div style={{padding:14,borderRadius:12,border:'1px solid rgba(239,68,68,.3)',background:'rgba(239,68,68,.08)',marginBottom:12}}>
             <h3 style={{fontWeight:700,marginBottom:8,fontSize:14,color:'#f87171'}}>❤️ Lives</h3>
-            <p style={{fontSize:13,color:'#fca5a5',margin:0,lineHeight:1.5}}>You start with 3 lives. Wrong answers cost 1 life. Game over at 0 lives! Extra lives (up to 6) only available if you've earned them.</p>
-          </div>
-          <div style={{padding:14,borderRadius:12,border:'1px solid rgba(34,197,94,.3)',background:'rgba(34,197,94,.08)',marginBottom:16}}>
-            <h3 style={{fontWeight:700,marginBottom:8,fontSize:14,color:'#4ade80'}}>🔁 Replays (Level {LEVEL})</h3>
-            <p style={{fontSize:13,color:'#86efac',margin:0}}>You have <strong>{maxReplays}</strong> replays per round.</p>
-            <p style={{fontSize:11,color:'#64748b',marginTop:4,marginBottom:0}}>L1–3: 2 replays · L4–12: 3 replays · L13–18: 4 replays</p>
+            <p style={{fontSize:13,color:'#fca5a5',margin:0,lineHeight:1.5}}>Start with 3 lives. Wrong answers cost 1 life. Game over at 0! Get a 5-streak to recover a life (cap: 6).</p>
           </div>
           <button style={{width:'100%',padding:14,border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',background:'linear-gradient(135deg,#3b82f6,#a855f7)',color:'#fff'}} onClick={()=>setShowHtp(false)}>
             Got it! Let's Play 🎹
@@ -629,14 +673,13 @@ const LEVEL = storedUser.level || 1
         </div>
       </div>
 
-      {/* ── GAME OVER MODAL ── */}
+      {/* GAME OVER MODAL */}
       <div className={`gp-modal-bg ${showGameOver?'show':''}`}>
         <div className="gp-modal-backdrop" onClick={()=>setShowGameOver(false)}/>
         <div className="gp-modal gp-go-modal">
           <div style={{fontSize:44,marginBottom:4}}>💀</div>
           <div style={{fontSize:26,fontWeight:900}}>Game Over!</div>
           <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>Level {LEVEL} · Session Complete</div>
-
           <div className="gp-go-stats">
             {[[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],
               [accuracy+'%','Accuracy','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']
@@ -647,15 +690,18 @@ const LEVEL = storedUser.level || 1
               </div>
             ))}
           </div>
-
+          <div style={{padding:12,borderRadius:10,background:'rgba(234,179,8,.1)',border:'1px solid rgba(234,179,8,.3)',marginBottom:16}}>
+            <div style={{fontSize:22,fontWeight:900,color:'#fbbf24'}}>🏆 {s.correct * 100 + s.bestStreak * 50} pts</div>
+            <div style={{fontSize:11,color:'#92400e'}}>Logged to leaderboard</div>
+          </div>
           {/* Ear Training Meter */}
           <div className="gp-ear-meter">
             <div style={{fontSize:14,fontWeight:700,color:'#0ea5e9',marginBottom:12}}>👂 Ear Training Meter</div>
             {[
               ['Pitch Accuracy', Math.min(accuracy+7,100), 'linear-gradient(90deg,#22c55e,#4ade80)', '#4ade80'],
-              ['Note Memory',    Math.max(accuracy-10,0),  'linear-gradient(90deg,#3b82f6,#60a5fa)', '#60a5fa'],
-              ['Sequence Order', Math.max(accuracy-20,0),  'linear-gradient(90deg,#f97316,#fb923c)', '#fb923c'],
-              ['Speed',          Math.min(accuracy+15,100),'linear-gradient(90deg,#a855f7,#c084fc)', '#c084fc'],
+              ['Note Memory', Math.max(accuracy-10,0), 'linear-gradient(90deg,#3b82f6,#60a5fa)', '#60a5fa'],
+              ['Sequence Order', Math.max(accuracy-20,0), 'linear-gradient(90deg,#f97316,#fb923c)', '#fb923c'],
+              ['Speed', Math.min(accuracy+15,100),'linear-gradient(90deg,#a855f7,#c084fc)', '#c084fc'],
               ['Replay Efficiency', Math.max(accuracy-5,0),'linear-gradient(90deg,#14b8a6,#2dd4bf)', '#2dd4bf'],
             ].map(([label,val,grad,col])=>(
               <div key={label} className="gp-ear-row">
@@ -664,13 +710,8 @@ const LEVEL = storedUser.level || 1
                 <div className="gp-ear-score" style={{color:col}}>{val}%</div>
               </div>
             ))}
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:12,paddingTop:12,borderTop:'1px solid #334155'}}>
-              <div style={{fontSize:12,color:'#64748b'}}>Overall Ear Score</div>
-              <div style={{fontSize:20,fontWeight:900,color:'#fbbf24'}}>{accuracy} <span style={{fontSize:12,color:'#64748b'}}>/ 100</span></div>
-            </div>
           </div>
-
-          {/* TAMi insight */}
+          {/* TAMi */}
           <div className="gp-tami-card">
             <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
               <div className="gp-tami-avatar">T</div>
@@ -681,26 +722,24 @@ const LEVEL = storedUser.level || 1
             </div>
             <div style={{fontSize:12,color:'#94a3b8',lineHeight:1.6}}>
               {accuracy >= 80
-                ? `Great session! Your ear is developing well. You're ${3-LEVEL > 0 ? 3-LEVEL+' levels' : 'ready'} from unlocking the second octave. Keep this up! 🎵`
+                ? `Great session! Your ear is developing well. Keep the streak going! 🎵`
                 : accuracy >= 50
-                ? `Good effort! Focus on listening to the interval between notes — that pattern will help your sequence order. TAMi is watching your progress! 🎯`
-                : `Keep practicing! Every session trains your ear a little more. Remember: Play Scale first, then really focus on each note before answering. You've got this! 💪`
+                ? `Good effort! Focus on the interval between notes — that pattern will help. TAMi is watching your progress! 🎯`
+                : `Keep practicing! Play Scale first, then really focus on each note before answering. You've got this! 💪`
               }
             </div>
             <div style={{marginTop:8}}>
               <span className="gp-tami-tag" style={{background:'rgba(34,197,94,.2)',color:'#4ade80',border:'1px solid rgba(34,197,94,.3)'}}>📍 WYL Saved</span>
               <span className="gp-tami-tag" style={{background:'rgba(59,130,246,.2)',color:'#60a5fa',border:'1px solid rgba(59,130,246,.3)'}}>📊 DPM Updated</span>
-              {s.bestStreak >= 5 && <span className="gp-tami-tag" style={{background:'rgba(239,68,68,.2)',color:'#f87171',border:'1px solid rgba(239,68,68,.3)'}}>🔥 Streak Noted</span>}
+              <span className="gp-tami-tag" style={{background:'rgba(234,179,8,.2)',color:'#fbbf24',border:'1px solid rgba(234,179,8,.3)'}}>🏆 Leaderboard</span>
             </div>
           </div>
-
           <div className="gp-go-actions">
-            <button className="gp-go-restart" onClick={()=>{setShowGameOver(false);setAnswers([]);setNoteStates({});setLitNote(null);setStreak(0);setSessionLogged(false);sessionRef.current={correct:0,attempts:0,noteErrors:{},replaysUsed:0,startTime:Date.now(),bestStreak:0,currentStreak:0}}}>🎮 Play Again</button>
+            <button className="gp-go-restart" onClick={()=>{setShowGameOver(false);resetGame()}}>🎮 Play Again</button>
             <button className="gp-go-summary" onClick={()=>navigate('/session-summary')}>📊 Summary</button>
           </div>
         </div>
       </div>
-
     </div>
   )
 }
