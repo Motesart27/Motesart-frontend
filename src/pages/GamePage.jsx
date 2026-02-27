@@ -446,6 +446,7 @@ export default function GamePage() {
     setScaleReplays(r => r - 1)
     sessionRef.current.replaysUsed++
     playSequence([0,1,2,3,4,5,6,7], () => {
+      setLitNote(null)
       setTimeout(() => playSequenceHidden(mystery), 600)
     })
   }
@@ -489,6 +490,7 @@ export default function GamePage() {
   // Key press
   const pressKey = useCallback((noteIdx, keyPos) => {
     if (isPlaying) return
+    if (mode === 'game' && lives <= 0) return
     if (!audioCtx || audioCtx.state === 'suspended') {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     }
