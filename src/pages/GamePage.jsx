@@ -29,11 +29,11 @@ function getOctaves(level) {
   return 3
 }
 function getNoteCount(level) { return level }
-function getMaxReplays(level) {
-  if (level <= 3) return 2
-  if (level <= 12) return 3
-  return 4
+function getMaxScaleReplays(level) {
+  if (level <= 12) return 2
+  return 3
 }
+function getMaxFindReplays() { return 2 }
 function getOctaveLabel(level) {
   const o = getOctaves(level)
   return o === 1 ? 'One octave' : o === 2 ? 'Two octaves' : 'Three octaves'
@@ -296,11 +296,12 @@ export default function GamePage() {
   const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 
   // Level lives in state so UI updates when it changes
-  const [level, setLevel] = useState(storedUser.level || 1)
+  const [level, setLevel] = useState(1)
 
   const keys = getPianoKeys(level)
   const noteCount = getNoteCount(level)
-  const maxReplays = getMaxReplays(level)
+  const maxScaleReplays = getMaxScaleReplays(level)
+  const maxFindReplays = getMaxFindReplays()
   const octaveLabel = getOctaveLabel(level)
 
   // Game state
@@ -310,8 +311,8 @@ export default function GamePage() {
   const [pressed, setPressed] = useState(null)
   const [showHtp, setShowHtp] = useState(false)
   const [showGameOver, setShowGameOver] = useState(false)
-  const [scaleReplays, setScaleReplays] = useState(maxReplays)
-  const [findReplays, setFindReplays] = useState(maxReplays)
+  const [scaleReplays, setScaleReplays] = useState(2)
+  const [findReplays, setFindReplays] = useState(2)
   const [mystery, setMystery] = useState([])
   const [mode, setMode] = useState('game')
   const [isPlaying, setIsPlaying] = useState(false)
@@ -388,8 +389,8 @@ export default function GamePage() {
   useEffect(() => {
     const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
     setMystery(seq)
-    setScaleReplays(getMaxReplays(level))
-    setFindReplays(getMaxReplays(level))
+    setScaleReplays(getMaxScaleReplays(level))
+    setFindReplays(getMaxFindReplays())
   }, [level, noteCount])
 
   // Play sequence WITH staff lighting (Play Scale)
@@ -442,6 +443,7 @@ export default function GamePage() {
     if (scaleReplays <= 0 || isPlaying) return
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
     setScaleReplays(r => r - 1)
+    setFindReplays(r => Math.max(0, r - 1))  // costs 1 from both counters
     sessionRef.current.replaysUsed++
     playSequence([0,1,2,3,4,5,6,7], () => {
       setLitNote(null)
@@ -566,15 +568,16 @@ export default function GamePage() {
         // Always generate new mystery — whether correct or wrong
         const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
         setMystery(seq)
-        setScaleReplays(maxReplays)
-        setFindReplays(maxReplays)
+        setScaleReplays(getMaxScaleReplays(level))
+        setFindReplays(getMaxFindReplays())
       }, 1600)
     }
-  }, [answers, isPlaying, mystery, noteCount, maxReplays, mode, maxLives, logSession, level, doLevelUp])
+  }, [answers, isPlaying, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp])
 
   const resetGame = () => {
+    setLevel(1)
     setAnswers([]); setNoteStates({}); setLitNote(null)
-    setScaleReplays(maxReplays); setFindReplays(maxReplays)
+    setScaleReplays(getMaxScaleReplays(1)); setFindReplays(getMaxFindReplays())
     setStreak(0); setLives(3)
     setLevelProgress(0)
     setSessionLogged(false); setSessionPoints(0)
@@ -582,7 +585,7 @@ export default function GamePage() {
       correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
       startTime: Date.now(), bestStreak: 0, currentStreak: 0,
     }
-    const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
+    const seq = Array.from({ length: 1 }, () => Math.floor(Math.random() * 8))
     setMystery(seq)
   }
 
