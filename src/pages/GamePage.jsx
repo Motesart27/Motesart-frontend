@@ -78,11 +78,16 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
 
   return (
     <div style={{
-      width:'100%', maxWidth:960, position:'relative', height:140,
-      background:'linear-gradient(180deg,#1e293b,#0f172a)',
-      borderRadius:'0 0 8px 8px', border:'2px solid #334155',
-      borderTop:'4px solid #475569', overflow:'visible',
-      display:'flex'
+      width:'100%', maxWidth:960, position:'relative', height:150,
+      background:'linear-gradient(180deg,#1a2744,#0f172a)',
+      borderRadius:'0 0 12px 12px',
+      border:'2px solid #2d3f5e',
+      borderTop:'6px solid #3b4f6b',
+      overflow:'visible',
+      display:'flex',
+      padding:'0 2px',
+      gap:'2px',
+      boxShadow:'inset 0 2px 8px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5)'
     }}>
       {whiteKeys.map((k,i) => (
         <div
@@ -91,23 +96,29 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
           style={{
             flex:1,
             background: pressed===i
-              ? 'linear-gradient(180deg,#93c5fd,#bfdbfe)'
+              ? 'linear-gradient(180deg,#bfdbfe,#93c5fd)'
               : k.isOctaveC
-                ? 'linear-gradient(180deg,#dbeafe,#bfdbfe)'
-                : 'linear-gradient(180deg,#e2e8f0,#f8fafc)',
-            borderLeft: '1px solid #cbd5e1',
-            borderRight: i === totalWhite-1 ? '1px solid #cbd5e1' : 'none',
-            borderBottom: '3px solid ' + (pressed===i ? '#3b82f6' : '#94a3b8'),
+                ? 'linear-gradient(180deg,#dbeafe 0%,#c7d9f5 60%,#b8cef0 100%)'
+                : 'linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 60%,#cbd5e1 100%)',
+            borderLeft:'none',
+            borderRight:'none',
+            borderBottom:'none',
+            borderRadius:'0 0 6px 6px',
             display:'flex', flexDirection:'column', alignItems:'center',
-            justifyContent:'flex-end', paddingBottom:6,
+            justifyContent:'flex-end', paddingBottom:8,
             cursor:'pointer', position:'relative', zIndex:1,
-            borderRadius:'0 0 4px 4px', minWidth:0,
-            transform: pressed===i ? 'translateY(2px)' : 'none',
-            transition:'all .1s',
+            minWidth:0,
+            transform: pressed===i ? 'translateY(3px) scaleY(0.98)' : 'none',
+            transition:'all .08s',
+            boxShadow: pressed===i
+              ? 'inset 0 -1px 0 rgba(0,0,0,.15), inset 0 2px 4px rgba(0,0,0,.2)'
+              : k.isOctaveC
+                ? 'inset -2px 0 0 rgba(100,140,220,.3), inset 2px 0 0 rgba(100,140,220,.3), inset 0 -3px 0 #8baad4, 2px 0 4px rgba(0,0,0,.25)'
+                : 'inset -2px 0 0 rgba(0,0,0,.08), inset 2px 0 0 rgba(255,255,255,.6), inset 0 -3px 0 #94a3b8, 2px 0 4px rgba(0,0,0,.2)',
           }}
         >
           <span style={{fontSize:10,fontWeight:700,color: k.isOctaveC ? '#1d4ed8' : '#94a3b8',pointerEvents:'none'}}>{k.num}</span>
-          <span style={{fontSize:10,fontWeight:700,color: k.isOctaveC ? '#1d4ed8' : '#475569',pointerEvents:'none'}}>{k.name}</span>
+          <span style={{fontSize:11,fontWeight:800,color: k.isOctaveC ? '#1d4ed8' : '#475569',pointerEvents:'none'}}>{k.name}</span>
         </div>
       ))}
 
@@ -117,7 +128,7 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
           const whiteIdx = octaveStart + offset
           if (whiteIdx >= totalWhite - 1) return null
           const keyWidth = 100 / totalWhite
-          const leftPct = (whiteIdx + 1) * keyWidth - (keyWidth * 0.3)
+          const leftPct = (whiteIdx + 1) * keyWidth - (keyWidth * 0.35)
           return (
             <div
               key={`b-${o}-${offset}`}
@@ -125,13 +136,14 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
                 position:'absolute',
                 left: leftPct + '%',
                 top:0,
-                width: keyWidth * 0.6 + '%',
-                height:'60%',
-                background:'linear-gradient(180deg,#1e293b,#0f172a)',
-                border:'1px solid #334155',
-                borderRadius:'0 0 4px 4px',
+                width: keyWidth * 0.65 + '%',
+                height:'62%',
+                background:'linear-gradient(180deg,#1e2a3a 0%,#162030 50%,#0f1820 100%)',
+                border:'1px solid #0a1520',
+                borderTop:'2px solid #2d3f52',
+                borderRadius:'0 0 5px 5px',
                 zIndex:2,
-                boxShadow:'0 4px 8px rgba(0,0,0,.5)',
+                boxShadow:'2px 4px 8px rgba(0,0,0,.7), inset 1px 0 0 rgba(255,255,255,.06), inset -1px 0 0 rgba(0,0,0,.4)',
                 cursor:'pointer',
                 pointerEvents:'none',
               }}
@@ -141,6 +153,7 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
       })}
     </div>
   )
+}
 }
 
 // ─── STREAK CONFIG ─────────────────────────────────────────────────────────────
