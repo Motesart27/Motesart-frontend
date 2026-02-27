@@ -275,6 +275,7 @@ export default function GamePage() {
   const [pressed, setPressed] = useState(null)
   const [showHtp, setShowHtp] = useState(false)
   const [showGameOver, setShowGameOver] = useState(false)
+  // CHANGED: split into two separate replay counters
   const [scaleReplays, setScaleReplays] = useState(maxReplays)
   const [findReplays, setFindReplays] = useState(maxReplays)
   const [mystery, setMystery] = useState([])
@@ -378,20 +379,22 @@ export default function GamePage() {
     step()
   }, [])
 
+  // CHANGED: playScale uses scaleReplays only
   const playScale = () => {
-    if (replaysLeft <= 0 || isPlaying) return
+    if (scaleReplays <= 0 || isPlaying) return
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
-    setReplaysLeft(r => r - 1)
+    setScaleReplays(r => r - 1)
     sessionRef.current.replaysUsed++
     playSequence([0,1,2,3,4,5,6,7], () => {
       setTimeout(() => playSequence(mystery), 600)
     })
   }
 
+  // CHANGED: findNote uses findReplays only
   const findNote = () => {
-    if (replaysLeft <= 0 || !mystery.length || isPlaying) return
+    if (findReplays <= 0 || !mystery.length || isPlaying) return
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
-    setReplaysLeft(r => r - 1)
+    setFindReplays(r => r - 1)
     sessionRef.current.replaysUsed++
     playSequence(mystery)
   }
@@ -469,7 +472,9 @@ export default function GamePage() {
         if (allCorrect) {
           const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
           setMystery(seq)
-          setReplaysLeft(maxReplays)
+          // CHANGED: reset both replay counters on correct answer
+          setScaleReplays(maxReplays)
+          setFindReplays(maxReplays)
         }
       }, 1600)
     }
@@ -477,7 +482,9 @@ export default function GamePage() {
 
   const resetGame = () => {
     setAnswers([]); setNoteStates({}); setLitNote(null)
-    setReplaysLeft(maxReplays); setStreak(0); setLives(3)
+    // CHANGED: reset both replay counters
+    setScaleReplays(maxReplays); setFindReplays(maxReplays)
+    setStreak(0); setLives(3)
     setSessionCorrect(0); setSessionLogged(false); setSessionPoints(0)
     sessionRef.current = {
       correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
@@ -578,15 +585,15 @@ export default function GamePage() {
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons — CHANGED: each button uses its own counter */}
         <div className="gp-action-row">
-          <button className={`gp-abtn gp-abtn-scale ${replaysLeft<=0?'depleted':''}`}
-            onClick={playScale} disabled={isPlaying || replaysLeft<=0}>
-            🎵 Play Scale ({replaysLeft})
+          <button className={`gp-abtn gp-abtn-scale ${scaleReplays<=0?'depleted':''}`}
+            onClick={playScale} disabled={isPlaying || scaleReplays<=0}>
+            🎵 Play Scale ({scaleReplays})
           </button>
-          <button className={`gp-abtn gp-abtn-find ${replaysLeft<=0?'depleted':''}`}
-            onClick={findNote} disabled={isPlaying || replaysLeft<=0}>
-            ▶ Find Note ({replaysLeft})
+          <button className={`gp-abtn gp-abtn-find ${findReplays<=0?'depleted':''}`}
+            onClick={findNote} disabled={isPlaying || findReplays<=0}>
+            ▶ Find Note ({findReplays})
           </button>
         </div>
 
