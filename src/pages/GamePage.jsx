@@ -230,7 +230,8 @@ const css = `
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function GamePage() {
   const navigate = useNavigate()
-  const LEVEL = 1 // wire from context/props
+  const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
+const LEVEL = storedUser.level || 1
   const keys = getPianoKeys(LEVEL)
   const noteCount = getNoteCount(LEVEL)
   const maxReplays = getMaxReplays(LEVEL)
