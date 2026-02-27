@@ -39,10 +39,21 @@ function getOctaveLabel(level) {
   return o === 1 ? 'One octave' : o === 2 ? 'Two octaves' : 'Three octaves'
 }
 
-// White keys per octave = 8 (C D E F G A B C)
-// Black key positions within an octave group (% from left of that group):
-//   C# after C, D# after D, skip E, F# after F, G# after G, A# after A, skip B
-// Correct CSS approach: absolute positioning relative to piano container
+// ─── TAMI LEVEL UP MESSAGES ───────────────────────────────────────────────────
+function getTamiLevelUpMsg(level) {
+  if (level === 2) return "You found your first note! Your ear is waking up 🎵"
+  if (level === 3) return "Two notes at once — your memory is growing! 🧠"
+  if (level === 4) return "Three notes! You're building real pitch memory now 🎯"
+  if (level === 5) return "Level 5! You're officially a music student now 🎓"
+  if (level === 6) return "Six levels deep — your ear is sharper than you think! ✨"
+  if (level === 7) return "Seven! TAMi is taking notes on your progress 📝"
+  if (level === 8) return "Eight notes incoming — you're entering expert territory! 🔥"
+  if (level === 9) return "Almost at double digits! Your pitch memory is elite 🎸"
+  if (level === 10) return "LEVEL 10! Double digits — TAMi is seriously impressed ⚡"
+  if (level === 12) return "Level 12! Three octaves unlocked. You're a force 🌋"
+  if (level >= 15) return "LEGENDARY status. TAMi bows to your ear training 👑"
+  return `Level ${level}! Keep climbing — TAMi believes in you! 🚀`
+}
 
 function getPianoKeys(level) {
   const oct = getOctaves(level)
@@ -61,16 +72,11 @@ function getPianoKeys(level) {
   return keys
 }
 
-// ─── PIANO COMPONENT (fixed proportions + black keys) ─────────────────────────
+// ─── PIANO COMPONENT ──────────────────────────────────────────────────────────
 function Piano({ keys, octaves, pressed, onKeyPress }) {
-  // White keys count
-  const whiteKeys = keys // all keys in our array are white
+  const whiteKeys = keys
   const totalWhite = whiteKeys.length
-
-  // Black key positions: within each octave of 8 white keys,
-  // black keys sit between: 0-1(C#), 1-2(D#), skip 2-3, 3-4(F#), 4-5(G#), 5-6(A#), skip 6-7
-  // Pattern indices (0-based within octave): after key 0,1, skip, after 3,4,5, skip
-  const BLACK_OFFSETS = [0,1,3,4,5] // which white key index has a black key to its right (within an 8-key octave)
+  const BLACK_OFFSETS = [0,1,3,4,5]
 
   return (
     <div style={{
@@ -80,7 +86,6 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
       borderTop:'4px solid #475569', overflow:'visible',
       display:'flex'
     }}>
-      {/* White keys */}
       {whiteKeys.map((k,i) => (
         <div
           key={i}
@@ -108,14 +113,11 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
         </div>
       ))}
 
-      {/* Black keys — absolutely positioned */}
       {Array.from({length: octaves}, (_,o) => {
-        const octaveStart = o * 8 // index of first white key in this octave
+        const octaveStart = o * 8
         return BLACK_OFFSETS.map(offset => {
           const whiteIdx = octaveStart + offset
           if (whiteIdx >= totalWhite - 1) return null
-          // Position: center of gap between whiteIdx and whiteIdx+1
-          // Each white key = 100/totalWhite %
           const keyWidth = 100 / totalWhite
           const leftPct = (whiteIdx + 1) * keyWidth - (keyWidth * 0.3)
           return (
@@ -133,7 +135,7 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
                 zIndex:2,
                 boxShadow:'0 4px 8px rgba(0,0,0,.5)',
                 cursor:'pointer',
-                pointerEvents:'none', // decorative only for now
+                pointerEvents:'none',
               }}
             />
           )
@@ -256,17 +258,52 @@ const css = `
 .gp-tami-tag{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:700;margin:2px}
 .gp-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:100;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;opacity:0;transition:all .4s;pointer-events:none;white-space:nowrap}
 .gp-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.gp-levelup-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(6px)}
+.gp-levelup-card{background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid rgba(251,191,36,.4);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;position:relative;overflow:hidden}
+.gp-levelup-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(251,191,36,.05),rgba(168,85,247,.05));pointer-events:none}
+.gp-confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;pointer-events:none;z-index:300}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 `
+
+// ─── CONFETTI COMPONENT ───────────────────────────────────────────────────────
+function Confetti() {
+  const pieces = Array.from({length: 60}, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 0.8,
+    duration: 1.5 + Math.random() * 1.5,
+    color: ['#fbbf24','#a855f7','#14b8a6','#ef4444','#3b82f6','#22c55e','#f97316'][Math.floor(Math.random() * 7)],
+    size: 6 + Math.random() * 8,
+  }))
+  return (
+    <>
+      {pieces.map(p => (
+        <div key={p.id} className="gp-confetti-piece" style={{
+          left: p.left + '%',
+          top: '-10px',
+          width: p.size,
+          height: p.size,
+          background: p.color,
+          animationDelay: p.delay + 's',
+          animationDuration: p.duration + 's',
+        }}/>
+      ))}
+    </>
+  )
+}
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function GamePage() {
   const navigate = useNavigate()
   const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
-  const LEVEL = storedUser.level || 1
-  const keys = getPianoKeys(LEVEL)
-  const noteCount = getNoteCount(LEVEL)
-  const maxReplays = getMaxReplays(LEVEL)
-  const octaveLabel = getOctaveLabel(LEVEL)
+
+  // Level lives in state so UI updates when it changes
+  const [level, setLevel] = useState(storedUser.level || 1)
+
+  const keys = getPianoKeys(level)
+  const noteCount = getNoteCount(level)
+  const maxReplays = getMaxReplays(level)
+  const octaveLabel = getOctaveLabel(level)
 
   // Game state
   const [answers, setAnswers] = useState([])
@@ -275,7 +312,6 @@ export default function GamePage() {
   const [pressed, setPressed] = useState(null)
   const [showHtp, setShowHtp] = useState(false)
   const [showGameOver, setShowGameOver] = useState(false)
-  // CHANGED: split into two separate replay counters
   const [scaleReplays, setScaleReplays] = useState(maxReplays)
   const [findReplays, setFindReplays] = useState(maxReplays)
   const [mystery, setMystery] = useState([])
@@ -284,13 +320,17 @@ export default function GamePage() {
   const [streak, setStreak] = useState(0)
   const [toast, setToast] = useState(null)
 
-  // Lives: start at 3, max 6 (only if earned)
+  // Lives
   const [lives, setLives] = useState(3)
-  const [maxLives] = useState(6) // cap
+  const [maxLives] = useState(6)
 
-  // Progress: total correct answers this session (for progress bar)
-  const [sessionCorrect, setSessionCorrect] = useState(0)
-  const SESSION_TARGET = 10 // 10 correct = 100% progress bar
+  // Progress toward level-up (resets each level)
+  const [levelProgress, setLevelProgress] = useState(0)
+  const CORRECT_TO_LEVELUP = 4
+
+  // Level up celebration
+  const [showLevelUp, setShowLevelUp] = useState(false)
+  const [pendingLevel, setPendingLevel] = useState(null)
 
   const [sessionLogged, setSessionLogged] = useState(false)
   const [sessionPoints, setSessionPoints] = useState(0)
@@ -318,7 +358,7 @@ export default function GamePage() {
         body: JSON.stringify({
           user_id: user.id || user.name || 'anonymous',
           user_name: user.name || 'Player',
-          level: LEVEL, mode,
+          level, mode,
           correct: s.correct, attempts: s.attempts, accuracy,
           best_streak: s.bestStreak, replays_used: s.replaysUsed,
           duration_seconds: durationSeconds,
@@ -327,8 +367,6 @@ export default function GamePage() {
           game_name: 'Find the Note',
         })
       })
-
-      // Also log to leaderboard
       await fetch(`${BACKEND_URL}/leaderboard/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -336,26 +374,27 @@ export default function GamePage() {
           user_id: user.id || user.name || 'anonymous',
           user_name: user.name || 'Player',
           game: 'Find the Note',
-          level: LEVEL,
+          level,
           points,
           accuracy,
           best_streak: s.bestStreak,
         })
       })
-
       setSessionLogged(true)
     } catch (e) {
       console.warn('Session/leaderboard log failed:', e)
     }
-  }, [sessionLogged, mode, LEVEL])
+  }, [sessionLogged, mode, level])
 
-  // Generate mystery sequence
+  // Generate mystery sequence whenever level or noteCount changes
   useEffect(() => {
     const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
     setMystery(seq)
-  }, [LEVEL, noteCount])
+    setScaleReplays(getMaxReplays(level))
+    setFindReplays(getMaxReplays(level))
+  }, [level, noteCount])
 
-  // Play sequence
+  // Play sequence WITH staff lighting (Play Scale)
   const playSequence = useCallback((noteIndices, onDone) => {
     if (playingRef.current) return
     playingRef.current = true
@@ -379,7 +418,28 @@ export default function GamePage() {
     step()
   }, [])
 
-  // CHANGED: playScale uses scaleReplays only
+  // Play sequence WITHOUT staff lighting (Find Note — hidden)
+  const playSequenceHidden = useCallback((noteIndices, onDone) => {
+    if (playingRef.current) return
+    playingRef.current = true
+    setIsPlaying(true)
+    let i = 0
+    const step = () => {
+      if (i >= noteIndices.length) {
+        playingRef.current = false
+        setIsPlaying(false)
+        onDone && onDone()
+        return
+      }
+      const ni = noteIndices[i]
+      // Audio only — no setLitNote
+      playTone(SCALE_NOTES[ni].freq, 0.5)
+      i++
+      setTimeout(step, 620)
+    }
+    step()
+  }, [])
+
   const playScale = () => {
     if (scaleReplays <= 0 || isPlaying) return
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
@@ -390,13 +450,13 @@ export default function GamePage() {
     })
   }
 
-  // CHANGED: findNote uses findReplays only
   const findNote = () => {
     if (findReplays <= 0 || !mystery.length || isPlaying) return
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
     setFindReplays(r => r - 1)
     sessionRef.current.replaysUsed++
-    playSequence(mystery)
+    // Hidden — no lighting
+    playSequenceHidden(mystery)
   }
 
   const showToastMsg = (msg, color, bg, border) => {
@@ -404,10 +464,31 @@ export default function GamePage() {
     setTimeout(() => setToast(null), 2000)
   }
 
+  // Advance to next level
+  const doLevelUp = useCallback((currentLevel) => {
+    const newLevel = currentLevel + 1
+    // Save to localStorage
+    const user = JSON.parse(localStorage.getItem('som_user') || '{}')
+    user.level = newLevel
+    localStorage.setItem('som_user', JSON.stringify(user))
+    setPendingLevel(newLevel)
+    setShowLevelUp(true)
+  }, [])
+
+  // Dismiss level up and apply new level
+  const dismissLevelUp = () => {
+    setShowLevelUp(false)
+    setLevel(pendingLevel)
+    setLevelProgress(0)
+    setAnswers([])
+    setNoteStates({})
+    setLitNote(null)
+    setStreak(0)
+  }
+
   // Key press
   const pressKey = useCallback((noteIdx, keyPos) => {
     if (isPlaying) return
-    // Resume AudioContext on user gesture
     if (!audioCtx || audioCtx.state === 'suspended') {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     }
@@ -437,13 +518,20 @@ export default function GamePage() {
         sessionRef.current.currentStreak = newStreak
         sessionRef.current.bestStreak = Math.max(sessionRef.current.bestStreak, newStreak)
         setStreak(newStreak)
-        setSessionCorrect(c => c + 1)
+
+        // Check level up
+        setLevelProgress(prev => {
+          const newProgress = prev + 1
+          if (newProgress >= CORRECT_TO_LEVELUP) {
+            setTimeout(() => doLevelUp(level), 1600)
+          }
+          return newProgress
+        })
 
         // Streak milestones
         if (newStreak === 3) showToastMsg('🔥 TRIPLE! +50 pts', '#fb923c', 'rgba(249,115,22,.15)', 'rgba(249,115,22,.4)')
         if (newStreak === 5) {
           showToastMsg('🔥 ON FIRE! Life recovered! ❤️', '#ef4444', 'rgba(239,68,68,.15)', 'rgba(239,68,68,.4)')
-          // Recover a life up to max
           if (mode === 'game') setLives(l => Math.min(l + 1, maxLives))
         }
         if (newStreak === 10) showToastMsg('🌋 INFERNO! x2 multiplier!', '#fbbf24', 'rgba(251,191,36,.12)', 'rgba(251,191,36,.4)')
@@ -451,7 +539,6 @@ export default function GamePage() {
       } else {
         sessionRef.current.currentStreak = 0
         setStreak(0)
-        // Lose a life in game mode
         if (mode === 'game') {
           setLives(l => {
             const newLives = l - 1
@@ -472,20 +559,19 @@ export default function GamePage() {
         if (allCorrect) {
           const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
           setMystery(seq)
-          // CHANGED: reset both replay counters on correct answer
           setScaleReplays(maxReplays)
           setFindReplays(maxReplays)
         }
       }, 1600)
     }
-  }, [answers, isPlaying, mystery, noteCount, maxReplays, mode, maxLives, logSession, LEVEL])
+  }, [answers, isPlaying, mystery, noteCount, maxReplays, mode, maxLives, logSession, level, doLevelUp])
 
   const resetGame = () => {
     setAnswers([]); setNoteStates({}); setLitNote(null)
-    // CHANGED: reset both replay counters
     setScaleReplays(maxReplays); setFindReplays(maxReplays)
     setStreak(0); setLives(3)
-    setSessionCorrect(0); setSessionLogged(false); setSessionPoints(0)
+    setLevelProgress(0)
+    setSessionLogged(false); setSessionPoints(0)
     sessionRef.current = {
       correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
       startTime: Date.now(), bestStreak: 0, currentStreak: 0,
@@ -497,17 +583,45 @@ export default function GamePage() {
   const streakStyle = getStreakStyle(streak)
   const s = sessionRef.current
   const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
-  const progressPct = Math.min(100, (sessionCorrect / SESSION_TARGET) * 100)
-
-  // Lives display
-  const livesDisplay = Array.from({ length: maxLives }, (_, i) => {
-    if (i < lives) return '❤️'
-    if (i < 3) return '🖤' // always show 3 slots minimum as empty
-    return null // extra slots only shown if earned (lives > 3 means they were recovered)
-  }).filter(Boolean)
+  const progressPct = Math.min(100, (levelProgress / CORRECT_TO_LEVELUP) * 100)
 
   return (
     <div className="gp"><style>{css}</style>
+
+      {/* CONFETTI + LEVEL UP OVERLAY */}
+      {showLevelUp && pendingLevel && (
+        <>
+          <Confetti />
+          <div className="gp-levelup-overlay">
+            <div className="gp-levelup-card">
+              <div style={{fontSize:52,marginBottom:4}}>🎉</div>
+              <div style={{fontSize:13,fontWeight:700,color:'#fbbf24',textTransform:'uppercase',letterSpacing:2,marginBottom:8}}>Level Up!</div>
+              <div style={{fontSize:48,fontWeight:900,background:'linear-gradient(135deg,#fbbf24,#f97316)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:4}}>
+                {pendingLevel}
+              </div>
+              <div style={{fontSize:14,color:'#94a3b8',marginBottom:20}}>
+                {getOctaveLabel(pendingLevel)} · {getNoteCount(pendingLevel)} {getNoteCount(pendingLevel)===1?'note':'notes'} to find
+              </div>
+              {/* TAMi encouragement */}
+              <div style={{background:'linear-gradient(135deg,rgba(20,184,166,.1),rgba(6,182,212,.1))',border:'1px solid rgba(20,184,166,.3)',borderRadius:12,padding:14,marginBottom:20,textAlign:'left'}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                  <div style={{width:28,height:28,borderRadius:'50%',background:'linear-gradient(135deg,#14b8a6,#06b6d4)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:900,color:'#fff',flexShrink:0}}>T</div>
+                  <div style={{fontSize:12,fontWeight:700,color:'#2dd4bf'}}>TAMi says...</div>
+                </div>
+                <div style={{fontSize:13,color:'#94a3b8',lineHeight:1.6}}>
+                  {getTamiLevelUpMsg(pendingLevel)}
+                </div>
+              </div>
+              <button
+                onClick={dismissLevelUp}
+                style={{width:'100%',padding:14,border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',background:'linear-gradient(135deg,#fbbf24,#f97316)',color:'#fff',boxShadow:'0 4px 16px rgba(251,191,36,.4)'}}
+              >
+                Let's Go! 🎹
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* TOAST */}
       {toast && (
@@ -523,7 +637,7 @@ export default function GamePage() {
           ? <div className="gp-lives">{Array.from({length:3}, (_,i) => i < lives ? '❤️' : '🖤')}</div>
           : <div style={{fontSize:11,color:'#0ea5e9',fontWeight:700}}>📚 Academic</div>
         }
-        <div className="gp-bpm">Lv {LEVEL}</div>
+        <div className="gp-bpm">Lv {level}</div>
         <div style={{textAlign:'center'}}>
           <div className={`gp-streak-ring ${streak > 0 ? 'animated' : ''}`}
             style={{borderColor:streakStyle.border, background:streakStyle.bg, color:streakStyle.color}}>
@@ -534,9 +648,9 @@ export default function GamePage() {
           {streakStyle.label && <div className="gp-streak-label" style={{color:streakStyle.color}}>{streakStyle.label}</div>}
         </div>
         <div className="gp-prog-wrap">
-          <span style={{fontSize:9,color:'#6b7280'}}>Session</span>
+          <span style={{fontSize:9,color:'#6b7280'}}>Level</span>
           <div className="gp-prog-bar"><div className="gp-prog-fill" style={{width:progressPct+'%'}}/></div>
-          <span style={{fontSize:12,fontWeight:700,color:'#d1d5db'}}>{sessionCorrect}/{SESSION_TARGET}</span>
+          <span style={{fontSize:12,fontWeight:700,color:'#d1d5db'}}>{levelProgress}/{CORRECT_TO_LEVELUP}</span>
         </div>
       </div></div>
 
@@ -571,7 +685,7 @@ export default function GamePage() {
               )
             })}
           </div>
-          <div className="gp-staff-hint">C Major Scale · One note lights as it plays · Find Note hides which note plays</div>
+          <div className="gp-staff-hint">C Major Scale · Play Scale lights the notes · Find Note is audio only</div>
         </div>
 
         {/* Title */}
@@ -581,11 +695,11 @@ export default function GamePage() {
             <button className="gp-info" onClick={()=>setShowHtp(true)}>ⓘ</button>
           </div>
           <div style={{fontSize:13,color:'#64748b',marginTop:4}}>
-            Level {LEVEL} · {octaveLabel} · {noteCount} {noteCount===1?'note':'notes'}
+            Level {level} · {octaveLabel} · {noteCount} {noteCount===1?'note':'notes'}
           </div>
         </div>
 
-        {/* Action buttons — CHANGED: each button uses its own counter */}
+        {/* Action buttons */}
         <div className="gp-action-row">
           <button className={`gp-abtn gp-abtn-scale ${scaleReplays<=0?'depleted':''}`}
             onClick={playScale} disabled={isPlaying || scaleReplays<=0}>
@@ -619,7 +733,7 @@ export default function GamePage() {
       <div className="gp-kb">
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           <div className="gp-lvl-badge">
-            <div className="gp-lvl-num">{LEVEL}</div>
+            <div className="gp-lvl-num">{level}</div>
             <div className="gp-lvl-lbl">Level</div>
           </div>
           <div>
@@ -631,7 +745,7 @@ export default function GamePage() {
         <div className="gp-piano-wrap">
           <Piano
             keys={keys}
-            octaves={getOctaves(LEVEL)}
+            octaves={getOctaves(level)}
             pressed={pressed}
             onKeyPress={pressKey}
           />
@@ -662,13 +776,14 @@ export default function GamePage() {
             <h2 style={{fontSize:22,fontWeight:700}}>🎵 How to Play</h2>
             <button style={{background:'none',border:'none',color:'#6b7280',fontSize:22,cursor:'pointer'}} onClick={()=>setShowHtp(false)}>✕</button>
           </div>
-          {[['1','Play Scale','Listen to the C Major scale to tune your ear. Watch the notes light up on the staff!'],
-            ['2','Find Note','Listen to the mystery notes. You cannot see which notes play — use your ear!'],
+          {[['1','Play Scale','Listen to the C Major scale. The notes light up on the staff so you can follow along!'],
+            ['2','Find Note','Listen to the mystery notes — audio only, no lighting. Use your ear!'],
             ['3','Tap the Answer','Tap the piano keys in the same order you heard them.'],
-          ].map(([n,t,s])=>(
+            ['4','Level Up','Get 4 correct answers to advance to the next level!'],
+          ].map(([n,t,desc])=>(
             <div key={n} className="gp-htp-step">
               <div className="gp-htp-badge">{n}</div>
-              <div><p style={{fontWeight:600,fontSize:14,margin:'0 0 2px'}}>{t}</p><p style={{fontSize:12,color:'#94a3b8',margin:0,lineHeight:1.5}}>{s}</p></div>
+              <div><p style={{fontWeight:600,fontSize:14,margin:'0 0 2px'}}>{t}</p><p style={{fontSize:12,color:'#94a3b8',margin:0,lineHeight:1.5}}>{desc}</p></div>
             </div>
           ))}
           <div style={{padding:14,borderRadius:12,border:'1px solid rgba(239,68,68,.3)',background:'rgba(239,68,68,.08)',marginBottom:12}}>
@@ -687,7 +802,7 @@ export default function GamePage() {
         <div className="gp-modal gp-go-modal">
           <div style={{fontSize:44,marginBottom:4}}>💀</div>
           <div style={{fontSize:26,fontWeight:900}}>Game Over!</div>
-          <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>Level {LEVEL} · Session Complete</div>
+          <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>Level {level} · Session Complete</div>
           <div className="gp-go-stats">
             {[[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],
               [accuracy+'%','Accuracy','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']
