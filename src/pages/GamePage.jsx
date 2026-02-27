@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
+
 // ─── NOTE DATA ───────────────────────────────────────────────────────────────
 const NOTE_FREQS = [
   261.63,293.66,329.63,349.23,392.00,440.00,493.88,
@@ -247,12 +249,47 @@ export default function GamePage() {
   const [streak, setStreak]         = useState(7)
   const [toast, setToast]           = useState(null)
   const playingRef = useRef(false)
+  const [sessionLogged, setSessionLogged] = useState(false)
 
   // Game session stats for TAMi/WYL
   const sessionRef = useRef({
     correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
     startTime: Date.now(), bestStreak: 0, currentStreak: 0,
   })
+
+  // POST session to Railway — called on Game Over
+  const logSession = useCallback(async () => {
+    if (sessionLogged) return
+    const s = sessionRef.current
+    const user = JSON.parse(localStorage.getItem('som_user') || '{}')
+    const durationSeconds = Math.round((Date.now() - s.startTime) / 1000)
+    const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
+    const earScore = Math.min(Math.round((accuracy * 0.6) + (s.bestStreak * 2)), 100)
+    const dpmGained = Math.max(0, Math.round(durationSeconds / 60) * 2)
+    try {
+      await fetch(`${BACKEND_URL}/session/log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id || 'anonymous',
+          level: LEVEL,
+          mode,
+          correct: s.correct,
+          attempts: s.attempts,
+          accuracy,
+          best_streak: s.bestStreak,
+          replays_used: s.replaysUsed,
+          duration_seconds: durationSeconds,
+          note_errors: s.noteErrors,
+          ear_score: earScore,
+          dpm_gained: dpmGained,
+        })
+      })
+      setSessionLogged(true)
+    } catch (e) {
+      console.warn('Session log failed:', e)
+    }
+  }, [sessionLogged, mode, LEVEL])
 
   // Generate mystery sequence on mount
   useEffect(() => {
@@ -543,7 +580,7 @@ export default function GamePage() {
       <div className="gp-footer">
         <button className="gp-fbtn gp-fbtn-dash" onClick={()=>navigate('/')}>📊 Dashboard</button>
         <button className="gp-fbtn gp-fbtn-gray" onClick={()=>{setAnswers([]);setNoteStates({});setLitNote(null);setReplaysLeft(maxReplays)}}>Reset</button>
-        <button className="gp-fbtn gp-fbtn-gray" onClick={()=>setShowGameOver(true)}>Game Over</button>
+        <button className="gp-fbtn gp-fbtn-gray" onClick={()=>{logSession();setShowGameOver(true)}}>Game Over</button>
       </div>
 
       {/* ── HOW TO PLAY MODAL ── */}
@@ -657,7 +694,7 @@ export default function GamePage() {
           </div>
 
           <div className="gp-go-actions">
-            <button className="gp-go-restart" onClick={()=>{setShowGameOver(false);setAnswers([]);setNoteStates({});setLitNote(null);setStreak(0);sessionRef.current={correct:0,attempts:0,noteErrors:{},replaysUsed:0,startTime:Date.now(),bestStreak:0,currentStreak:0}}}>🎮 Play Again</button>
+            <button className="gp-go-restart" onClick={()=>{setShowGameOver(false);setAnswers([]);setNoteStates({});setLitNote(null);setStreak(0);setSessionLogged(false);sessionRef.current={correct:0,attempts:0,noteErrors:{},replaysUsed:0,startTime:Date.now(),bestStreak:0,currentStreak:0}}}>🎮 Play Again</button>
             <button className="gp-go-summary" onClick={()=>navigate('/session-summary')}>📊 Summary</button>
           </div>
         </div>
