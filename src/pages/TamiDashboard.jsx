@@ -13,7 +13,7 @@ export default function TamiDashboard() {
       <div style={{ borderBottom:'1px solid #1f2937', position:'sticky', top:0, background:'rgba(17,24,39,0.95)', backdropFilter:'blur(12px)', zIndex:10, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           <div style={{ width:44, height:44, borderRadius:'50%', border:'2px solid rgba(249,115,22,0.7)', overflow:'hidden', flexShrink:0, boxShadow:'0 0 14px rgba(232,75,138,0.5)' }}>
-            <img src="/TAMi_2.PNG" alt="T.A.M.i" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+            <img src="/tami-avatar.png" alt="T.A.M.i" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
           </div>
           <div>
             <div style={{ fontSize:16, fontWeight:700 }}>{userName}</div>
@@ -177,7 +177,7 @@ export default function TamiDashboard() {
           <div style={{ background:'linear-gradient(135deg,rgba(232,75,138,0.12),rgba(249,115,22,0.12))', border:'1px solid rgba(232,75,138,0.25)', borderRadius:12, overflow:'hidden' }}>
             <div style={{ padding:'12px 16px', borderBottom:'1px solid rgba(232,75,138,0.2)', display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:32, height:32, borderRadius:'50%', border:'1.5px solid rgba(249,115,22,0.6)', overflow:'hidden', flexShrink:0 }}>
-                <img src="/TAMi_2.PNG" alt="T.A.M.i" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+                <img src="/tami-avatar.png" alt="T.A.M.i" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
               </div>
               <span style={{ fontSize:14, fontWeight:700, color:'#fb923c' }}>T.A.M.i Weekly Report</span>
             </div>
