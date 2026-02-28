@@ -4,6 +4,7 @@ import Login from './pages/Login.jsx'
 import Registration from './pages/Registration.jsx'
 import StudentDashboard from './pages/StudentDashboard.jsx'
 import TeacherDashboard from './pages/TeacherDashboard.jsx'
+import TeacherTamiDashboard from './pages/TeacherTamiDashboard.jsx'
 import ParentDashboard from './pages/ParentDashboard.jsx'
 import GamePage from './pages/GamePage.jsx'
 import HomeworkDashboard from './pages/HomeworkDashboard.jsx'
@@ -38,6 +39,7 @@ export default function App() {
       <Route path="/student" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
       <Route path="/tami" element={<ProtectedRoute><TamiDashboard /></ProtectedRoute>} />
       <Route path="/teacher" element={<ProtectedRoute><TeacherDashboard /></ProtectedRoute>} />
+      <Route path="/teacher-tami" element={<ProtectedRoute><TeacherTamiDashboard /></ProtectedRoute>} />
       <Route path="/parent" element={<ProtectedRoute><ParentDashboard /></ProtectedRoute>} />
       <Route path="/game" element={<ProtectedRoute><GamePage /></ProtectedRoute>} />
       <Route path="/homework" element={<ProtectedRoute><HomeworkDashboard /></ProtectedRoute>} />
