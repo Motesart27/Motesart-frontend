@@ -36,19 +36,38 @@ const SCHEDULE = [
   { time:'5:45 PM', name:'Sofia Patel', inst:'Flute · 30 min', status:'upcoming' },
 ]
 
+const INSTRUMENTS = ['Piano','Violin','Guitar','Cello','Voice','Trumpet','Clarinet','Saxophone','Flute','Drums','Harp','Bass']
+
 const STATUS_STYLES = {
-  critical: { background:'rgba(220,38,38,0.2)', color:'#f87171', border:'1px solid rgba(220,38,38,0.3)' },
-  atrisk:   { background:'rgba(217,119,6,0.2)',  color:'#fb923c', border:'1px solid rgba(217,119,6,0.3)' },
-  watch:    { background:'rgba(161,98,7,0.2)',   color:'#facc15', border:'1px solid rgba(161,98,7,0.3)' },
-  ontrack:  { background:'rgba(6,95,70,0.2)',    color:'#34d399', border:'1px solid rgba(6,95,70,0.3)' },
+  critical: { background:'rgba(220,38,38,0.2)',  color:'#f87171', border:'1px solid rgba(220,38,38,0.3)' },
+  atrisk:   { background:'rgba(217,119,6,0.2)',   color:'#fb923c', border:'1px solid rgba(217,119,6,0.3)' },
+  watch:    { background:'rgba(161,98,7,0.2)',    color:'#facc15', border:'1px solid rgba(161,98,7,0.3)' },
+  ontrack:  { background:'rgba(6,95,70,0.2)',     color:'#34d399', border:'1px solid rgba(6,95,70,0.3)' },
 }
 
 export default function TeacherDashboard() {
   const navigate = useNavigate()
+
+  // roster state
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [rosterOpen, setRosterOpen] = useState(true)
   const [showAll, setShowAll] = useState(false)
+
+  // modal/panel state
+  const [showAddStudent, setShowAddStudent] = useState(false)
+  const [showCreateAssignment, setShowCreateAssignment] = useState(false)
+  const [showMessagePanel, setShowMessagePanel] = useState(false)
+
+  // add student form
+  const [newStudent, setNewStudent] = useState({ name:'', email:'', instrument:'Piano', grade:'' })
+
+  // create assignment form
+  const [newAssignment, setNewAssignment] = useState({ title:'', assignTo:'all', dueDate:'', notes:'' })
+
+  // message form
+  const [message, setMessage] = useState({ to:'all', subject:'', body:'' })
+  const [messageSent, setMessageSent] = useState(false)
 
   const counts = {
     all:      STUDENTS_DATA.length,
@@ -68,18 +87,145 @@ export default function TeacherDashboard() {
   const avgDPM = Math.round(STUDENTS_DATA.reduce((a, s) => a + s.dpm, 0) / STUDENTS_DATA.length)
   const avgPractice = Math.round(STUDENTS_DATA.reduce((a, s) => a + s.weeklyMin, 0) / STUDENTS_DATA.length)
 
+  const handleSendMessage = () => {
+    setMessageSent(true)
+    setTimeout(() => { setMessageSent(false); setShowMessagePanel(false); setMessage({ to:'all', subject:'', body:'' }) }, 2000)
+  }
+
+  const overlayStyle = { position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:500, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }
+  const modalStyle = { background:'#131c2e', border:'1px solid rgba(255,255,255,0.12)', borderRadius:16, padding:24, width:'100%', maxWidth:480, position:'relative' }
+
   return (
     <div style={{ fontFamily:"'Inter',-apple-system,sans-serif", background:'#0a0e1a', color:'#e2e8f0', minHeight:'100vh', fontSize:13, paddingBottom:80 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         @keyframes fu { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         .roster-body { overflow:hidden; transition:max-height 0.35s ease; max-height:4000px; }
         .roster-body.collapsed { max-height:0; }
         .row-hover:hover { background:rgba(255,255,255,0.025) !important; }
-        .action-btn:hover { background:rgba(255,255,255,0.1) !important; }
-        .quick-btn:hover { opacity:0.85; }
+        .quick-btn:hover { opacity:0.8; }
+        input,select,textarea { font-family:'Inter',sans-serif; }
       `}</style>
+
+      {/* ── ADD STUDENT MODAL ── */}
+      {showAddStudent && (
+        <div style={overlayStyle} onClick={() => setShowAddStudent(false)}>
+          <div style={modalStyle} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:16, fontWeight:700, color:'#fff', marginBottom:16 }}>➕ Add New Student</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:12 }}>
+              {[
+                { label:'Full Name', key:'name', placeholder:'e.g. Emma Rodriguez', type:'text' },
+                { label:'Email', key:'email', placeholder:'student@email.com', type:'email' },
+                { label:'Grade', key:'grade', placeholder:'e.g. 5', type:'number' },
+              ].map(f => (
+                <div key={f.key} style={ f.key==='name' ? { gridColumn:'1/-1'} : {}}>
+                  <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>{f.label}</div>
+                  <input
+                    type={f.type}
+                    value={newStudent[f.key]}
+                    onChange={e => setNewStudent(p => ({...p, [f.key]: e.target.value}))}
+                    placeholder={f.placeholder}
+                    style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }}
+                  />
+                </div>
+              ))}
+              <div>
+                <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Instrument</div>
+                <select
+                  value={newStudent.instrument}
+                  onChange={e => setNewStudent(p => ({...p, instrument: e.target.value}))}
+                  style={{ width:'100%', background:'#1a2438', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }}
+                >
+                  {INSTRUMENTS.map(i => <option key={i}>{i}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={() => setShowAddStudent(false)} style={{ flex:1, padding:'9px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'#9ca3af', fontSize:12, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+              <button onClick={() => setShowAddStudent(false)} style={{ flex:1, padding:'9px', borderRadius:8, border:'none', background:'#7c3aed', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer' }}>Add Student</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CREATE ASSIGNMENT MODAL ── */}
+      {showCreateAssignment && (
+        <div style={overlayStyle} onClick={() => setShowCreateAssignment(false)}>
+          <div style={modalStyle} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:16, fontWeight:700, color:'#fff', marginBottom:16 }}>📝 Create Assignment</div>
+            <div style={{ marginBottom:10 }}>
+              <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Title</div>
+              <input value={newAssignment.title} onChange={e => setNewAssignment(p => ({...p, title:e.target.value}))} placeholder="e.g. Practice C Major Scale" style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }} />
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:10 }}>
+              <div>
+                <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Assign To</div>
+                <select value={newAssignment.assignTo} onChange={e => setNewAssignment(p => ({...p, assignTo:e.target.value}))} style={{ width:'100%', background:'#1a2438', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }}>
+                  <option value="all">All Students (24)</option>
+                  <option value="critical">Critical Only (3)</option>
+                  <option value="atrisk">At Risk (5)</option>
+                  <option value="individual">Individual Student...</option>
+                </select>
+              </div>
+              <div>
+                <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Due Date</div>
+                <input type="date" value={newAssignment.dueDate} onChange={e => setNewAssignment(p => ({...p, dueDate:e.target.value}))} style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none', colorScheme:'dark' }} />
+              </div>
+            </div>
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Notes / Instructions</div>
+              <textarea value={newAssignment.notes} onChange={e => setNewAssignment(p => ({...p, notes:e.target.value}))} placeholder="Optional instructions..." rows={3} style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none', resize:'vertical' }} />
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={() => setShowCreateAssignment(false)} style={{ flex:1, padding:'9px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'#9ca3af', fontSize:12, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+              <button onClick={() => setShowCreateAssignment(false)} style={{ flex:1, padding:'9px', borderRadius:8, border:'none', background:'linear-gradient(90deg,#7c3aed,#2dd4bf)', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer' }}>Create Assignment</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MESSAGE CLASS PANEL ── */}
+      {showMessagePanel && (
+        <>
+          <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', zIndex:400, animation:'fadeIn .2s ease' }} onClick={() => setShowMessagePanel(false)} />
+          <div style={{ position:'fixed', top:0, right:0, bottom:0, width:380, background:'#131c2e', borderLeft:'1px solid rgba(255,255,255,0.1)', zIndex:500, display:'flex', flexDirection:'column', animation:'slideIn .25s ease' }}>
+            <div style={{ padding:'16px 20px', borderBottom:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div style={{ fontSize:15, fontWeight:700, color:'#fff' }}>💬 Message Class</div>
+              <div onClick={() => setShowMessagePanel(false)} style={{ width:28, height:28, borderRadius:7, background:'rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:14, color:'#9ca3af' }}>✕</div>
+            </div>
+            <div style={{ flex:1, padding:20, overflowY:'auto', display:'flex', flexDirection:'column', gap:14 }}>
+              <div>
+                <div style={{ fontSize:10, color:'#6b7280', marginBottom:5 }}>Send To</div>
+                <select value={message.to} onChange={e => setMessage(p => ({...p, to:e.target.value}))} style={{ width:'100%', background:'#1a2438', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }}>
+                  <option value="all">All Students (24)</option>
+                  <option value="critical">Critical Only (3)</option>
+                  <option value="atrisk">At Risk (5)</option>
+                  <option value="watch">Watch List (7)</option>
+                  <option value="individual">Individual Student...</option>
+                </select>
+              </div>
+              <div>
+                <div style={{ fontSize:10, color:'#6b7280', marginBottom:5 }}>Subject</div>
+                <input value={message.subject} onChange={e => setMessage(p => ({...p, subject:e.target.value}))} placeholder="e.g. Practice reminder this week" style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }} />
+              </div>
+              <div>
+                <div style={{ fontSize:10, color:'#6b7280', marginBottom:5 }}>Message</div>
+                <textarea value={message.body} onChange={e => setMessage(p => ({...p, body:e.target.value}))} placeholder="Write your message here..." rows={8} style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none', resize:'vertical' }} />
+              </div>
+            </div>
+            <div style={{ padding:'14px 20px', borderTop:'1px solid rgba(255,255,255,0.07)' }}>
+              {messageSent ? (
+                <div style={{ textAlign:'center', padding:'10px', background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.3)', borderRadius:9, color:'#34d399', fontWeight:700, fontSize:13 }}>✓ Message Sent!</div>
+              ) : (
+                <button onClick={handleSendMessage} style={{ width:'100%', padding:'10px', borderRadius:9, border:'none', background:'linear-gradient(90deg,#2dd4bf,#7c3aed)', color:'#fff', fontSize:13, fontWeight:700, cursor:'pointer' }}>Send Message</button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── HEADER ── */}
       <div style={{ background:'#0d1525', borderBottom:'1px solid rgba(255,255,255,0.07)', padding:'8px 20px', display:'flex', alignItems:'center', gap:10, position:'sticky', top:0, zIndex:200, flexWrap:'wrap' }}>
@@ -92,19 +238,12 @@ export default function TeacherDashboard() {
           </div>
           <div style={{ fontSize:10, color:'#6b7280', marginTop:1 }}>Piano &amp; Theory · {counts.all} Students</div>
         </div>
-
         <div style={{ flex:1 }} />
-
-        {/* T.A.M.i Pill */}
-        <div
-          onClick={() => navigate('/teacher-tami')}
-          style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 14px 5px 5px', borderRadius:999, background:'rgba(42,28,18,0.85)', border:'1.5px solid rgba(180,100,50,0.6)', cursor:'pointer' }}
-        >
-          <div style={{ width:30, height:30, borderRadius:'50%', overflow:'hidden', background:'linear-gradient(135deg,#e84b8a,#f97316)', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:800, color:'#fff' }}>T</div>
+        <div onClick={() => navigate('/teacher-tami')} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 14px 5px 5px', borderRadius:999, background:'rgba(42,28,18,0.85)', border:'1.5px solid rgba(180,100,50,0.6)', cursor:'pointer' }}>
+          <div style={{ width:30, height:30, borderRadius:'50%', background:'linear-gradient(135deg,#e84b8a,#f97316)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:800, color:'#fff', flexShrink:0 }}>T</div>
           <div style={{ width:7, height:7, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 5px #22c55e', animation:'livePulse 2s infinite', flexShrink:0 }} />
           <span style={{ fontSize:12, fontWeight:700, color:'#fff', whiteSpace:'nowrap' }}>T.A.M.i Dash</span>
         </div>
-
         <div style={{ width:32, height:32, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, cursor:'pointer', position:'relative' }}>
           🔔
           <div style={{ position:'absolute', top:5, right:5, width:7, height:7, background:'#ef4444', borderRadius:'50%', border:'1.5px solid #0d1525' }} />
@@ -123,11 +262,11 @@ export default function TeacherDashboard() {
           <div style={{ width:1, height:36, background:'rgba(255,255,255,0.08)', flexShrink:0 }} />
           <div style={{ display:'flex', gap:20, flexWrap:'wrap' }}>
             {[
-              { num:counts.all,        label:'Students',    color:'#a78bfa' },
-              { num:avgPractice+'m',   label:'Avg/Wk',      color:'#2dd4bf' },
-              { num:'72%',             label:'HW Done',     color:'#34d399' },
-              { num:counts.critical,   label:'Attention',   color:'#fbbf24' },
-              { num:avgDPM+'%',        label:'Avg DPM',     color:'#f87171' },
+              { num:counts.all,      label:'Students',  color:'#a78bfa' },
+              { num:avgPractice+'m', label:'Avg/Wk',    color:'#2dd4bf' },
+              { num:'72%',           label:'HW Done',   color:'#34d399' },
+              { num:counts.critical, label:'Attention', color:'#fbbf24' },
+              { num:avgDPM+'%',      label:'Avg DPM',   color:'#f87171' },
             ].map((q, i) => (
               <div key={i} style={{ textAlign:'center' }}>
                 <div style={{ fontSize:20, fontWeight:800, lineHeight:1, color:q.color }}>{q.num}</div>
@@ -136,82 +275,49 @@ export default function TeacherDashboard() {
             ))}
           </div>
           <div style={{ marginLeft:'auto', display:'flex', gap:8, flexWrap:'wrap' }}>
-            {[
-              { label:'👁 Student View', s:{ background:'rgba(45,212,191,0.12)', color:'#2dd4bf', border:'1px solid rgba(45,212,191,0.2)' } },
-              { label:'📊 Academic',     s:{ background:'rgba(255,255,255,0.06)', color:'#a0aec0', border:'1px solid rgba(255,255,255,0.08)' } },
-              { label:'🎮 Game Mode',    s:{ background:'#7c3aed', color:'#fff', border:'none' } },
-            ].map((b, i) => (
-              <button key={i} className="quick-btn" style={{ padding:'7px 14px', borderRadius:8, fontSize:11, fontWeight:600, cursor:'pointer', ...b.s }}>{b.label}</button>
-            ))}
+            <button className="quick-btn" onClick={() => navigate('/student')} style={{ padding:'7px 14px', borderRadius:8, fontSize:11, fontWeight:600, cursor:'pointer', background:'rgba(45,212,191,0.12)', color:'#2dd4bf', border:'1px solid rgba(45,212,191,0.2)' }}>👁 Student View</button>
+            <button className="quick-btn" onClick={() => navigate('/teacher?mode=academic')} style={{ padding:'7px 14px', borderRadius:8, fontSize:11, fontWeight:600, cursor:'pointer', background:'rgba(255,255,255,0.06)', color:'#a0aec0', border:'1px solid rgba(255,255,255,0.08)' }}>📊 Academic</button>
+            <button className="quick-btn" onClick={() => navigate('/game')} style={{ padding:'7px 14px', borderRadius:8, fontSize:11, fontWeight:600, cursor:'pointer', background:'#7c3aed', color:'#fff', border:'none' }}>🎮 Game Mode</button>
           </div>
         </div>
 
         {/* 2. QUICK ACTIONS */}
         <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16, animation:'fu .3s ease .05s both' }}>
-          {[
-            { icon:'➕', label:'Add Student' },
-            { icon:'📝', label:'Create Assignment' },
-            { icon:'📅', label:"Today's Schedule" },
-            { icon:'📊', label:'Generate Report' },
-            { icon:'💬', label:'Message Class', gold:true },
-          ].map((a, i) => (
-            <button key={i} className="quick-btn" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 16px', borderRadius:10, border: a.gold ? '1px solid rgba(234,179,8,0.3)' : '1px solid rgba(255,255,255,0.08)', background: a.gold ? 'rgba(234,179,8,0.08)' : '#131c2e', color: a.gold ? '#fbbf24' : '#fff', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-              <span style={{ fontSize:16 }}>{a.icon}</span>{a.label}
-            </button>
-          ))}
+          <button className="quick-btn" onClick={() => setShowAddStudent(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 16px', borderRadius:10, border:'1px solid rgba(255,255,255,0.08)', background:'#131c2e', color:'#fff', fontSize:12, fontWeight:600, cursor:'pointer' }}><span style={{ fontSize:16 }}>➕</span>Add Student</button>
+          <button className="quick-btn" onClick={() => setShowCreateAssignment(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 16px', borderRadius:10, border:'1px solid rgba(255,255,255,0.08)', background:'#131c2e', color:'#fff', fontSize:12, fontWeight:600, cursor:'pointer' }}><span style={{ fontSize:16 }}>📝</span>Create Assignment</button>
+          <button className="quick-btn" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 16px', borderRadius:10, border:'1px solid rgba(255,255,255,0.08)', background:'#131c2e', color:'#fff', fontSize:12, fontWeight:600, cursor:'pointer' }}><span style={{ fontSize:16 }}>📅</span>Today's Schedule</button>
+          <button className="quick-btn" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 16px', borderRadius:10, border:'1px solid rgba(255,255,255,0.08)', background:'#131c2e', color:'#fff', fontSize:12, fontWeight:600, cursor:'pointer' }}><span style={{ fontSize:16 }}>📊</span>Generate Report</button>
+          <button className="quick-btn" onClick={() => setShowMessagePanel(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 16px', borderRadius:10, border:'1px solid rgba(234,179,8,0.3)', background:'rgba(234,179,8,0.08)', color:'#fbbf24', fontSize:12, fontWeight:600, cursor:'pointer' }}><span style={{ fontSize:16 }}>💬</span>Message Class</button>
         </div>
 
         {/* 3. COLLAPSIBLE STUDENT ROSTER */}
         <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden', marginBottom:16, animation:'fu .3s ease .1s both' }}>
-
-          {/* Roster Header — clickable to collapse */}
-          <div
-            onClick={() => setRosterOpen(o => !o)}
-            style={{ padding:'12px 16px', display:'flex', alignItems:'center', gap:10, cursor:'pointer', userSelect:'none', borderBottom: rosterOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', background:'rgba(255,255,255,0.02)', flexWrap:'wrap' }}
-          >
+          <div onClick={() => setRosterOpen(o => !o)} style={{ padding:'12px 16px', display:'flex', alignItems:'center', gap:10, cursor:'pointer', userSelect:'none', borderBottom: rosterOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', background:'rgba(255,255,255,0.02)', flexWrap:'wrap' }}>
             <span style={{ fontSize:15, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
               🎓 Student Roster
               <span style={{ fontSize:11, fontWeight:600, color:'#9ca3af', background:'rgba(255,255,255,0.06)', padding:'2px 8px', borderRadius:10 }}>{counts.all} students</span>
               <span style={{ fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:6, background:'rgba(220,38,38,0.15)', color:'#f87171', border:'1px solid rgba(220,38,38,0.2)' }}>⚠ {counts.critical} Critical</span>
               <span style={{ fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:6, background:'rgba(217,119,6,0.15)', color:'#fb923c', border:'1px solid rgba(217,119,6,0.2)' }}>🔔 {counts.atrisk} At Risk</span>
             </span>
-
-            {/* Inline search */}
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              onClick={e => e.stopPropagation()}
-              placeholder="🔍 Search..."
-              style={{ width:160, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'5px 10px', color:'#fff', fontSize:11, outline:'none' }}
-            />
-
-            {/* Filter dots */}
+            <input value={search} onChange={e => setSearch(e.target.value)} onClick={e => e.stopPropagation()} placeholder="🔍 Search..." style={{ width:160, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'5px 10px', color:'#fff', fontSize:11, outline:'none' }} />
             <div style={{ display:'flex', gap:4 }} onClick={e => e.stopPropagation()}>
               {[
-                { key:'all',      label:'All',  active: filter==='all',      ac:'#7c3aed', ic:'rgba(255,255,255,0.04)', tc:'#fff' },
-                { key:'critical', label:'🔴',   active: filter==='critical', ac:'rgba(220,38,38,0.4)', ic:'rgba(255,255,255,0.04)', tc:'#f87171' },
-                { key:'atrisk',   label:'🟠',   active: filter==='atrisk',   ac:'rgba(217,119,6,0.4)',  ic:'rgba(255,255,255,0.04)', tc:'#fb923c' },
-                { key:'watch',    label:'🟡',   active: filter==='watch',    ac:'rgba(161,98,7,0.4)',   ic:'rgba(255,255,255,0.04)', tc:'#facc15' },
-                { key:'ontrack',  label:'🟢',   active: filter==='ontrack',  ac:'rgba(6,95,70,0.4)',    ic:'rgba(255,255,255,0.04)', tc:'#34d399' },
+                { key:'all',      label:'All', ac:'#7c3aed' },
+                { key:'critical', label:'🔴',  ac:'rgba(220,38,38,0.5)', tc:'#f87171' },
+                { key:'atrisk',   label:'🟠',  ac:'rgba(217,119,6,0.5)', tc:'#fb923c' },
+                { key:'watch',    label:'🟡',  ac:'rgba(161,98,7,0.5)',  tc:'#facc15' },
+                { key:'ontrack',  label:'🟢',  ac:'rgba(6,95,70,0.5)',   tc:'#34d399' },
               ].map(f => (
-                <div
-                  key={f.key}
-                  onClick={() => { setFilter(f.key); setShowAll(false); }}
-                  style={{ padding:'4px 10px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background: f.active ? f.ac : f.ic, color: f.active ? '#fff' : f.tc, fontSize:10, fontWeight:600, cursor:'pointer' }}
-                >{f.label}</div>
+                <div key={f.key} onClick={() => { setFilter(f.key); setShowAll(false) }} style={{ padding:'4px 10px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background: filter===f.key ? f.ac : 'rgba(255,255,255,0.04)', color: filter===f.key ? '#fff' : (f.tc||'#9ca3af'), fontSize:10, fontWeight:600, cursor:'pointer' }}>{f.label}</div>
               ))}
             </div>
-
             <span style={{ fontSize:16, color:'#6b7280', marginLeft:'auto', transition:'transform .3s', transform: rosterOpen ? 'rotate(0deg)' : 'rotate(-90deg)', display:'inline-block' }}>▾</span>
           </div>
 
-          {/* Roster Body */}
           <div className={`roster-body${rosterOpen ? '' : ' collapsed'}`}>
-            {/* Column headers */}
             <div style={{ display:'grid', gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 100px', padding:'8px 16px', fontSize:10, fontWeight:600, color:'#6b7280', textTransform:'uppercase', letterSpacing:0.5, background:'rgba(255,255,255,0.01)' }}>
               <div>Student</div><div>DPM</div><div>Practice</div><div>Homework</div><div>Status</div><div>Actions</div>
             </div>
-
             {displayed.map(s => (
               <div key={s.id} className="row-hover" style={{ display:'grid', gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 100px', padding:'10px 16px', alignItems:'center', borderTop:'1px solid rgba(255,255,255,0.04)' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -227,19 +333,15 @@ export default function TeacherDashboard() {
                 <div><span style={{ padding:'3px 9px', borderRadius:6, fontSize:10, fontWeight:700, display:'inline-flex', alignItems:'center', gap:3, ...STATUS_STYLES[s.status] }}>{s.statusLabel}</span></div>
                 <div style={{ display:'flex', gap:5 }}>
                   {['📊','💬','✕'].map((icon, i) => (
-                    <button key={i} className="action-btn" style={{ width:28, height:28, borderRadius:6, border:'none', background:'rgba(255,255,255,0.06)', color:'#9ca3af', fontSize:12, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>{icon}</button>
+                    <button key={i} onClick={() => i===1 && setShowMessagePanel(true)} style={{ width:28, height:28, borderRadius:6, border:'none', background:'rgba(255,255,255,0.06)', color:'#9ca3af', fontSize:12, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>{icon}</button>
                   ))}
                 </div>
               </div>
             ))}
-
             {filtered.length > 6 && (
               <div style={{ padding:'10px 16px', textAlign:'center', borderTop:'1px solid rgba(255,255,255,0.04)' }}>
-                <button
-                  onClick={() => setShowAll(v => !v)}
-                  style={{ padding:'7px 20px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', color:'#9ca3af', fontSize:11, fontWeight:600, cursor:'pointer' }}
-                >
-                  {showAll ? `Show less ▴` : `Show all ${filtered.length} students ▾`}
+                <button onClick={() => setShowAll(v => !v)} style={{ padding:'7px 20px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', color:'#9ca3af', fontSize:11, fontWeight:600, cursor:'pointer' }}>
+                  {showAll ? 'Show less ▴' : `Show all ${filtered.length} students ▾`}
                 </button>
               </div>
             )}
@@ -248,12 +350,9 @@ export default function TeacherDashboard() {
 
         {/* 4. SCHEDULE + HOMEWORK */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14, animation:'fu .3s ease .15s both' }}>
-
-          {/* Schedule */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden' }}>
             <div style={{ padding:'11px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)', fontSize:13, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              📅 Today's Schedule
-              <span style={{ fontSize:10, color:'#6b7280' }}>5 lessons</span>
+              📅 Today's Schedule <span style={{ fontSize:10, color:'#6b7280' }}>5 lessons</span>
             </div>
             {SCHEDULE.map((s, i) => {
               const isLive = s.status === 'live'
@@ -274,11 +373,9 @@ export default function TeacherDashboard() {
             })}
           </div>
 
-          {/* Homework */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden' }}>
             <div style={{ padding:'11px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)', fontSize:13, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              📝 Homework Tracker
-              <span style={{ fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:6, background:'rgba(220,38,38,0.15)', color:'#f87171' }}>4 Overdue</span>
+              📝 Homework Tracker <span style={{ fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:6, background:'rgba(220,38,38,0.15)', color:'#f87171' }}>4 Overdue</span>
             </div>
             <div style={{ padding:'14px 16px' }}>
               <div style={{ display:'flex', gap:8, marginBottom:14 }}>
@@ -315,8 +412,6 @@ export default function TeacherDashboard() {
 
         {/* 5. DPM HEALTH + RISK BREAKDOWN */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, animation:'fu .3s ease .2s both' }}>
-
-          {/* DPM Ring */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:20 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:14 }}>🎯 Class DPM Health</div>
             <div style={{ display:'flex', alignItems:'center', gap:20, flexWrap:'wrap' }}>
@@ -324,15 +419,11 @@ export default function TeacherDashboard() {
                 <svg width="130" height="130" style={{ transform:'rotate(-90deg)' }}>
                   <defs>
                     <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#7c3aed"/>
-                      <stop offset="100%" stopColor="#2dd4bf"/>
+                      <stop offset="0%" stopColor="#7c3aed"/><stop offset="100%" stopColor="#2dd4bf"/>
                     </linearGradient>
                   </defs>
                   <circle cx="65" cy="65" r="55" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10"/>
-                  <circle cx="65" cy="65" r="55" fill="none" stroke="url(#ringGrad)" strokeWidth="10" strokeLinecap="round"
-                    strokeDasharray={2*Math.PI*55}
-                    strokeDashoffset={2*Math.PI*55 - (2*Math.PI*55 * avgDPM / 100)}
-                  />
+                  <circle cx="65" cy="65" r="55" fill="none" stroke="url(#ringGrad)" strokeWidth="10" strokeLinecap="round" strokeDasharray={2*Math.PI*55} strokeDashoffset={2*Math.PI*55-(2*Math.PI*55*avgDPM/100)}/>
                 </svg>
                 <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center' }}>
                   <div style={{ fontSize:28, fontWeight:900, color:'#fff', lineHeight:1 }}>{avgDPM}</div>
@@ -359,7 +450,6 @@ export default function TeacherDashboard() {
             </div>
           </div>
 
-          {/* Risk Breakdown */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:20 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:14 }}>📊 Risk Breakdown</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
@@ -369,11 +459,7 @@ export default function TeacherDashboard() {
                 { key:'watch',    num:counts.watch,    label:'👀 Watch',    color:'#facc15', bg:'rgba(161,98,7,0.1)',   border:'rgba(161,98,7,0.25)' },
                 { key:'ontrack',  num:counts.ontrack,  label:'✓ On Track',  color:'#34d399', bg:'rgba(6,95,70,0.1)',    border:'rgba(6,95,70,0.25)' },
               ].map(r => (
-                <div
-                  key={r.key}
-                  onClick={() => { setFilter(r.key); setRosterOpen(true); setShowAll(false); }}
-                  style={{ background:r.bg, border:`1px solid ${r.border}`, borderRadius:10, padding:'14px', textAlign:'center', cursor:'pointer' }}
-                >
+                <div key={r.key} onClick={() => { setFilter(r.key); setRosterOpen(true); setShowAll(false) }} style={{ background:r.bg, border:`1px solid ${r.border}`, borderRadius:10, padding:'14px', textAlign:'center', cursor:'pointer' }}>
                   <div style={{ fontSize:26, fontWeight:900, color:r.color }}>{r.num}</div>
                   <div style={{ fontSize:10, color:r.color, fontWeight:600, marginTop:2 }}>{r.label}</div>
                 </div>
