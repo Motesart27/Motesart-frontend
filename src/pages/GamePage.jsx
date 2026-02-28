@@ -154,7 +154,6 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
     </div>
   )
 }
-}
 
 // ─── STREAK CONFIG ─────────────────────────────────────────────────────────────
 function getStreakStyle(streak) {
