@@ -34,7 +34,7 @@ const css = `
 .reg-avatar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
 .reg-avatar-card{background:#1c2333;border:2px solid rgba(99,179,237,.15);border-radius:16px;padding:16px 8px 12px;text-align:center;cursor:pointer;position:relative}
 .reg-avatar-card.sel{border-color:#4ecdc4;background:rgba(78,205,196,.07);box-shadow:0 0 18px rgba(78,205,196,.18)}
-.reg-avatar-card.sel::after{content:'✓';position:absolute;top:7px;right:9px;font-size:9px;color:#4ecdc4;font-weight:700}
+.reg-avatar-card.sel::after{content:'â';position:absolute;top:7px;right:9px;font-size:9px;color:#4ecdc4;font-weight:700}
 .reg-av-emoji{font-size:36px;margin-bottom:7px;display:block}
 .reg-av-name{font-size:12px;font-weight:700}
 .reg-av-role{font-size:9px;color:#718096;margin-top:2px}
@@ -54,8 +54,8 @@ const css = `
 .reg-wyl-opt.sel .reg-radio{border-color:#4ecdc4;background:#4ecdc4}
 `
 
-const ROLES = [{icon:'🎹',name:'Student',desc:'Learn & practice music'},{icon:'👨‍👩‍👧',name:'Parent',desc:'Monitor your child'},{icon:'👩‍🏫',name:'Teacher',desc:'Manage students'},{icon:'⭐',name:'Ambassador',desc:'Grow the community'}]
-const AVATARS = [{emoji:'👩🏿‍🎤',name:'Lyric',role:'The Storyteller'},{emoji:'👦🏽',name:'Jazz',role:'The Performer'},{emoji:'👧🏻',name:'Coda',role:'The Dreamer'},{emoji:'🧑🏾',name:'Forte',role:'The Rockstar'},{emoji:'👧🏾',name:'Sol',role:'The Composer'},{emoji:'👦🏻',name:'Riff',role:'The Freestyler'}]
+const ROLES = [{icon:'ð¹',name:'Student',desc:'Learn & practice music'},{icon:'ð¨âð©âð§',name:'Parent',desc:'Monitor your child'},{icon:'ð©âð«',name:'Teacher',desc:'Manage students'},{icon:'â­',name:'Ambassador',desc:'Grow the community'}]
+const AVATARS = [{emoji:'ð©ð¿âð¤',name:'Lyric',role:'The Storyteller'},{emoji:'ð¦ð½',name:'Jazz',role:'The Performer'},{emoji:'ð§ð»',name:'Coda',role:'The Dreamer'},{emoji:'ð§ð¾',name:'Forte',role:'The Rockstar'},{emoji:'ð§ð¾',name:'Sol',role:'The Composer'},{emoji:'ð¦ð»',name:'Riff',role:'The Freestyler'}]
 
 export default function RegistrationPage() {
   const navigate = useNavigate()
@@ -75,14 +75,14 @@ export default function RegistrationPage() {
     } catch {
       login({ name:'New User', email:'user@example.com', role })
     }
-    navigate('/')
+    navigate('/dashboard')
   }
 
   return (
     <div className="reg-page"><style>{css}</style>
-      <div className="reg-title">School of Motesart — Registration Flow</div>
+      <div className="reg-title">School of Motesart â Registration Flow</div>
       <div className="reg-steps">{['Profile','Role','Music','WYL','Assessment','Avatar','Confirm'].map((s,i)=>(
-        <div key={s} className={`reg-step-btn ${step===i?'active':''}`} onClick={()=>setStep(i)}>{i+1} · {s}</div>
+        <div key={s} className={`reg-step-btn ${step===i?'active':''}`} onClick={()=>setStep(i)}>{i+1} Â· {s}</div>
       ))}</div>
       <div className="reg-phone">
         <div className="reg-screen-label">Step {step+1} of 7</div>
@@ -94,7 +94,7 @@ export default function RegistrationPage() {
           <div className="reg-field-row"><div className="reg-field"><label>First Name *</label><input placeholder="John"/></div><div className="reg-field"><label>Last Name *</label><input placeholder="Doe"/></div></div>
           <div className="reg-field"><label>Email *</label><input placeholder="you@email.com"/></div>
           <div className="reg-field"><label>Password *</label><input type="password" placeholder="Create a password"/></div>
-          <button className="reg-btn reg-btn-p" style={{width:'100%',marginTop:6}} onClick={()=>go(1)}>Continue →</button>
+          <button className="reg-btn reg-btn-p" style={{width:'100%',marginTop:6}} onClick={()=>go(1)}>Continue â</button>
         </>}
 
         {step===1 && <>
@@ -104,7 +104,7 @@ export default function RegistrationPage() {
               <div style={{fontSize:20,marginBottom:5}}>{r.icon}</div><div style={{fontSize:12,fontWeight:700}}>{r.name}</div><div style={{fontSize:9,color:'#718096',marginTop:2}}>{r.desc}</div>
             </div>
           ))}</div>
-          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>← Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue →</button></div>
+          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>â Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue â</button></div>
         </>}
 
         {step===2 && <>
@@ -113,29 +113,29 @@ export default function RegistrationPage() {
           <div className="reg-field"><label>Favorite Song *</label><input placeholder="e.g. Moonlight Sonata"/></div>
           <div className="reg-field"><label>Primary Instrument</label><select><option>Piano</option><option>Guitar</option><option>Violin</option></select></div>
           <div className="reg-field"><label>Experience Level</label><div className="reg-chips">{['Beginner','Intermediate','Advanced'].map(e=><div key={e} className={`reg-chip ${exp===e?'sel':''}`} onClick={()=>setExp(e)}>{e}</div>)}</div></div>
-          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>← Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue →</button></div>
+          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>â Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue â</button></div>
         </>}
 
         {step===3 && <>
           <div className="reg-step-title">Way You Learn</div><div className="reg-step-sub">Helps T.A.M.i teach in the way that works best for you</div>
           <div className="reg-wyl-card">
-            <div style={{fontSize:38,marginBottom:10}}>🧠</div>
+            <div style={{fontSize:38,marginBottom:10}}>ð§ </div>
             <div style={{display:'inline-block',background:'rgba(78,205,196,.15)',color:'#4ecdc4',fontSize:9,letterSpacing:1.5,textTransform:'uppercase',padding:'3px 10px',borderRadius:20,marginBottom:10}}>Optional</div>
             <div style={{fontSize:16,fontWeight:800,marginBottom:8}}>Way You Learn Assessment</div>
             <div style={{fontSize:11,color:'#718096',lineHeight:1.7,marginBottom:16}}>10 quick questions help T.A.M.i understand how you learn best.</div>
           </div>
-          <div className="reg-wyl-q"><div style={{fontSize:11,fontWeight:500,marginBottom:8,lineHeight:1.5}}>🎮 You want to learn a Mario Kart speed boost. Do you:</div>
+          <div className="reg-wyl-q"><div style={{fontSize:11,fontWeight:500,marginBottom:8,lineHeight:1.5}}>ð® You want to learn a Mario Kart speed boost. Do you:</div>
             {['A. Watch a video online','B. Figure it out by trying','C. Ask someone to explain it'].map((o,i)=><div key={o} className={`reg-wyl-opt ${i===0?'sel':''}`}><div className="reg-radio"/>{o}</div>)}
           </div>
-          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>← Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue →</button></div>
+          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>â Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue â</button></div>
         </>}
 
         {step===4 && <>
           <div className="reg-step-title">Music Assessment</div><div className="reg-step-sub">Helps T.A.M.i set your starting point</div>
-          {[['How long have you been learning piano?',['Less than 6 months','6 months–2 years','2+ years'],0],['Can you read sheet music?',['Not at all','With some difficulty','Comfortably'],1],['What is your goal?',['Just for fun','Play for friends/family','Perform or take exams'],0]].map(([q,opts,sel])=>(
+          {[['How long have you been learning piano?',['Less than 6 months','6 monthsâ2 years','2+ years'],0],['Can you read sheet music?',['Not at all','With some difficulty','Comfortably'],1],['What is your goal?',['Just for fun','Play for friends/family','Perform or take exams'],0]].map(([q,opts,sel])=>(
             <div key={q} style={{marginBottom:12}}><div style={{fontSize:11,fontWeight:500,marginBottom:6}}>{q}</div><div className="reg-chips">{opts.map((o,i)=><div key={o} className={`reg-chip ${i===sel?'sel':''}`}>{o}</div>)}</div></div>
           ))}
-          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>← Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue →</button></div>
+          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>â Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue â</button></div>
         </>}
 
         {step===5 && <>
@@ -145,16 +145,16 @@ export default function RegistrationPage() {
               <span className="reg-av-emoji">{a.emoji}</span><div className="reg-av-name">{a.name}</div><div className="reg-av-role">{a.role}</div>
             </div>
           ))}</div>
-          <div className="reg-upload"><div style={{fontSize:22,marginBottom:5}}>📷</div><div style={{fontSize:12,color:'#4ecdc4',fontWeight:600}}>Upload your own photo</div><div style={{fontSize:9,color:'#718096'}}>JPG, PNG or GIF · Max 5MB</div></div>
-          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>← Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue →</button></div>
+          <div className="reg-upload"><div style={{fontSize:22,marginBottom:5}}>ð·</div><div style={{fontSize:12,color:'#4ecdc4',fontWeight:600}}>Upload your own photo</div><div style={{fontSize:9,color:'#718096'}}>JPG, PNG or GIF Â· Max 5MB</div></div>
+          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>â Back</button><button className="reg-btn reg-btn-p" onClick={()=>go(1)}>Continue â</button></div>
         </>}
 
         {step===6 && <>
           <div className="reg-step-title">Confirm your profile</div><div className="reg-step-sub">Make sure everything looks right</div>
           <div className="reg-confirm-card"><div style={{fontSize:36}}>{AVATARS[avatar].emoji}</div><div><div style={{fontSize:15,fontWeight:700}}>New User</div><div style={{fontSize:10,color:'#718096',marginTop:2}}>user@example.com</div><div style={{display:'inline-block',background:'rgba(78,205,196,.15)',color:'#4ecdc4',fontSize:9,padding:'2px 8px',borderRadius:20,marginTop:4}}>{role}</div></div></div>
-          <div className="reg-detail-card"><strong>🎵 Music Profile</strong>Instrument: Piano · {exp}<br/>Weekly Goal: 60 min</div>
-          <div className="reg-detail-card"><strong>🧠 Learning Style</strong><span style={{color:'#4ecdc4'}}>Kinesthetic</span> — learns best by doing</div>
-          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>← Back</button><button className="reg-btn reg-btn-p" onClick={finish}>Finish Setup ✓</button></div>
+          <div className="reg-detail-card"><strong>ðµ Music Profile</strong>Instrument: Piano Â· {exp}<br/>Weekly Goal: 60 min</div>
+          <div className="reg-detail-card"><strong>ð§  Learning Style</strong><span style={{color:'#4ecdc4'}}>Kinesthetic</span> â learns best by doing</div>
+          <div className="reg-btn-row"><button className="reg-btn reg-btn-s" onClick={()=>go(-1)}>â Back</button><button className="reg-btn reg-btn-p" onClick={finish}>Finish Setup â</button></div>
         </>}
       </div>
     </div>
