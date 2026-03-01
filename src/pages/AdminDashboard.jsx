@@ -9,6 +9,7 @@
  * Images are in ./assets/ — update import paths to match your bundler.
  */
 
+import './AdminDashboard.css';
 import React from 'react';
 
 // ─── Image imports ───────────────────────────────────────────
