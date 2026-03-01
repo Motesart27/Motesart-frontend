@@ -26,8 +26,8 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 /* PROFILE HEADER */
 .profile-header { margin-top: 56px; padding: 20px 28px; background: #1a1840; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 16px; }
 .back-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; color: rgba(255,255,255,0.45); flex-shrink: 0; }
-.p-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #7c6af7, #a855f7); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 19px; }
-.p-name { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 21px; }
+.p-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #7c6af7, #a855f7); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 19px; color: #fff; }
+.p-name { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 21px; color: #fff; }
 .badge-admin { font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 7px; letter-spacing: .05em; background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3); }
 .p-sub { font-size: 12px; color: rgba(255,255,255,0.38); margin-top: 4px; }
 .tami-pill { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-radius: 50px; background: rgba(180,140,60,0.12); border: 2px solid rgba(210,170,80,0.4); cursor: pointer; margin-left: auto; }
@@ -42,10 +42,10 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .hero { border-radius: 20px; background: linear-gradient(135deg, #1e1b50 0%, #2a1f5f 50%, #1e2860 100%); border: 1px solid rgba(120,100,220,0.3); padding: 30px 34px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 32px; position: relative; overflow: hidden; }
 .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 280px; height: 280px; border-radius: 50%; background: rgba(100,80,200,0.1); pointer-events: none; }
 .hero-left { flex: 1; }
-.hero-greeting { font-family: 'Outfit', sans-serif; font-size: 27px; font-weight: 800; margin-bottom: 14px; }
+.hero-greeting { font-family: 'Outfit', sans-serif; font-size: 27px; font-weight: 800; margin-bottom: 14px; color: #fff; }
 .ref-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .ref-label { font-size: 13px; color: rgba(255,255,255,0.5); }
-.ref-code { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; padding: 6px 16px; border-radius: 9px; border: 1px solid rgba(120,100,220,0.45); background: rgba(255,255,255,0.06); letter-spacing: .08em; }
+.ref-code { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; padding: 6px 16px; border-radius: 9px; border: 1px solid rgba(120,100,220,0.45); background: rgba(255,255,255,0.06); letter-spacing: .08em; color: #fff; }
 .ref-copy { display: flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.75); cursor: pointer; }
 .hero-stats { display: flex; gap: 36px; }
 .hs-val { font-family: 'Outfit', sans-serif; font-size: 36px; font-weight: 800; line-height: 1; }
@@ -79,7 +79,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .s-pu { border: 1px solid rgba(168,85,247,0.2); }
 .s-pu::after { background: linear-gradient(90deg, #a855f7, transparent); }
 .stat-icon { font-size: 21px; margin-bottom: 9px; }
-.stat-val { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; }
+.stat-val { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; color: #fff; }
 .s-or .stat-val { color: #f97316; }
 .s-te .stat-val { color: #14b8a6; }
 .s-pk .stat-val { color: #e84b8a; }
@@ -93,7 +93,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 /* CARD BASE */
 .card { background: #1a1840; border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; padding: 20px; }
 .card-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-.card-title { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; }
+.card-title { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: #fff; }
 .card-sub { font-size: 11px; color: rgba(255,255,255,0.32); margin-top: 3px; }
 .pill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
 .p-or2 { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.25); }
@@ -113,7 +113,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .amb-row:last-child { border-bottom: none; padding-bottom: 0; }
 .amb-medal { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; }
 .amb-av { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 13px; }
-.amb-name { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; }
+.amb-name { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: #fff; }
 .amb-name-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .tier-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
 .t-go { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.28); }
@@ -137,7 +137,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .lr:hover { background: rgba(232,75,138,0.06); border-color: rgba(232,75,138,0.15); }
 .lr-num { font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.22); width: 16px; flex-shrink: 0; }
 .lr-av { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 12px; }
-.lr-name { font-size: 13px; font-weight: 700; }
+.lr-name { font-size: 13px; font-weight: 700; color: #fff; }
 .lr-meta { font-size: 11px; color: rgba(255,255,255,0.36); margin-top: 1px; }
 .lr-val-n { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 800; text-align: right; }
 .lr-val-l { font-size: 10px; color: rgba(255,255,255,0.32); text-align: right; margin-top: 1px; display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
@@ -169,7 +169,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .alert-row { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .alert-row:last-child { border-bottom: none; }
 .adot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-.a-txt { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.45; }
+.a-txt { font-size: 13px; color: rgba(255,255,255,0.82); line-height: 1.45; }
 .a-time { font-size: 11px; color: rgba(255,255,255,0.32); margin-top: 2px; }
 
 /* HEALTH */
@@ -186,7 +186,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .money-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .money-row:last-child { border-bottom: none; }
 .m-lbl { font-size: 13px; color: rgba(255,255,255,0.45); }
-.m-val { font-size: 14px; font-weight: 800; }
+.m-val { font-size: 14px; font-weight: 800; color: #fff; }
 
 /* QUICK ACTIONS */
 .qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
