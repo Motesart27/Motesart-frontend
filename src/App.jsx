@@ -6,6 +6,8 @@ import StudentDashboard from './pages/StudentDashboard.jsx'
 import TeacherDashboard from './pages/TeacherDashboard.jsx'
 import TeacherTamiDashboard from './pages/TeacherTamiDashboard.jsx'
 import ParentDashboard from './pages/ParentDashboard.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
+import AmbassadorDashboard from './pages/AmbassadorDashboard.jsx'
 import GamePage from './pages/GamePage.jsx'
 import HomeworkDashboard from './pages/HomeworkDashboard.jsx'
 import Leaderboard from './pages/Leaderboard.jsx'
@@ -25,7 +27,9 @@ function DashboardRedirect() {
   const { user } = useAuth()
   if (!user) return <Navigate to="/" replace />
   const role = (user.role || 'User').toLowerCase()
-  if (role === 'teacher' || role === 'admin') return <Navigate to="/teacher" replace />
+  if (role === 'admin') return <Navigate to="/admin" replace />
+  if (role === 'ambassador') return <Navigate to="/ambassador" replace />
+  if (role === 'teacher') return <Navigate to="/teacher" replace />
   if (role === 'parent') return <Navigate to="/parent" replace />
   return <Navigate to="/student" replace />
 }
@@ -41,6 +45,8 @@ export default function App() {
       <Route path="/teacher" element={<ProtectedRoute><TeacherDashboard /></ProtectedRoute>} />
       <Route path="/teacher-tami" element={<ProtectedRoute><TeacherTamiDashboard /></ProtectedRoute>} />
       <Route path="/parent" element={<ProtectedRoute><ParentDashboard /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/ambassador" element={<ProtectedRoute><AmbassadorDashboard /></ProtectedRoute>} />
       <Route path="/game" element={<ProtectedRoute><GamePage /></ProtectedRoute>} />
       <Route path="/homework" element={<ProtectedRoute><HomeworkDashboard /></ProtectedRoute>} />
       <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
