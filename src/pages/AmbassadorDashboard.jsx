@@ -58,7 +58,7 @@ export const TopNav = ({ activeTab, setActiveTab, onIntelClick, onStudentsClick 
 export const ProfileHeader = ({ onTamiClick }) => {
   return (
     <div className="profile-header">
-      <div className="back-btn">←</div>
+      <div className="back-btn" onClick={() => window.history.back()}>←</div>
       <div style={{ flex: 1 }}>
         <div className="p-name">Motesart</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
@@ -1063,7 +1063,7 @@ const AmbassadorDashboard = () => {
         onIntelClick={() => setIntelOpen(true)}
         onStudentsClick={() => setStudentsOpen(true)}
       />
-      <ProfileHeader onTamiClick={() => setTamiOpen(!tamiOpen)} />
+      <ProfileHeader onTamiClick={() => window.dispatchEvent(new Event('open-tami-chat'))} />
 
       <div className="main">
         <OrbitalHero />
@@ -1074,13 +1074,13 @@ const AmbassadorDashboard = () => {
       <IntelligenceOverlay
         isOpen={intelOpen}
         onClose={() => { setIntelOpen(false); setActiveTab('overview'); }}
-        onTamiClick={() => setTamiOpen(!tamiOpen)}
+        onTamiClick={() => window.dispatchEvent(new Event('open-tami-chat'))}
       />
 
       <StudentsOverlay
         isOpen={studentsOpen}
         onClose={() => { setStudentsOpen(false); setActiveTab('overview'); }}
-        onTamiClick={() => setTamiOpen(!tamiOpen)}
+        onTamiClick={() => window.dispatchEvent(new Event('open-tami-chat'))}
       />
 
       <TamiChat />
