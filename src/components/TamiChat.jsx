@@ -14,7 +14,6 @@ export default function TamiChat() {
   const [voiceEnabled, setVoiceEnabled] = useState(true)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const messagesEndRef = useRef(null)
-  const synthRef = useRef(window.speechSynthesis)
 
   const studentName = user?.name || user?.email?.split('@')[0] || 'Student'
 
@@ -36,19 +35,7 @@ export default function TamiChat() {
     }
   }, []);
 
-  // Pre-load voices on mount to reduce first-speak delay
-  useEffect(() => {
-    const warmUp = () => {
-      const synth = window.speechSynthesis;
-      synth.getVoices();
-      const u = new SpeechSynthesisUtterance('');
-      u.volume = 0;
-      synth.speak(u);
-      synth.cancel();
-    };
-    warmUp();
-    window.speechSynthesis.onvoiceschanged = warmUp;
-  }, []);
+
 
     useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -56,8 +43,8 @@ export default function TamiChat() {
 
   // Stop speech when chat closes
   useEffect(() => {
-    if (!isOpen && synthRef.current.speaking) {
-      synthRef.current.cancel()
+    if (!isOpen && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel()
       setIsSpeaking(false)
     }
   }, [isOpen])
@@ -65,51 +52,53 @@ export default function TamiChat() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (synthRef.current.speaking) synthRef.current.cancel()
+      if (window.speechSynthesis.speaking) window.speechSynthesis.cancel()
     }
   }, [])
 
-  // ---- Text-to-Speech using Web Speech API ----
-  const speakText = useCallback((text) => {
-    if (!voiceEnabled || !text) return
-    // Cancel any ongoing speech
-    if (synthRef.current.speaking) synthRef.current.cancel()
+  // ---- Text-to-Speech using Puter.js (Neural voices) ----
+  // Load Puter.js script on mount
+  useEffect(() => {
+    if (!document.getElementById('puter-js')) {
+      const s = document.createElement('script');
+      s.id = 'puter-js';
+      s.src = 'https://js.puter.com/v2/';
+      document.head.appendChild(s);
+    }
+  }, []);
 
-    // Clean the text for speech (remove markdown, emojis markers, etc.)
+  const speakText = useCallback((text) => {
+    if (!voiceEnabled || !text) return;
+    // Clean the text for speech (remove markdown, emojis, links)
     const cleanText = text
       .replace(/[*_~`#]/g, '')
       .replace(/\[.*?\]\(.*?\)/g, '')
       .replace(/https?:\/\/\S+/g, '')
-      .trim()
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .trim();
+    if (!cleanText || cleanText.length > 3000) return;
 
-    if (!cleanText) return
-
-    const utterance = new SpeechSynthesisUtterance(cleanText)
-    utterance.rate = 1.05
-    utterance.pitch = 1.15
-    utterance.volume = 1.0
-
-    // Try to pick a good female voice
-    const voices = synthRef.current.getVoices()
-    const voiceNames = ['Nicky', 'Samantha', 'Google US English', 'Shelley', 'Microsoft Zira', 'Karen', 'Moira', 'Victoria'];
-      const preferred = voiceNames.reduce((found, name) => found || voices.find(v => v.name.includes(name)), null);
-      if (preferred) utterance.voice = preferred
-
-    utterance.onstart = () => setIsSpeaking(true)
-    utterance.onend = () => setIsSpeaking(false)
-    utterance.onerror = () => setIsSpeaking(false)
-
-    synthRef.current.speak(utterance)
-  }, [voiceEnabled])
-
-  // Preload voices (they load async in some browsers)
-  useEffect(() => {
-    const loadVoices = () => synthRef.current.getVoices()
-    loadVoices()
-    if (synthRef.current.onvoiceschanged !== undefined) {
-      synthRef.current.onvoiceschanged = loadVoices
+    setIsSpeaking(true);
+    if (window.puter && window.puter.ai) {
+      window.puter.ai.txt2speech(cleanText, {
+        voice: 'Joanna',
+        engine: 'neural',
+        language: 'en-US'
+      }).then(audio => {
+        audio.onended = () => setIsSpeaking(false);
+        audio.onerror = () => setIsSpeaking(false);
+        audio.play().catch(() => setIsSpeaking(false));
+      }).catch(() => setIsSpeaking(false));
+    } else {
+      // Fallback to Web Speech API if Puter not loaded yet
+      const synth = window.speechSynthesis;
+      const u = new SpeechSynthesisUtterance(cleanText);
+      u.rate = 1.05; u.pitch = 1.15;
+      u.onend = () => setIsSpeaking(false);
+      u.onerror = () => setIsSpeaking(false);
+      synth.speak(u);
     }
-  }, [])
+  }, [voiceEnabled])
 
   // T.A.M.i greets the student when chat opens for the first time
   useEffect(() => {
@@ -147,8 +136,8 @@ export default function TamiChat() {
     if (!overrideMsg) setInput('')
 
     // Stop any current speech when user sends a new message
-    if (synthRef.current.speaking) {
-      synthRef.current.cancel()
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel()
       setIsSpeaking(false)
     }
 
@@ -178,8 +167,8 @@ export default function TamiChat() {
   }
 
   const toggleVoice = () => {
-    if (voiceEnabled && synthRef.current.speaking) {
-      synthRef.current.cancel()
+    if (voiceEnabled && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel()
       setIsSpeaking(false)
     }
     setVoiceEnabled(prev => !prev)
