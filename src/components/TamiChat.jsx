@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { api } from '../services/api.js'
+import api from '../services/api.js'
 
 export default function TamiChat() {
   const { user } = useAuth()
@@ -9,42 +9,67 @@ export default function TamiChat() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [history, setHistory] = useState([])
-  const [suggestedActions, setSuggestedActions] = useState([])
   const [hasGreeted, setHasGreeted] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [autoPlay, setAutoPlay] = useState(true)
   const messagesEndRef = useRef(null)
 
-  const studentName = user?.name || user?.email?.split('@')[0] || 'Student'
+  const studentName = user?.name || user?.email?.split('@')[0] || 'Friend'
 
-// Listen for external open-tami-chat events (from header buttons)
+  // Load Puter.js for TTS
   useEffect(() => {
-    const handleOpenTami = () => setIsOpen(true);
-    window.addEventListener('open-tami-chat', handleOpenTami);
-    return () => window.removeEventListener('open-tami-chat', handleOpenTami);
-  }, []);
+    if (!document.getElementById('puter-js')) {
+      const s = document.createElement('script')
+      s.id = 'puter-js'
+      s.src = 'https://js.puter.com/v2/'
+      document.head.appendChild(s)
+    }
+  }, [])
+
+  // Listen for open-tami-chat event
+  useEffect(() => {
+    const handler = () => setIsOpen(true)
+    window.addEventListener('open-tami-chat', handler)
+    return () => window.removeEventListener('open-tami-chat', handler)
+  }, [])
 
   // Inject pulse animation keyframes
   useEffect(() => {
-    const styleId = 'tami-pulse-style';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = '@keyframes tami-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.7; } }';
-      document.head.appendChild(style);
+    if (!document.getElementById('tami-pulse-style')) {
+      const style = document.createElement('style')
+      style.id = 'tami-pulse-style'
+      style.textContent = `
+        @keyframes tamiPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5); }
+          50% { box-shadow: 0 0 15px 5px rgba(139, 92, 246, 0.3); }
+        }
+        @keyframes tamiBounce {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @keyframes tamiGlow {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+        @keyframes tamiSlideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes tamiDots {
+          0%, 20% { opacity: 0.3; }
+          50% { opacity: 1; }
+          80%, 100% { opacity: 0.3; }
+        }
+      `
+      document.head.appendChild(style)
     }
-  }, []);
-
-
-
-    useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [])
 
   // Stop speech when chat closes
   useEffect(() => {
-    if (!isOpen && window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel()
+    if (!isOpen) {
+      window.speechSynthesis?.cancel()
       setIsSpeaking(false)
     }
   }, [isOpen])
@@ -52,303 +77,541 @@ export default function TamiChat() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (window.speechSynthesis.speaking) window.speechSynthesis.cancel()
+      window.speechSynthesis?.cancel()
     }
   }, [])
 
-  // ---- Text-to-Speech using Puter.js (Neural voices) ----
-  // Load Puter.js script on mount
+  // Auto-scroll to bottom
   useEffect(() => {
-    if (!document.getElementById('puter-js')) {
-      const s = document.createElement('script');
-      s.id = 'puter-js';
-      s.src = 'https://js.puter.com/v2/';
-      document.head.appendChild(s);
-    }
-  }, []);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
+  // Greeting on first open
+  useEffect(() => {
+    if (!isOpen || hasGreeted || !user) return
+    const fetchGreeting = async () => {
+      setHasGreeted(true)
+      const firstName = studentName.split(' ')[0]
+      // Show instant frontend greeting
+      setMessages([{
+        role: 'assistant',
+        content: `Yo ${firstName}! What's good? I'm T.A.M.i, your music coach.`
+      }])
+      // Then get real greeting from backend
+      try {
+        const res = await api.chatWithTami(
+          studentName,
+          'I just opened the app. Greet me by name and tell me what I should work on today based on my DPM data.',
+          []
+        )
+        const reply = res.reply || res.response || res.message
+        if (reply) {
+          setMessages([{ role: 'assistant', content: reply }])
+          setHistory([
+            { role: 'user', content: 'I just opened the app.' },
+            { role: 'assistant', content: reply }
+          ])
+          if (autoPlay) speakText(reply)
+        }
+      } catch (err) {
+        console.error('T.A.M.i greeting error:', err)
+      }
+    }
+    fetchGreeting()
+  }, [isOpen, hasGreeted, user])
+
+  // Speak text with Puter.js (primary) or Web Speech API (fallback)
   const speakText = useCallback((text) => {
-    if (!voiceEnabled || !text) return;
-    // Clean the text for speech (remove markdown, emojis, links)
+    if (!voiceEnabled || !text) return
     const cleanText = text
       .replace(/[*_~`#]/g, '')
       .replace(/\[.*?\]\(.*?\)/g, '')
       .replace(/https?:\/\/\S+/g, '')
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
-      .trim();
-    if (!cleanText || cleanText.length > 3000) return;
-
-    setIsSpeaking(true);
+      .trim()
+    if (!cleanText || cleanText.length > 3000) return
+    setIsSpeaking(true)
     if (window.puter && window.puter.ai) {
       window.puter.ai.txt2speech(cleanText, {
-        voice: 'Joanna',
-        engine: 'neural',
-        language: 'en-US'
+        voice: 'Joanna', engine: 'neural', language: 'en-US'
       }).then(audio => {
-        audio.onended = () => setIsSpeaking(false);
-        audio.onerror = () => setIsSpeaking(false);
-        audio.play().catch(() => setIsSpeaking(false));
-      }).catch(() => setIsSpeaking(false));
+        audio.onended = () => setIsSpeaking(false)
+        audio.onerror = () => setIsSpeaking(false)
+        audio.play().catch(() => setIsSpeaking(false))
+      }).catch(() => setIsSpeaking(false))
     } else {
-      // Fallback to Web Speech API if Puter not loaded yet
-      const synth = window.speechSynthesis;
-      const u = new SpeechSynthesisUtterance(cleanText);
-      u.rate = 1.05; u.pitch = 1.15;
-      u.onend = () => setIsSpeaking(false);
-      u.onerror = () => setIsSpeaking(false);
-      synth.speak(u);
+      const synth = window.speechSynthesis
+      const u = new SpeechSynthesisUtterance(cleanText)
+      u.rate = 1.05
+      u.pitch = 1.15
+      u.onend = () => setIsSpeaking(false)
+      u.onerror = () => setIsSpeaking(false)
+      synth.speak(u)
     }
   }, [voiceEnabled])
 
-  // T.A.M.i greets the student when chat opens for the first time
-  useEffect(() => {
-    if (isOpen && !hasGreeted && messages.length === 0) {
-      fetchGreeting()
-    }
-  }, [isOpen])
-
-  const fetchGreeting = async () => {
-    setHasGreeted(true)
-    setLoading(true)
-    try {
-      const res = await api.chatWithTami(
-        studentName,
-        'I just opened the app. Greet me by name and tell me what I should work on today based on my DPM data.',
-        []
-      )
-      const reply = res.reply || "Hey! I'm T.A.M.i, your AI music coach. What are we working on today?"
-      setMessages([{ role: 'assistant', content: reply }])
-      speakText(reply)
-      if (res.updated_history) setHistory(res.updated_history)
-      if (res.suggested_actions?.length) setSuggestedActions(res.suggested_actions)
-    } catch (err) {
-      console.error('T.A.M.i greeting error:', err)
-      const fallback = `Yo ${studentName.split(' ')[0]}! What's good?`
-      setMessages([{ role: 'assistant', content: fallback }])
-      speakText(fallback)
-    }
-    setLoading(false)
-  }
-
-  const sendMessage = useCallback(async (overrideMsg) => {
-    const userMsg = overrideMsg || input.trim()
+  // Send message
+  const sendMessage = useCallback(async (messageText) => {
+    const userMsg = messageText || input.trim()
     if (!userMsg || loading) return
-    if (!overrideMsg) setInput('')
-
-    // Stop any current speech when user sends a new message
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel()
-      setIsSpeaking(false)
-    }
-
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }])
-    setSuggestedActions([])
+    setInput('')
     setLoading(true)
+
+    const userMessage = { role: 'user', content: userMsg }
+    setMessages(prev => [...prev, userMessage])
+
     try {
       const res = await api.chatWithTami(studentName, userMsg, history)
-      const reply = res.reply || res.response || res.message || "I'm here to help!"
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
-      speakText(reply)
-      if (res.updated_history) setHistory(res.updated_history)
-      if (res.suggested_actions?.length) setSuggestedActions(res.suggested_actions)
+      const reply = res.reply || res.response || res.message
+      if (reply) {
+        const assistantMessage = { role: 'assistant', content: reply }
+        setMessages(prev => [...prev, assistantMessage])
+        setHistory(prev => [...prev, userMessage, assistantMessage])
+        if (autoPlay) speakText(reply)
+      }
     } catch (err) {
       console.error('T.A.M.i chat error:', err)
-      const errMsg = "Sorry, I'm having trouble connecting right now. Try again in a moment!"
-      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }])
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Sorry, I'm having trouble connecting right now. Try again in a sec!"
+      }])
+    } finally {
+      setLoading(false)
     }
+  }, [input, loading, history, studentName, speakText, autoPlay])
+
+  // Replay last assistant message
+  const replayLastMessage = () => {
+    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant')
+    if (lastAssistant) speakText(lastAssistant.content)
+  }
+
+  // Reset chat
+  const resetChat = () => {
+    window.speechSynthesis?.cancel()
+    setIsSpeaking(false)
+    setMessages([])
+    setHistory([])
+    setHasGreeted(false)
     setLoading(false)
-  }, [input, loading, history, studentName, speakText])
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
   }
 
-  const toggleVoice = () => {
-    if (voiceEnabled && window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel()
-      setIsSpeaking(false)
-    }
-    setVoiceEnabled(prev => !prev)
-  }
+  // Quick actions
+  const quickActions = [
+    { label: 'How am I doing?', icon: '\u{1F4CA}' },
+    { label: 'What should I practice?', icon: '\u{1F3B5}' },
+    { label: 'Check my homework', icon: '\u{1F4DD}' }
+  ]
 
-  const s = {
-    fab: {
-      position: 'fixed', bottom: 24, right: 24, width: 60, height: 60,
-      borderRadius: '50%', border: '3px solid rgba(139,92,246,0.5)',
-      cursor: 'pointer', zIndex: 9999,
-      background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 4px 20px rgba(6,182,212,0.4)',
-      transition: 'transform 0.2s', fontSize: 28, overflow: 'hidden', padding: 0
-    },
-    panel: {
-      position: 'fixed', bottom: 96, right: 24, width: 360, maxHeight: 520,
-      background: '#1f2937', borderRadius: 16, zIndex: 9998,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      display: 'flex', flexDirection: 'column',
-      border: '1px solid rgba(6,182,212,0.3)', overflow: 'hidden'
-    },
-    header: {
-      padding: '14px 16px',
-      background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-    },
-    headerLeft: {
-      display: 'flex', alignItems: 'center', gap: 8
-    },
-    headerRight: {
-      display: 'flex', alignItems: 'center', gap: 6
-    },
-    headerTitle: { color: '#fff', fontWeight: 700, fontSize: 16, margin: 0 },
-    voiceBtn: {
-      background: 'rgba(255,255,255,0.2)', border: 'none',
-      borderRadius: 6, padding: '4px 8px', cursor: 'pointer',
-      display: 'flex', alignItems: 'center', gap: 4,
-      color: '#fff', fontSize: 12, fontFamily: 'inherit',
-      transition: 'background 0.2s'
-    },
-    voiceBtnOff: {
-      background: 'rgba(0,0,0,0.3)', border: 'none',
-      borderRadius: 6, padding: '4px 8px', cursor: 'pointer',
-      display: 'flex', alignItems: 'center', gap: 4,
-      color: 'rgba(255,255,255,0.5)', fontSize: 12, fontFamily: 'inherit',
-      transition: 'background 0.2s'
-    },
-    closeBtn: {
-      background: 'none', border: 'none', color: '#fff',
-      fontSize: 20, cursor: 'pointer', padding: '0 4px'
-    },
-    body: {
-      flex: 1, overflowY: 'auto', padding: 12,
-      display: 'flex', flexDirection: 'column', gap: 8,
-      maxHeight: 340, minHeight: 200
-    },
-    msgUser: {
-      alignSelf: 'flex-end', background: 'rgba(6,182,212,0.2)',
-      borderRadius: '12px 12px 4px 12px', padding: '8px 12px',
-      color: '#e5e7eb', fontSize: 14, maxWidth: '80%', lineHeight: 1.5
-    },
-    msgBot: {
-      alignSelf: 'flex-start', background: 'rgba(139,92,246,0.15)',
-      borderRadius: '12px 12px 12px 4px', padding: '8px 12px',
-      color: '#e5e7eb', fontSize: 14, maxWidth: '80%', lineHeight: 1.5
-    },
-    speakingIndicator: {
-      display: 'inline-block', marginLeft: 6, width: 8, height: 8,
-      borderRadius: '50%', background: '#34d399',
-      animation: 'tami-pulse 1s ease-in-out infinite'
-    },
-    inputRow: {
-      display: 'flex', padding: '8px 12px',
-      borderTop: '1px solid rgba(255,255,255,0.1)', gap: 8,
-      background: '#111827'
-    },
-    input: {
-      flex: 1, background: 'rgba(255,255,255,0.06)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      borderRadius: 8, padding: '8px 12px', color: '#fff',
-      fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit'
-    },
-    sendBtn: {
-      background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-      border: 'none', borderRadius: 8, padding: '8px 14px',
-      color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 14
-    },
-    actionBtn: {
-      padding: '5px 12px', borderRadius: 16,
-      background: 'rgba(139,92,246,0.12)',
-      border: '1px solid rgba(139,92,246,0.3)',
-      color: '#a78bfa', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit'
-    }
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '28px',
+          boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+          animation: 'tamiPulse 2s infinite',
+          zIndex: 9999,
+          transition: 'transform 0.2s ease'
+        }}
+        onMouseEnter={e => e.target.style.transform = 'scale(1.1)'}
+        onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+        title="Chat with T.A.M.i"
+      >
+        {'\u{1F3B5}'}
+      </button>
+    )
   }
 
   return (
-    <>
-      {/* Pulse animation for speaking indicator */}
-      <style>{`
-        @keyframes tami-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.4; transform: scale(0.8); }
-        }
-      `}</style>
-
-      {isOpen && (
-        <div style={s.panel}>
-          <div style={s.header}>
-            <div style={s.headerLeft}>
-              <img src="/tami-avatar.png" alt="T.A.M.i"
-                style={{ width: 24, height: 24, borderRadius: '50%' }} />
-              <span style={s.headerTitle}>
-                T.A.M.i
-                {isSpeaking && <span style={s.speakingIndicator} />}
-              </span>
-            </div>
-            <div style={s.headerRight}>
-              <div
-                onClick={() => setVoiceEnabled(!voiceEnabled)}
-                title={voiceEnabled ? 'Voice On' : 'Voice Off'}
-                style={{
-                  width: 12, height: 12, borderRadius: '50%',
-                  background: voiceEnabled ? '#00e676' : '#ff1744',
-                  boxShadow: voiceEnabled
-                    ? (isSpeaking ? '0 0 8px 4px rgba(0,230,118,0.7)' : '0 0 6px 2px rgba(0,230,118,0.4)')
-                    : '0 0 6px 2px rgba(255,23,68,0.4)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  animation: isSpeaking ? 'tami-pulse 1s infinite' : 'none',
-                  marginRight: 8
-                }}
-              />
-              <button style={s.closeBtn} onClick={() => setIsOpen(false)}>â</button>
-            </div>
+    <div style={{
+      position: 'fixed',
+      bottom: '24px',
+      right: '24px',
+      width: '380px',
+      height: '560px',
+      borderRadius: '20px',
+      overflow: 'hidden',
+      boxShadow: '0 8px 40px rgba(0,0,0,0.25)',
+      display: 'flex',
+      flexDirection: 'column',
+      zIndex: 9999,
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      background: '#0F0A1A',
+      animation: 'tamiSlideUp 0.3s ease-out'
+    }}>
+      {/* HEADER - Gradient with avatar */}
+      <div style={{
+        background: 'linear-gradient(135deg, #7C3AED 0%, #DB2777 50%, #F59E0B 100%)',
+        padding: '16px 16px 20px',
+        position: 'relative'
+      }}>
+        {/* Top row: close + controls */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <button
+            onClick={() => setIsOpen(false)}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: 'none',
+              color: 'white',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
+          >{'\u2715'}</button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {/* Replay button */}
+            <button
+              onClick={replayLastMessage}
+              title="Replay last message"
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                color: 'white',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(10px)',
+                animation: isSpeaking ? 'tamiBounce 0.6s infinite' : 'none'
+              }}
+            >{isSpeaking ? '\u{1F50A}' : '\u{1F509}'}</button>
+            {/* Reset button */}
+            <button
+              onClick={resetChat}
+              title="Reset chat"
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                color: 'white',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(10px)'
+              }}
+            >{'\u{1F504}'}</button>
           </div>
+        </div>
 
-          <div style={s.body}>
-            {messages.map((m, i) => (
-              <div key={i} style={m.role === 'user' ? s.msgUser : s.msgBot}>
-                {m.content}
-              </div>
-            ))}
-            {loading && (
-              <div style={s.msgBot}>
-                <span style={{ opacity: 0.6 }}>T.A.M.i is thinking...</span>
-              </div>
-            )}
-            {suggestedActions.length > 0 && !loading && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {suggestedActions.map((action, i) => (
-                  <button key={i} onClick={() => sendMessage(action)}
-                    style={s.actionBtn}>{action}</button>
-                ))}
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+        {/* Avatar + Name row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '24px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+            border: '2px solid rgba(255,255,255,0.3)'
+          }}>{'\u{1F3B6}'}</div>
+          <div>
+            <div style={{
+              color: 'white',
+              fontSize: '20px',
+              fontWeight: '700',
+              letterSpacing: '-0.3px'
+            }}>T.A.M.i</div>
+            <div style={{
+              color: 'rgba(255,255,255,0.85)',
+              fontSize: '13px',
+              fontWeight: '500'
+            }}>Fun Coach {'\u{1F3B5}'}</div>
           </div>
+          {/* Voice status dot */}
+          <div style={{
+            marginLeft: 'auto',
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            background: voiceEnabled ? '#4ADE80' : '#EF4444',
+            boxShadow: voiceEnabled ? '0 0 8px rgba(74, 222, 128, 0.6)' : '0 0 8px rgba(239, 68, 68, 0.6)',
+            animation: voiceEnabled ? 'tamiGlow 2s infinite' : 'none'
+          }} title={voiceEnabled ? 'Voice ON' : 'Voice OFF'} />
+        </div>
+      </div>
 
-          <div style={s.inputRow}>
-            <textarea style={s.input} rows={1}
-              value={input} onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown} placeholder="Ask T.A.M.i anything..." />
-            <button style={s.sendBtn} onClick={() => sendMessage()}
-              disabled={loading}>Send</button>
-          </div>
+      {/* QUICK ACTIONS */}
+      {messages.length <= 1 && (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          padding: '12px 16px',
+          background: '#130E22',
+          overflowX: 'auto'
+        }}>
+          {quickActions.map((action, i) => (
+            <button
+              key={i}
+              onClick={() => sendMessage(action.label)}
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                color: '#C4B5FD',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '500',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseEnter={e => {
+                e.target.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3))'
+                e.target.style.borderColor = 'rgba(139, 92, 246, 0.6)'
+                e.target.style.color = '#E9D5FF'
+              }}
+              onMouseLeave={e => {
+                e.target.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))'
+                e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)'
+                e.target.style.color = '#C4B5FD'
+              }}
+            >
+              <span>{action.icon}</span>
+              {action.label}
+            </button>
+          ))}
         </div>
       )}
 
-      <button style={s.fab}
-        onClick={() => setIsOpen(!isOpen)}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-        title="Chat with T.A.M.i"
-      >
-        {isOpen ? 'â' : (
-          <img src="/tami-avatar.png" alt="T.A.M.i"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+      {/* MESSAGES */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        background: '#0F0A1A'
+      }}>
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              animation: 'tamiSlideUp 0.3s ease-out'
+            }}
+          >
+            {msg.role === 'assistant' && (
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #7C3AED, #DB2777)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                marginRight: '8px',
+                flexShrink: 0,
+                marginTop: '2px'
+              }}>{'\u{1F3B6}'}</div>
+            )}
+            <div style={{
+              maxWidth: '75%',
+              padding: '10px 14px',
+              borderRadius: msg.role === 'user'
+                ? '16px 16px 4px 16px'
+                : '16px 16px 16px 4px',
+              background: msg.role === 'user'
+                ? 'linear-gradient(135deg, #7C3AED, #6D28D9)'
+                : 'rgba(255, 255, 255, 0.08)',
+              color: msg.role === 'user' ? 'white' : '#E2E8F0',
+              fontSize: '14px',
+              lineHeight: '1.5',
+              wordBreak: 'break-word'
+            }}>
+              {msg.content}
+            </div>
+          </div>
+        ))}
+
+        {/* Loading indicator */}
+        {loading && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            animation: 'tamiSlideUp 0.3s ease-out'
+          }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #7C3AED, #DB2777)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              flexShrink: 0
+            }}>{'\u{1F3B6}'}</div>
+            <div style={{
+              padding: '10px 16px',
+              borderRadius: '16px 16px 16px 4px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              gap: '4px'
+            }}>
+              {[0, 1, 2].map(j => (
+                <div key={j} style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: '#8B5CF6',
+                  animation: `tamiDots 1.4s infinite ${j * 0.2}s`
+                }} />
+              ))}
+            </div>
+          </div>
         )}
-      </button>
-    </>
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* FOOTER - Audio toggle + Input */}
+      <div style={{
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        background: '#130E22'
+      }}>
+        {/* Audio auto-play toggle */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.05)'
+        }}>
+          <button
+            onClick={() => setAutoPlay(!autoPlay)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: autoPlay ? '#A78BFA' : '#64748B',
+              fontSize: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '2px 0',
+              fontWeight: '500',
+              transition: 'color 0.2s'
+            }}
+          >
+            {autoPlay ? '\u{1F50A}' : '\u{1F507}'} Audio auto-play {autoPlay ? 'ON' : 'OFF'}
+          </button>
+          <button
+            onClick={() => {
+              setVoiceEnabled(!voiceEnabled)
+              if (voiceEnabled) {
+                window.speechSynthesis?.cancel()
+                setIsSpeaking(false)
+              }
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#64748B',
+              fontSize: '12px',
+              cursor: 'pointer',
+              padding: '2px 0',
+              textDecoration: 'underline',
+              textUnderlineOffset: '2px'
+            }}
+          >
+            {voiceEnabled ? 'Mute Voice' : 'Unmute Voice'}
+          </button>
+        </div>
+
+        {/* Input area */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '12px 16px'
+        }}>
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                sendMessage()
+              }
+            }}
+            placeholder="Ask T.A.M.i anything..."
+            style={{
+              flex: 1,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(139, 92, 246, 0.2)',
+              borderRadius: '24px',
+              padding: '10px 16px',
+              color: '#E2E8F0',
+              fontSize: '14px',
+              outline: 'none',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={e => e.target.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
+            onBlur={e => e.target.style.borderColor = 'rgba(139, 92, 246, 0.2)'}
+          />
+          <button
+            onClick={() => sendMessage()}
+            disabled={loading || !input.trim()}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: loading || !input.trim()
+                ? 'rgba(139, 92, 246, 0.2)'
+                : 'linear-gradient(135deg, #7C3AED, #DB2777)',
+              border: 'none',
+              cursor: loading || !input.trim() ? 'default' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              color: 'white',
+              transition: 'all 0.2s ease',
+              flexShrink: 0
+            }}
+          >
+            {loading ? '\u23F3' : '\u{1F3B5}'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
