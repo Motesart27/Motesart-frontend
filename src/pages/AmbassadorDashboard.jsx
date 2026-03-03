@@ -5,7 +5,7 @@ import avatarImg from './assets/amb-image-2.png';
 import './AmbassadorDashboard.css';
 
 // Sub-components
-export const TopNav = ({ activeTab, setActiveTab }) => {
+export const TopNav = ({ activeTab, setActiveTab, onIntelClick, onStudentsClick }) => {
   const navTabs = [
     { id: 'overview', label: 'Overview', color: '#059669', glow: true },
     { id: 'students', label: 'Students', color: '#059669' },
@@ -25,7 +25,11 @@ export const TopNav = ({ activeTab, setActiveTab }) => {
             className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => {
               setActiveTab(tab.id);
-              console.log(`Navigating to ${tab.label}`);
+              if (tab.id === 'intelligence' && onIntelClick) {
+                onIntelClick();
+              } else if (tab.id === 'students' && onStudentsClick) {
+                onStudentsClick();
+              }
             }}
           >
             <div
@@ -681,6 +685,89 @@ export const IntelligenceOverlay = ({ isOpen, onClose, onTamiClick }) => {
               </div>
             </div>
             <div style={{ padding: '12px', borderRadius: '11px', background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa'         </svg>
+            </div>
+            <div className="style-grid">
+              <div style={{ padding: '7px', borderRadius: '8px', textAlign: 'center', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)' }}>
+                <div className="sg-top" style={{ color: '#a78bfa' }}>
+                  Adaptive
+                </div>
+                <div className="sg-sub">vs Rigid</div>
+              </div>
+              <div style={{ padding: '7px', borderRadius: '8px', textAlign: 'center', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.15)' }}>
+                <div className="sg-top" style={{ color: '#f97316' }}>
+                  Auditory
+                </div>
+                <div className="sg-sub">Learning Style</div>
+              </div>
+              <div style={{ padding: '7px', borderRadius: '8px', textAlign: 'center', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                <div className="sg-top" style={{ color: '#22c55e' }}>
+                  Coach
+                </div>
+                <div className="sg-sub">vs Lecturer</div>
+              </div>
+              <div style={{ padding: '7px', borderRadius: '8px', textAlign: 'center', background: 'rgba(232,75,138,0.08)', border: '1px solid rgba(232,75,138,0.15)' }}>
+                <div className="sg-top" style={{ color: '#e84b8a' }}>
+                  High Energy
+                </div>
+                <div className="sg-sub">Delivery</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Content Fingerprint + Audience Match */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '16px', marginBottom: '16px' }}>
+          {/* Content Fingerprint */}
+          <div className="icard">
+            <div className="icard-title">
+              🔍 Content Fingerprint <span className="ipill ip-or">Generated</span>
+            </div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '10px' }}>
+              Top Keywords & Phrases
+            </div>
+            <div className="tag-cloud" style={{ marginBottom: '16px' }}>
+              {keywords.map((kw, idx) => (
+                <div
+                  key={idx}
+                  className="ftag"
+                  style={{
+                    background: kw.color,
+                    color: kw.textColor,
+                    border: `1px solid ${kw.textColor}${40}`,
+                  }}
+                >
+                  {kw.text}
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '10px' }}>
+              Recommended Content Formats
+            </div>
+            <div className="fmt-grid">
+              <div style={{ padding: '12px 8px', borderRadius: '11px', textAlign: 'center', background: 'rgba(232,75,138,0.08)', border: '1px solid rgba(232,75,138,0.2)' }}>
+                <div className="fmt-icon">🎬</div>
+                <div className="fmt-lbl" style={{ color: '#e84b8a' }}>
+                  Reels
+                </div>
+                <div className="fmt-sub">Best fit</div>
+              </div>
+              <div style={{ padding: '12px 8px', borderRadius: '11px', textAlign: 'center', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                <div className="fmt-icon">📱</div>
+                <div className="fmt-lbl" style={{ color: '#f97316' }}>
+                  Lives
+                </div>
+                <div className="fmt-sub">High match</div>
+              </div>
+              <div style={{ padding: '12px 8px', borderRadius: '11px', textAlign: 'center', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)' }}>
+                <div className="fmt-icon">📝</div>
+                <div className="fmt-lbl" style={{ color: '#3b82f6' }}>
+                  Posts
+                </div>
+                <div className="fmt-sub">Good fit</div>
+              </div>
+            </div>
+            <div style={{ padding: '12px', borderRadius: '11px', background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', marginBottom: '5px' }}>
                 T.A.M.i CONTENT RECOMMENDATION
               </div>
@@ -832,15 +919,150 @@ export const IntelligenceOverlay = ({ isOpen, onClose, onTamiClick }) => {
   );
 };
 
+// Students Overlay
+export const StudentsOverlay = ({ isOpen, onClose, onTamiClick }) => {
+  const students = [
+    { name: 'Marcus Thompson', instrument: 'Piano', classes: 12, level: 'Intermediate', status: 'Active', dpm: '78%', color: '#22c55e' },
+    { name: 'Sofia Rivera', instrument: 'Guitar', classes: 8, level: 'Beginner', status: 'Active', dpm: '65%', color: '#3b82f6' },
+    { name: 'Aaliyah Johnson', instrument: 'Vocals', classes: 15, level: 'Advanced', status: 'Active', dpm: '94%', color: '#e84b8a' },
+    { name: 'James Okoro', instrument: 'Drums', classes: 6, level: 'Beginner', status: 'Active', dpm: '52%', color: '#f97316' },
+    { name: 'Maya Chen', instrument: 'Piano', classes: 10, level: 'Intermediate', status: 'Inactive', dpm: '41%', color: '#a855f7' },
+    { name: 'Dwayne Harris', instrument: 'Bass Guitar', classes: 4, level: 'Beginner', status: 'Active', dpm: '38%', color: '#14b8a6' },
+  ];
+
+  const summaryStats = [
+    { label: 'Total Students', value: '47', color: '#22c55e' },
+    { label: 'Active This Week', value: '31', color: '#3b82f6' },
+    { label: 'Avg DPM Score', value: '61%', color: '#f97316' },
+    { label: 'Total Classes Taken', value: '284', color: '#a855f7' },
+  ];
+
+  const instruments = [
+    { name: 'Piano', count: 14, width: '30%', color: '#22c55e' },
+    { name: 'Guitar', count: 11, width: '23%', color: '#3b82f6' },
+    { name: 'Vocals', count: 9, width: '19%', color: '#e84b8a' },
+    { name: 'Drums', count: 7, width: '15%', color: '#f97316' },
+    { name: 'Bass', count: 4, width: '9%', color: '#a855f7' },
+    { name: 'Other', count: 2, width: '4%', color: '#14b8a6' },
+  ];
+
+  return (
+    <div className={`intel-overlay ${isOpen ? 'open' : ''}`}>
+      <div className="intel-nav">
+        <button className="intel-back-btn" onClick={onClose}>
+          ← Back to Dashboard
+        </button>
+        <div className="intel-title-block">
+          <div className="intel-title">🎓 Students Dashboard</div>
+          <div className="intel-sub">Motesart · Your Referred Students</div>
+        </div>
+        <div className="intel-tami-pill" onClick={onTamiClick}>
+          <div className="i-online" />
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#e84b8a' }}>T.A.M.i</span>
+        </div>
+      </div>
+
+      <div className="intel-body">
+        {/* T.A.M.i Insight */}
+        <div className="intel-insight">
+          <img src={tamiImg} alt="T.A.M.i" style={{ width: '42px', height: '42px', borderRadius: '11px', objectFit: 'cover', border: '2px solid rgba(232,75,138,0.3)' }} />
+          <div>
+            <div className="ii-label">T.A.M.i Student Analysis</div>
+            <div className="ii-text">
+              Your referrals show strong engagement — <strong style={{ color: '#22c55e' }}>31 of 47 students</strong> are active this week. Piano and Guitar are the most popular instruments. <strong style={{ color: '#a78bfa' }}>3 students</strong> are flagged for re-engagement outreach. Average DPM is trending up <strong style={{ color: '#f97316' }}>+8%</strong> this month. 🎯
+            </div>
+          </div>
+        </div>
+
+        {/* Summary Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
+          {summaryStats.map((stat, idx) => (
+            <div key={idx} className="icard" style={{ textAlign: 'center', padding: '18px 12px' }}>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '28px', fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '6px' }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '16px', marginBottom: '16px' }}>
+          {/* Student List */}
+          <div className="icard">
+            <div className="icard-title">
+              👥 Your Students <span className="ipill ip-gr">{students.length} shown</span>
+            </div>
+            {students.map((s, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', marginBottom: '6px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: `${s.color}20`, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '12px', flexShrink: 0 }}>
+                  {s.name.split(' ').map(w => w[0]).join('')}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{s.name}</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.36)', marginTop: '1px' }}>{s.instrument} · {s.level} · {s.classes} classes</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '14px', fontWeight: 800, color: s.color }}>{s.dpm}</div>
+                  <div style={{ fontSize: '10px', color: s.status === 'Active' ? '#22c55e' : '#ef4444' }}>{s.status}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Instruments Breakdown */}
+          <div className="icard">
+            <div className="icard-title">
+              🎵 Instruments <span className="ipill ip-or">Breakdown</span>
+            </div>
+            {instruments.map((inst, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '10px' }}>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', width: '60px', flexShrink: 0 }}>{inst.name}</div>
+                <div style={{ flex: 1, height: '7px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: inst.width, background: inst.color, borderRadius: '3px' }} />
+                </div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: inst.color, width: '26px', textAlign: 'right' }}>{inst.count}</div>
+              </div>
+            ))}
+
+            <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '10px' }}>
+                Student Levels
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                <div style={{ padding: '10px', borderRadius: '10px', textAlign: 'center', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '18px', fontWeight: 800, color: '#22c55e' }}>28</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>Beginner</div>
+                </div>
+                <div style={{ padding: '10px', borderRadius: '10px', textAlign: 'center', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
+                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '18px', fontWeight: 800, color: '#3b82f6' }}>14</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>Intermediate</div>
+                </div>
+                <div style={{ padding: '10px', borderRadius: '10px', textAlign: 'center', background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)' }}>
+                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '18px', fontWeight: 800, color: '#a855f7' }}>5</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>Advanced</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main Component
 const AmbassadorDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [intelOpen, setIntelOpen] = useState(false);
+  const [studentsOpen, setStudentsOpen] = useState(false);
   const [tamiOpen, setTamiOpen] = useState(false);
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #f0fdf9 0%, #f8fffc 30%, #f0f9ff 65%, #fafff8 100%)' }}>
-      <TopNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      <TopNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onIntelClick={() => setIntelOpen(true)}
+        onStudentsClick={() => setStudentsOpen(true)}
+      />
       <ProfileHeader onTamiClick={() => setTamiOpen(!tamiOpen)} />
 
       <div className="main">
@@ -851,7 +1073,13 @@ const AmbassadorDashboard = () => {
 
       <IntelligenceOverlay
         isOpen={intelOpen}
-        onClose={() => setIntelOpen(false)}
+        onClose={() => { setIntelOpen(false); setActiveTab('overview'); }}
+        onTamiClick={() => setTamiOpen(!tamiOpen)}
+      />
+
+      <StudentsOverlay
+        isOpen={studentsOpen}
+        onClose={() => { setStudentsOpen(false); setActiveTab('overview'); }}
         onTamiClick={() => setTamiOpen(!tamiOpen)}
       />
 
