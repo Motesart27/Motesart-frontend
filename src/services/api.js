@@ -31,11 +31,34 @@ export const api = {
   // Sessions
   getSessions: (studentId) => request(`/sessions?student_id=${encodeURIComponent(studentId)}`),
 
-  // T.A.M.i Chat
-  chatWithTami: (message, context) => request('/tami/chat', {
-    method: 'POST',
-    body: JSON.stringify({ message, context }),
-  }),
+  // ===== T.A.M.i Chat (FIXED: correct field names) =====
+  chatWithTami: (studentName, message, conversationHistory = []) =>
+    request('/tami/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        student_id: studentName,
+        message: message,
+        conversation_history: conversationHistory,
+      }),
+    }),
+
+  // T.A.M.i Voice
+  chatWithTamiVoice: (studentName, message, conversationHistory = []) =>
+    request('/tami/chat/voice', {
+      method: 'POST',
+      body: JSON.stringify({
+        student_id: studentName,
+        message: message,
+        conversation_history: conversationHistory,
+      }),
+    }),
+
+  // T.A.M.i Weekly Review
+  tamiWeeklyReview: (studentName) =>
+    request('/tami/weekly-review', {
+      method: 'POST',
+      body: JSON.stringify({ student_name: studentName }),
+    }),
 
   // Health check
   wake: () => fetch(`${API_URL}/`).then(r => r.json()),
