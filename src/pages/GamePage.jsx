@@ -61,13 +61,31 @@ function getPianoKeys(level) {
   for (let o = 0; o < oct; o++) {
     for (let n = 0; n < 7; n++) {
       const globalIdx = o * 7 + n
-      keys.push({ num: n + 1, name: NOTE_NAMES[globalIdx], freq: NOTE_FREQS[globalIdx], idx: globalIdx, isOctaveC: false })
+      keys.push({ num: n + 1, name: NOTE_NAMES[globalIdx], freq: NOTE_FREQS[globalIdx], idx: globalIdx, isOctaveC: false, scaleNote: n })
     }
   }
   // Final high C only once
   const finalIdx = oct * 7
-  keys.push({ num: 8, name: "C", freq: NOTE_FREQS[finalIdx], idx: finalIdx, isOctaveC: true })
+  keys.push({ num: 8, name: "C", freq: NOTE_FREQS[finalIdx], idx: finalIdx, isOctaveC: true, scaleNote: 7 })
   return keys
+}
+
+
+// ─── GENERATE MYSTERY HELPER ──────────────────────────────────────────────────
+function generateMystery(length, prevMystery) {
+  let seq
+  let attempts = 0
+  do {
+    seq = Array.from({ length }, () => Math.floor(Math.random() * 8))
+    attempts++
+  } while (
+    attempts < 10 &&
+    prevMystery &&
+    prevMystery.length > 0 &&
+    seq.length === prevMystery.length &&
+    seq.every((n, i) => n === prevMystery[i])
+  )
+  return seq
 }
 
 // ─── PIANO COMPONENT ──────────────────────────────────────────────────────────
@@ -92,7 +110,7 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
       {whiteKeys.map((k,i) => (
         <div
           key={i}
-          onClick={() => onKeyPress(k.idx, i)}
+          onClick={() => onKeyPress(k.idx, i, k.scaleNote)}
           style={{
             flex:1,
             background: pressed===i
@@ -328,6 +346,7 @@ export default function GamePage() {
   const [mystery, setMystery] = useState([])
   const [mode, setMode] = useState('game')
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isEvaluating, setIsEvaluating] = useState(false)
   const [streak, setStreak] = useState(0)
   const [toast, setToast] = useState(null)
 
@@ -399,7 +418,7 @@ export default function GamePage() {
 
   // Generate mystery sequence whenever level or noteCount changes
   useEffect(() => {
-    const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
+    const seq = generateMystery(noteCount, mystery)
     setMystery(seq)
     setScaleReplays(getMaxScaleReplays(level))
     setFindReplays(getMaxFindReplays())
@@ -500,8 +519,9 @@ export default function GamePage() {
   }
 
   // Key press
-  const pressKey = useCallback((noteIdx, keyPos) => {
+  const pressKey = useCallback((noteIdx, keyPos, scaleNote) => {
     if (isPlaying) return
+    if (isEvaluating) return
     if (mode === 'game' && lives <= 0) return
     if (!audioCtx || audioCtx.state === 'suspended') {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)()
@@ -510,10 +530,11 @@ export default function GamePage() {
     setTimeout(() => setPressed(null), 180)
     playTone(NOTE_FREQS[noteIdx], 0.4)
 
-    const next = [...answers, noteIdx % 8]
+    const next = [...answers, scaleNote]
     setAnswers(next)
 
     if (next.length >= noteCount) {
+      setIsEvaluating(true)
       sessionRef.current.attempts++
       const allCorrect = next.every((n, i) => n === mystery[i])
       const newStates = {}
@@ -578,13 +599,14 @@ export default function GamePage() {
         setAnswers([])
         setNoteStates({})
         // Always generate new mystery — whether correct or wrong
-        const seq = Array.from({ length: noteCount }, () => Math.floor(Math.random() * 8))
+        setIsEvaluating(false)
+        const seq = generateMystery(noteCount, mystery)
         setMystery(seq)
         setScaleReplays(getMaxScaleReplays(level))
         setFindReplays(getMaxFindReplays())
       }, 1600)
     }
-  }, [answers, isPlaying, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp])
+  }, [answers, isPlaying, isEvaluating, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp])
 
   const resetGame = () => {
     setLevel(1)
@@ -597,7 +619,8 @@ export default function GamePage() {
       correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
       startTime: Date.now(), bestStreak: 0, currentStreak: 0,
     }
-    const seq = Array.from({ length: 1 }, () => Math.floor(Math.random() * 8))
+    setIsEvaluating(false)
+    const seq = generateMystery(1, mystery)
     setMystery(seq)
   }
 
