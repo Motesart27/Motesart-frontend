@@ -685,7 +685,7 @@ export const IntelligenceOverlay = ({ isOpen, onClose, onTamiClick }) => {
               </div>
             </div>
             <div style={{ padding: '12px', borderRadius: '11px', background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa'         </svg>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TEACHING STYLE</div>
             </div>
             <div className="style-grid">
               <div style={{ padding: '7px', borderRadius: '8px', textAlign: 'center', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)' }}>
