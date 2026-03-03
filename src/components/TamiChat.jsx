@@ -18,7 +18,14 @@ export default function TamiChat() {
 
   const studentName = user?.name || user?.email?.split('@')[0] || 'Student'
 
+// Listen for external open-tami-chat events (from header buttons)
   useEffect(() => {
+    const handleOpenTami = () => setIsOpen(true);
+    window.addEventListener('open-tami-chat', handleOpenTami);
+    return () => window.removeEventListener('open-tami-chat', handleOpenTami);
+  }, []);
+
+    useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
