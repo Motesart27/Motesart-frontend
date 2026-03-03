@@ -193,7 +193,9 @@ function AcademicView({ navigate }) {
         <Card title="T.A.M.i Leaders">
           <div style={{ display:'flex', alignItems:'center', gap:10, padding:8, background:'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border:'1px solid rgba(147,51,234,0.3)', borderRadius:8 }}>
             <span style={{ width:20, fontSize:12, fontWeight:700, textAlign:'center' }}>👑</span>
-            <div style={{ width:28, height:28, borderRadius:'50%', background:'#374151', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:600 }}>🎵</div>
+            <div style={{ width:28, height:28, borderRadius:'50%', background:'#1a1040', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', border:'2px solid rgba(168,85,247,0.4)' }}>
+              <img src="/motesart-avatar.png" alt="Motesart" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            </div>
             <span style={{ flex:1, fontSize:12, color:'#a855f7', fontWeight:700 }}>Motesart Mo (You)</span>
             <span style={{ fontSize:12, fontWeight:700, color:'#22c55e' }}>287</span>
           </div>
@@ -237,7 +239,9 @@ function GameView({ navigate }) {
         <Card title="🏆 Game Leaderboard">
           <div style={{ display:'flex', alignItems:'center', gap:10, padding:8, background:'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border:'1px solid rgba(147,51,234,0.3)', borderRadius:8 }}>
             <span style={{ width:20, fontSize:12, fontWeight:700, textAlign:'center' }}>👑</span>
-            <div style={{ width:28, height:28, borderRadius:'50%', background:'#374151', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:600 }}>🎵</div>
+            <div style={{ width:28, height:28, borderRadius:'50%', background:'#1a1040', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', border:'2px solid rgba(168,85,247,0.4)' }}>
+              <img src="/motesart-avatar.png" alt="Motesart" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            </div>
             <span style={{ flex:1, fontSize:12, color:'#a855f7', fontWeight:700 }}>Motesart Mo (You)</span>
             <span style={{ fontSize:12, fontWeight:700, color:'#22c55e' }}>0</span>
           </div>
