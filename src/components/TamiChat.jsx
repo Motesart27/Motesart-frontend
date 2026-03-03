@@ -1,35 +1,79 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../services/api.js'
 
 export default function TamiChat() {
   const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm T.A.M.i — your AI music assistant. How can I help you today? 🎵" }
-  ])
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState([])
+  const [suggestedActions, setSuggestedActions] = useState([])
+  const [hasGreeted, setHasGreeted] = useState(false)
   const messagesEndRef = useRef(null)
+
+  const studentName = user?.name || user?.email?.split('@')[0] || 'Student'
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return
-    const userMsg = { role: 'user', content: input.trim() }
-    setMessages(prev => [...prev, userMsg])
-    setInput('')
+  // T.A.M.i greets the student when chat opens for the first time
+  useEffect(() => {
+    if (isOpen && !hasGreeted && messages.length === 0) {
+      fetchGreeting()
+    }
+  }, [isOpen])
+
+  const fetchGreeting = async () => {
+    setHasGreeted(true)
     setLoading(true)
     try {
-      const res = await api.chatWithTami(input.trim(), user?.id)
-      setMessages(prev => [...prev, { role: 'assistant', content: res.response || res.message || "I'm not sure how to help with that." }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting. Try again in a moment! 🎶" }])
+      const res = await api.chatWithTami(
+        studentName,
+        'I just opened the app. Greet me by name and tell me what I should work on today based on my DPM data.',
+        []
+      )
+      setMessages([{ role: 'assistant', content: res.reply || "Hey! I'm T.A.M.i, your AI music coach. What are we working on today?" }])
+      if (res.updated_history) setHistory(res.updated_history)
+      if (res.suggested_actions?.length) setSuggestedActions(res.suggested_actions)
+    } catch (err) {
+      console.error('T.A.M.i greeting error:', err)
+      setMessages([{
+        role: 'assistant',
+        content: `Hey ${studentName.split(' ')[0]}! I'm T.A.M.i — your AI music coach. What are we working on today?`
+      }])
     }
     setLoading(false)
   }
+
+  const sendMessage = useCallback(async (overrideMsg) => {
+    const userMsg = overrideMsg || input.trim()
+    if (!userMsg || loading) return
+
+    if (!overrideMsg) setInput('')
+    setMessages(prev => [...prev, { role: 'user', content: userMsg }])
+    setSuggestedActions([])
+    setLoading(true)
+
+    try {
+      const res = await api.chatWithTami(studentName, userMsg, history)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: res.reply || res.response || res.message || "I'm here to help!"
+      }])
+      if (res.updated_history) setHistory(res.updated_history)
+      if (res.suggested_actions?.length) setSuggestedActions(res.suggested_actions)
+    } catch (err) {
+      console.error('T.A.M.i chat error:', err)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Sorry, I'm having trouble connecting right now. Try again in a moment!"
+      }])
+    }
+    setLoading(false)
+  }, [input, loading, history, studentName])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -48,7 +92,7 @@ export default function TamiChat() {
       fontSize: 28, overflow: 'hidden', padding: 0
     },
     panel: {
-      position: 'fixed', bottom: 96, right: 24, width: 360, maxHeight: 500,
+      position: 'fixed', bottom: 96, right: 24, width: 360, maxHeight: 520,
       background: '#1f2937', borderRadius: 16, zIndex: 9998,
       boxShadow: '0 8px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column',
       border: '1px solid rgba(6,182,212,0.3)', overflow: 'hidden'
@@ -69,12 +113,12 @@ export default function TamiChat() {
     msgUser: {
       alignSelf: 'flex-end', background: 'rgba(6,182,212,0.2)',
       borderRadius: '12px 12px 4px 12px', padding: '8px 12px',
-      color: '#e5e7eb', fontSize: 14, maxWidth: '80%'
+      color: '#e5e7eb', fontSize: 14, maxWidth: '80%', lineHeight: 1.5
     },
     msgBot: {
       alignSelf: 'flex-start', background: 'rgba(139,92,246,0.15)',
       borderRadius: '12px 12px 12px 4px', padding: '8px 12px',
-      color: '#e5e7eb', fontSize: 14, maxWidth: '80%'
+      color: '#e5e7eb', fontSize: 14, maxWidth: '80%', lineHeight: 1.5
     },
     inputRow: {
       display: 'flex', padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -89,6 +133,11 @@ export default function TamiChat() {
       background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)', border: 'none',
       borderRadius: 8, padding: '8px 14px', color: '#fff', fontWeight: 600,
       cursor: 'pointer', fontSize: 14
+    },
+    actionBtn: {
+      padding: '5px 12px', borderRadius: 16,
+      background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.3)',
+      color: '#a78bfa', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
     }
   }
 
@@ -97,7 +146,11 @@ export default function TamiChat() {
       {isOpen && (
         <div style={s.panel}>
           <div style={s.header}>
-            <span style={s.headerTitle}><img src="/tami-avatar.png" alt="T.A.M.i" style={{ width: 24, height: 24, borderRadius: '50%', marginRight: 8, verticalAlign: 'middle' }} />T.A.M.i</span>
+            <span style={s.headerTitle}>
+              <img src="/tami-avatar.png" alt="T.A.M.i"
+                style={{ width: 24, height: 24, borderRadius: '50%', marginRight: 8, verticalAlign: 'middle' }}
+              />T.A.M.i
+            </span>
             <button style={s.closeBtn} onClick={() => setIsOpen(false)}>✕</button>
           </div>
           <div style={s.body}>
@@ -111,20 +164,23 @@ export default function TamiChat() {
                 <span style={{ opacity: 0.6 }}>T.A.M.i is thinking...</span>
               </div>
             )}
+            {suggestedActions.length > 0 && !loading && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                {suggestedActions.map((action, i) => (
+                  <button key={i} onClick={() => sendMessage(action)} style={s.actionBtn}>{action}</button>
+                ))}
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
           <div style={s.inputRow}>
             <textarea
-              style={s.input}
-              rows={1}
-              value={input}
+              style={s.input} rows={1} value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask T.A.M.i anything..."
             />
-            <button style={s.sendBtn} onClick={sendMessage} disabled={loading}>
-              Send
-            </button>
+            <button style={s.sendBtn} onClick={() => sendMessage()} disabled={loading}>Send</button>
           </div>
         </div>
       )}
