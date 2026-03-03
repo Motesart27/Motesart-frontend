@@ -25,6 +25,31 @@ export default function TamiChat() {
     return () => window.removeEventListener('open-tami-chat', handleOpenTami);
   }, []);
 
+  // Inject pulse animation keyframes
+  useEffect(() => {
+    const styleId = 'tami-pulse-style';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = '@keyframes tami-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.7; } }';
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  // Pre-load voices on mount to reduce first-speak delay
+  useEffect(() => {
+    const warmUp = () => {
+      const synth = window.speechSynthesis;
+      synth.getVoices();
+      const u = new SpeechSynthesisUtterance('');
+      u.volume = 0;
+      synth.speak(u);
+      synth.cancel();
+    };
+    warmUp();
+    window.speechSynthesis.onvoiceschanged = warmUp;
+  }, []);
+
     useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -60,20 +85,15 @@ export default function TamiChat() {
     if (!cleanText) return
 
     const utterance = new SpeechSynthesisUtterance(cleanText)
-    utterance.rate = 1.0
-    utterance.pitch = 1.1
+    utterance.rate = 1.05
+    utterance.pitch = 1.15
     utterance.volume = 1.0
 
     // Try to pick a good female voice
     const voices = synthRef.current.getVoices()
-    const preferred = voices.find(v =>
-      v.name.includes('Samantha') || v.name.includes('Google US English') ||
-      v.name.includes('Karen') || v.name.includes('Moira') ||
-      v.name.includes('Fiona') || v.name.includes('Victoria')
-    ) || voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
-      || voices.find(v => v.lang.startsWith('en'))
-
-    if (preferred) utterance.voice = preferred
+    const voiceNames = ['Nicky', 'Samantha', 'Google US English', 'Shelley', 'Microsoft Zira', 'Karen', 'Moira', 'Victoria'];
+      const preferred = voiceNames.reduce((found, name) => found || voices.find(v => v.name.includes(name)), null);
+      if (preferred) utterance.voice = preferred
 
     utterance.onstart = () => setIsSpeaking(true)
     utterance.onend = () => setIsSpeaking(false)
@@ -114,7 +134,7 @@ export default function TamiChat() {
       if (res.suggested_actions?.length) setSuggestedActions(res.suggested_actions)
     } catch (err) {
       console.error('T.A.M.i greeting error:', err)
-      const fallback = `Hey ${studentName.split(' ')[0]}! I'm T.A.M.i â your AI music coach. What are we working on today?`
+      const fallback = `Yo ${studentName.split(' ')[0]}! What's good?`
       setMessages([{ role: 'assistant', content: fallback }])
       speakText(fallback)
     }
@@ -278,14 +298,21 @@ export default function TamiChat() {
               </span>
             </div>
             <div style={s.headerRight}>
-              <button
-                style={voiceEnabled ? s.voiceBtn : s.voiceBtnOff}
-                onClick={toggleVoice}
-                title={voiceEnabled ? 'Turn voice off' : 'Turn voice on'}
-              >
-                {voiceEnabled ? 'ð' : 'ð'}
-                <span>{voiceEnabled ? 'ON' : 'OFF'}</span>
-              </button>
+              <div
+                onClick={() => setVoiceEnabled(!voiceEnabled)}
+                title={voiceEnabled ? 'Voice On' : 'Voice Off'}
+                style={{
+                  width: 12, height: 12, borderRadius: '50%',
+                  background: voiceEnabled ? '#00e676' : '#ff1744',
+                  boxShadow: voiceEnabled
+                    ? (isSpeaking ? '0 0 8px 4px rgba(0,230,118,0.7)' : '0 0 6px 2px rgba(0,230,118,0.4)')
+                    : '0 0 6px 2px rgba(255,23,68,0.4)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  animation: isSpeaking ? 'tami-pulse 1s infinite' : 'none',
+                  marginRight: 8
+                }}
+              />
               <button style={s.closeBtn} onClick={() => setIsOpen(false)}>â</button>
             </div>
           </div>
