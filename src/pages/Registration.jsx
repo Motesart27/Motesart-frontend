@@ -108,7 +108,7 @@ export default function RegistrationPage() {
         </>}
 
         {step===2 && <>
-          <div className="reg-step-title">Your music journey</div><div className="reg-step-sub">Help Tammy personalize your experience</div>
+          <div className="reg-step-title">Your music journey</div><div className="reg-step-sub">Help TAMi personalize your experience</div>
           <div className="reg-field"><label>Favorite Genre *</label><input placeholder="e.g. R&B, Classical, Pop"/></div>
           <div className="reg-field"><label>Favorite Song *</label><input placeholder="e.g. Moonlight Sonata"/></div>
           <div className="reg-field"><label>Primary Instrument</label><select><option>Piano</option><option>Guitar</option><option>Violin</option></select></div>
@@ -117,12 +117,12 @@ export default function RegistrationPage() {
         </>}
 
         {step===3 && <>
-          <div className="reg-step-title">Way You Learn</div><div className="reg-step-sub">Helps Tammy teach in the way that works best for you</div>
+          <div className="reg-step-title">Way You Learn</div><div className="reg-step-sub">Helps TAMi teach in the way that works best for you</div>
           <div className="reg-wyl-card">
             <div style={{fontSize:38,marginBottom:10}}>ð§ </div>
             <div style={{display:'inline-block',background:'rgba(78,205,196,.15)',color:'#4ecdc4',fontSize:9,letterSpacing:1.5,textTransform:'uppercase',padding:'3px 10px',borderRadius:20,marginBottom:10}}>Optional</div>
             <div style={{fontSize:16,fontWeight:800,marginBottom:8}}>Way You Learn Assessment</div>
-            <div style={{fontSize:11,color:'#718096',lineHeight:1.7,marginBottom:16}}>10 quick questions help Tammy understand how you learn best.</div>
+            <div style={{fontSize:11,color:'#718096',lineHeight:1.7,marginBottom:16}}>10 quick questions help TAMi understand how you learn best.</div>
           </div>
           <div className="reg-wyl-q"><div style={{fontSize:11,fontWeight:500,marginBottom:8,lineHeight:1.5}}>ð® You want to learn a Mario Kart speed boost. Do you:</div>
             {['A. Watch a video online','B. Figure it out by trying','C. Ask someone to explain it'].map((o,i)=><div key={o} className={`reg-wyl-opt ${i===0?'sel':''}`}><div className="reg-radio"/>{o}</div>)}
@@ -131,7 +131,7 @@ export default function RegistrationPage() {
         </>}
 
         {step===4 && <>
-          <div className="reg-step-title">Music Assessment</div><div className="reg-step-sub">Helps Tammy set your starting point</div>
+          <div className="reg-step-title">Music Assessment</div><div className="reg-step-sub">Helps TAMi set your starting point</div>
           {[['How long have you been learning piano?',['Less than 6 months','6 monthsâ2 years','2+ years'],0],['Can you read sheet music?',['Not at all','With some difficulty','Comfortably'],1],['What is your goal?',['Just for fun','Play for friends/family','Perform or take exams'],0]].map(([q,opts,sel])=>(
             <div key={q} style={{marginBottom:12}}><div style={{fontSize:11,fontWeight:500,marginBottom:6}}>{q}</div><div className="reg-chips">{opts.map((o,i)=><div key={o} className={`reg-chip ${i===sel?'sel':''}`}>{o}</div>)}</div></div>
           ))}
