@@ -75,9 +75,9 @@ export default function SessionSummary() {
             ))}
           </div>
         </div></div>
-        <div className="ss-section"><div className="ss-lb-pos"><div style={{fontSize:13,color:'#c4b5fd'}}>Your Current Position</div><div style={{fontSize:40,fontWeight:700,marginTop:4}}>#4</div><div style={{fontSize:11,color:'#9ca3af',marginTop:4}}>on Tammy Leaderboard</div></div></div>
+        <div className="ss-section"><div className="ss-lb-pos"><div style={{fontSize:13,color:'#c4b5fd'}}>Your Current Position</div><div style={{fontSize:40,fontWeight:700,marginTop:4}}>#4</div><div style={{fontSize:11,color:'#9ca3af',marginTop:4}}>on TAMi Leaderboard</div></div></div>
         <div className="ss-section"><div className="ss-mini">
-          <div style={{display:'flex',alignItems:'center',gap:8,fontWeight:600,marginBottom:12}}>🏆 Tammy Leaders</div>
+          <div style={{display:'flex',alignItems:'center',gap:8,fontWeight:600,marginBottom:12}}>🏆 TAMi Leaders</div>
           {LEADERS.map((l,i)=>(
             <div key={i} className={`ss-mini-row ${l.me?'me':''}`}>
               <div style={{width:24,textAlign:'center',fontSize:l.rank.startsWith('#')?11:16,fontWeight:700,color:l.rank.startsWith('#')?'#9ca3af':'inherit'}}>{l.rank.startsWith('#')?l.rank:<span style={{color:l.color||'inherit'}}>{l.rank}</span>}</div>
