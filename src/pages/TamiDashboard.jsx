@@ -13,11 +13,11 @@ export default function TamiDashboard() {
       <div style={{ borderBottom:'1px solid #1f2937', position:'sticky', top:0, background:'rgba(17,24,39,0.95)', backdropFilter:'blur(12px)', zIndex:10, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           <div style={{ width:44, height:44, borderRadius:'50%', border:'2px solid rgba(249,115,22,0.7)', overflow:'hidden', flexShrink:0, boxShadow:'0 0 14px rgba(232,75,138,0.5)' }}>
-            <img src="/tami-avatar.png" alt="Tammy" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+            <img src="/tami-avatar.png" alt="TAMi" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
           </div>
           <div>
             <div style={{ fontSize:16, fontWeight:700 }}>{userName}</div>
-            <div style={{ fontSize:11, color:'#fb923c', marginTop:2 }}>Tammy Dashboard · Teaching Assistant for Musical Intelligence</div>
+            <div style={{ fontSize:11, color:'#fb923c', marginTop:2 }}>TAMi Dashboard · Teaching Assistant for Musical Intelligence</div>
           </div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -90,7 +90,7 @@ export default function TamiDashboard() {
                 ))}
               </div>
               <div style={{ background:'rgba(249,115,22,0.08)', border:'1px solid rgba(249,115,22,0.2)', borderRadius:8, padding:10 }}>
-                <div style={{ fontSize:11, fontWeight:700, color:'#fb923c', marginBottom:8 }}>How Tammy Adapts</div>
+                <div style={{ fontSize:11, fontWeight:700, color:'#fb923c', marginBottom:8 }}>How TAMi Adapts</div>
                 <div style={{ fontSize:11, color:'#9ca3af', marginBottom:6 }}>Teaching sequence:</div>
                 <div style={{ display:'flex', alignItems:'center', gap:4, marginBottom:10 }}>
                   {['Do','→','Hear','→','See'].map((s,i) => (
@@ -177,9 +177,9 @@ export default function TamiDashboard() {
           <div style={{ background:'linear-gradient(135deg,rgba(232,75,138,0.12),rgba(249,115,22,0.12))', border:'1px solid rgba(232,75,138,0.25)', borderRadius:12, overflow:'hidden' }}>
             <div style={{ padding:'12px 16px', borderBottom:'1px solid rgba(232,75,138,0.2)', display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:32, height:32, borderRadius:'50%', border:'1.5px solid rgba(249,115,22,0.6)', overflow:'hidden', flexShrink:0 }}>
-                <img src="/tami-avatar.png" alt="Tammy" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+                <img src="/tami-avatar.png" alt="TAMi" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
               </div>
-              <span style={{ fontSize:14, fontWeight:700, color:'#fb923c' }}>Tammy Weekly Report</span>
+              <span style={{ fontSize:14, fontWeight:700, color:'#fb923c' }}>TAMi Weekly Report</span>
             </div>
             <div style={{ padding:16 }}>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:8, marginBottom:14 }}>
@@ -191,7 +191,7 @@ export default function TamiDashboard() {
                 ))}
               </div>
               <div style={{ padding:'12px 14px', background:'rgba(0,0,0,0.2)', borderRadius:8, borderLeft:'3px solid #fb923c' }}>
-                <div style={{ fontSize:10, color:'#fb923c', fontWeight:700, marginBottom:6 }}>Tammy says</div>
+                <div style={{ fontSize:10, color:'#fb923c', fontWeight:700, marginBottom:6 }}>TAMi says</div>
                 <p style={{ fontSize:12, color:'#d1d5db', lineHeight:1.6, fontStyle:'italic' }}>"Your Passion is real — one game session proves that. One practice log this week changes everything for your Drive. Finish Level 3 Mastery and your Motivation wakes up. You're close."</p>
               </div>
             </div>
