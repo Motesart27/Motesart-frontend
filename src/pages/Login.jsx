@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../services/api.js'
 
 export default function Login() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   // If already logged in, redirect to dashboard (fixes back button showing login)
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user && location.pathname !== '/login') return <Navigate to="/dashboard" replace />
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
