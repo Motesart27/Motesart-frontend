@@ -93,7 +93,7 @@ function ProfileHeader() {
   return (
     <div className="profile-header">
       <div className="back-btn" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>{'\u2190'}</div>
-      <div className="p-avatar">
+      <div className="p-avatar" style={{ overflow: 'hidden' }}>
         <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
       </div>
       <div style={{ flex: 1 }}>
