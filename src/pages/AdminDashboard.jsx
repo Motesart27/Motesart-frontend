@@ -224,10 +224,10 @@ function StatsRow() {
 function AmbassadorLeaderboard() {
   const ambassadors = [
     { medal: '\uD83E\uDD47', medalBg: 'rgba(234,179,8,0.1)', initials: 'M', avBg: 'rgba(249,115,22,0.15)', avColor: '#f97316', name: 'Motesart', tier: '\uD83C\uDFC6 AMBASSADOR', tierClass: 't-go', refs: 47, conv: 31, rate: '66%', money: '20', signups: '47 signups' },
-    { medal: '\u2B50', medalBg: 'rgba(59,130,246,0.07)', initials: 'JO', avBg: 'rgba(59,130,246,0.15)', avColor: '#3b82f6', name: 'James Okoro', tier: '\u2B50 RISING STAR', tierClass: 't-si', refs: 31, conv: 18, rate: '58%', money: '10', signups: '31 signups' },
-    { medal: '\u2B50', medalBg: 'rgba(168,85,247,0.08)', initials: 'SR', avBg: 'rgba(168,85,247,0.15)', avColor: '#a855f7', name: 'Sofia Rivera', tier: '\u2B50 RISING STAR', tierClass: 't-si', refs: 24, conv: 13, rate: '54%', money: '10', signups: '24 signups' },
-    { medal: '\u2B50', medalBg: 'rgba(232,75,138,0.05)', initials: 'AJ', avBg: 'rgba(232,75,138,0.15)', avColor: '#e84b8a', name: 'Aaliyah Johnson', tier: '\u2B50 RISING STAR', tierClass: 't-si', refs: 18, conv: 9, rate: '50%', money: '20', signups: '18 signups' },
-    { medal: '\u2B50', medalBg: 'rgba(34,197,94,0.08)', initials: 'MW', avBg: 'rgba(34,197,94,0.15)', avColor: '#22c55e', name: 'Marcus Williams', tier: '\u2B50 RISING STAR', tierClass: 't-br', refs: 12, conv: 5, rate: '42%', money: '50', signups: '12 signups' },
+    { medal: '\uD83E\uDD48', medalBg: 'rgba(59,130,246,0.07)', initials: 'JO', avBg: 'rgba(59,130,246,0.15)', avColor: '#3b82f6', name: 'James Okoro', tier: '\u2B50 RISING STAR', tierClass: 't-si', refs: 31, conv: 18, rate: '58%', money: '10', signups: '31 signups' },
+    { medal: '\uD83E\uDD49', medalBg: 'rgba(168,85,247,0.08)', initials: 'SR', avBg: 'rgba(168,85,247,0.15)', avColor: '#a855f7', name: 'Sofia Rivera', tier: '\u2B50 RISING STAR', tierClass: 't-si', refs: 24, conv: 13, rate: '54%', money: '10', signups: '24 signups' },
+    { medal: '', medalBg: 'rgba(232,75,138,0.05)', initials: 'AJ', avBg: 'rgba(232,75,138,0.15)', avColor: '#e84b8a', name: 'Aaliyah Johnson', tier: '\u2B50 RISING STAR', tierClass: 't-si', refs: 18, conv: 9, rate: '50%', money: '20', signups: '18 signups' },
+    { medal: '', medalBg: 'rgba(34,197,94,0.08)', initials: 'MW', avBg: 'rgba(34,197,94,0.15)', avColor: '#22c55e', name: 'Marcus Williams', tier: '\u2B50 RISING STAR', tierClass: 't-br', refs: 12, conv: 5, rate: '42%', money: '50', signups: '12 signups' },
   ];
 
   return (
