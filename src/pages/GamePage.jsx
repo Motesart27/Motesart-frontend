@@ -76,7 +76,17 @@ function generateMystery(length, prevMystery) {
   let seq
   let attempts = 0
   do {
-    seq = Array.from({ length }, () => Math.floor(Math.random() * 8))
+    if (length <= 8) {
+      // Pick unique random notes so each lights up a distinct staff position
+      const pool = [0,1,2,3,4,5,6,7]
+      seq = []
+      for (let i = 0; i < length; i++) {
+        const ri = Math.floor(Math.random() * pool.length)
+        seq.push(pool.splice(ri, 1)[0])
+      }
+    } else {
+      seq = Array.from({ length }, () => Math.floor(Math.random() * 8))
+    }
     attempts++
   } while (
     attempts < 10 &&
@@ -538,12 +548,14 @@ export default function GamePage() {
       sessionRef.current.attempts++
       const allCorrect = next.every((n, i) => n === mystery[i])
       const newStates = {}
-      // For each note in the answer, light up the staff position of the expected note
+      // For each note in the answer, show feedback on the staff
       next.forEach((n, i) => {
-        const staffPos = mystery[i]  // which staff note was expected
         const isCorrect = n === mystery[i]
-        newStates[staffPos] = isCorrect ? 'correct' : 'wrong'
-        if (!isCorrect) {
+        if (isCorrect) {
+          newStates[mystery[i]] = 'correct'
+        } else {
+          // Show red on the note the user actually played (not the expected one)
+          newStates[n] = 'wrong'
           sessionRef.current.noteErrors[SCALE_NOTES[mystery[i]].name] =
             (sessionRef.current.noteErrors[SCALE_NOTES[mystery[i]].name] || 0) + 1
         }
