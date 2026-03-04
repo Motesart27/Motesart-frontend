@@ -30,7 +30,7 @@ export default function Leaderboard() {
               <svg width="20" height="20" fill="none" stroke="#9ca3af" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
             </button>
             <div>
-              <div style={{ fontSize:18, fontWeight:700, display:'flex', alignItems:'center', gap:8 }}>🏆 T.A.M.i Ambassadors</div>
+              <div style={{ fontSize:18, fontWeight:700, display:'flex', alignItems:'center', gap:8 }}>🏆 Tammy Ambassadors</div>
               <div style={{ fontSize:13, color:'#9ca3af' }}>Top performers in musical mastery</div>
             </div>
           </div>
