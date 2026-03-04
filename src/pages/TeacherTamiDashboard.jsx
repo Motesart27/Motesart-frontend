@@ -63,7 +63,7 @@ export default function TeacherTamiDashboard() {
         <div style={{ width:40, height:40, borderRadius:'50%', background:'linear-gradient(135deg,#e84b8a,#f97316)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:800, color:'#fff', flexShrink:0, animation:'tamiGlow 3s ease infinite' }}>T</div>
         <div>
           <div style={{ fontSize:14, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', gap:6 }}>
-            Tammy Dashboard
+            TAMi Dashboard
             <span style={{ fontSize:9, fontWeight:600, background:'linear-gradient(90deg,rgba(232,75,138,0.2),rgba(249,115,22,0.2))', color:'#f97316', padding:'2px 7px', borderRadius:4, border:'1px solid rgba(249,115,22,0.3)' }}>TEACHER AI</span>
           </div>
           <div style={{ fontSize:10, color:'#6b7280', marginTop:1 }}>Prof. J. Motes Â· Piano &amp; Theory</div>
@@ -89,14 +89,14 @@ export default function TeacherTamiDashboard() {
           <button style={{ marginLeft:'auto', padding:'4px 12px', borderRadius:6, border:'1px solid rgba(220,38,38,0.4)', background:'rgba(220,38,38,0.2)', color:'#f87171', fontSize:11, fontWeight:600, cursor:'pointer' }}>Draft Parent Messages</button>
         </div>
 
-        {/* TOP ROW: Tammy Chat + Weekly DPM */}
+        {/* TOP ROW: TAMi Chat + Weekly DPM */}
         <div style={{ display:'grid', gridTemplateColumns:'1.2fr 0.8fr', gap:14, marginBottom:14, animation:'fu .3s ease .05s both' }}>
 
-          {/* Tammy Chat */}
+          {/* TAMi Chat */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(232,75,138,0.2)', borderRadius:14, overflow:'hidden', display:'flex', flexDirection:'column' }}>
             <div style={{ padding:'11px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', gap:8 }}>
               <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#e84b8a,#f97316)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, color:'#fff', animation:'tamiGlow 3s ease infinite' }}>T</div>
-              <div style={{ fontSize:13, fontWeight:700, color:'#fff' }}>Ask Tammy</div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#fff' }}>Ask TAMi</div>
               <div style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', animation:'livePulse 2s infinite', marginLeft:4 }} />
             </div>
             <div style={{ flex:1, padding:'12px 16px', display:'flex', flexDirection:'column', gap:10, minHeight:180, maxHeight:240, overflowY:'auto' }}>
@@ -147,10 +147,10 @@ export default function TeacherTamiDashboard() {
           </div>
         </div>
 
-        {/* Tammy INSIGHTS */}
+        {/* TAMi INSIGHTS */}
         <div style={{ marginBottom:14, animation:'fu .3s ease .1s both' }}>
           <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:10, display:'flex', alignItems:'center', gap:8 }}>
-            ð§  Tammy Insights
+            ð§  TAMi Insights
             <span style={{ fontSize:10, color:'#6b7280', background:'rgba(255,255,255,0.05)', padding:'2px 8px', borderRadius:8 }}>4 this week</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
@@ -234,7 +234,7 @@ export default function TeacherTamiDashboard() {
                       <div style={{ fontSize:11, color:'#9ca3af' }}>WYL style: <span style={{ color:WYL_COLORS[s.wyl], fontWeight:600 }}>{s.wyl}</span></div>
                     </div>
                     <div>
-                      <div style={{ fontSize:10, color:'#6b7280', fontWeight:600, marginBottom:8, textTransform:'uppercase', letterSpacing:0.5 }}>Tammy Recommendation</div>
+                      <div style={{ fontSize:10, color:'#6b7280', fontWeight:600, marginBottom:8, textTransform:'uppercase', letterSpacing:0.5 }}>TAMi Recommendation</div>
                       <div style={{ fontSize:11, color:'#9ca3af', lineHeight:1.6, background:'rgba(232,75,138,0.06)', border:'1px solid rgba(232,75,138,0.15)', borderRadius:8, padding:'8px 10px' }}>
                         {s.status === 'critical' && `Contact parents immediately. Schedule a check-in. Try ${s.wyl.toLowerCase()} learning activities to re-engage.`}
                         {s.status === 'atrisk'   && `Monitor closely this week. Send an encouraging message. Assign shorter, achievable practice goals.`}
@@ -297,7 +297,7 @@ export default function TeacherTamiDashboard() {
               ))}
             </div>
             <div style={{ padding:'10px 12px', background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)', borderRadius:8 }}>
-              <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, marginBottom:2 }}>ð¤ Tammy Analysis</div>
+              <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, marginBottom:2 }}>ð¤ TAMi Analysis</div>
               <div style={{ fontSize:11, color:'#9ca3af', lineHeight:1.5 }}>Practice rate improved 12% vs last week. Ear training game sessions correlate with 23% higher DPM scores.</div>
             </div>
           </div>
