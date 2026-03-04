@@ -27,7 +27,7 @@ function TopNav() {
 
   const tabs = [
     { label: 'Overview', dotColor: '#f97316', dotShadow: true, active: true, route: '/admin' },
-    { label: 'T.A.M.i', isTami: true, route: '/tami' },
+    { label: 'Tammy', isTami: true, route: '/tami' },
     { label: 'Students', dotColor: '#14b8a6', route: '/student' },
     { label: 'Teachers', dotColor: '#f97316', route: '/teacher' },
     { label: 'Ambassadors', dotColor: '#3b82f6', route: '/ambassador' },
@@ -108,7 +108,7 @@ function ProfileHeader() {
           {'\uD83D\uDCAC'}
         </div>
         <div className="tami-online" />
-        <span className="tami-pill-label">T.A.M.i</span>
+        <span className="tami-pill-label">Tammy</span>
       </div>
       <div className="bell" style={{ marginLeft: 12 }}>
         {'\uD83D\uDD14'}<div className="bell-badge">4</div>
@@ -177,7 +177,7 @@ function TamiInsight() {
         {'\uD83D\uDCAC'}
       </div>
       <div>
-        <div className="ti-label">T.A.M.i Platform Intelligence</div>
+        <div className="ti-label">Tammy Platform Intelligence</div>
         <div className="ti-text" style={{ color: '#e0d6ff' }}>
           Signups up <strong style={{ color: '#4ade80' }}>18%</strong> this week driven by
           Ambassador code MOTES2026. Texas leads with 23 new students. Revenue reached{' '}
@@ -289,9 +289,9 @@ function TamiLeaders() {
           {'\uD83D\uDCAC'}
         </div>
         <div style={{ flex: 1 }}>
-          <div className="card-title">T.A.M.i Leaders</div>
+          <div className="card-title">Tammy Leaders</div>
           <div className="card-sub">
-            Top engagement with T.A.M.i across the platform
+            Top engagement with Tammy across the platform
           </div>
         </div>
         <span className="pill p-pk2">Live</span>
@@ -305,7 +305,7 @@ function TamiLeaders() {
         <div className="ftab">{'\u2B50'} Rising</div>
       </div>
       <div className="tab-cat-lbl">
-        {'\uD83D\uDC64'} Top Users by T.A.M.i Engagement
+        {'\uD83D\uDC64'} Top Users by Tammy Engagement
       </div>
       {leaders.map((l, i) => (
         <div key={i} className="lr">
@@ -385,7 +385,7 @@ function DpmHealth() {
 // ═══════════════════════════════════════════════════════════════
 function SystemAlerts() {
   const alerts = [
-    { color: '#ef4444', shadow: true, text: '14 students inactive 7+ days', time: 'T.A.M.i flagged \u00B7 2h ago' },
+    { color: '#ef4444', shadow: true, text: '14 students inactive 7+ days', time: 'Tammy flagged \u00B7 2h ago' },
     { color: '#f97316', shadow: false, text: '3 teacher accounts pending verification', time: 'System \u00B7 5h ago' },
     { color: '#eab308', shadow: false, text: 'Airtable API at 82% rate limit', time: 'System \u00B7 8h ago' },
     { color: '#eab308', shadow: false, text: 'Session log sync delayed \u2014 Railway', time: 'System \u00B7 12h ago' },
@@ -395,7 +395,7 @@ function SystemAlerts() {
     { name: 'Railway Backend', dotClass: 'dg', statusClass: 'hg', status: 'Online' },
     { name: 'Netlify Frontend', dotClass: 'dg', statusClass: 'hg', status: 'Deployed' },
     { name: 'Airtable DB', dotClass: 'dy', statusClass: 'hy', status: 'High Load' },
-    { name: 'T.A.M.i API', dotClass: 'dg', statusClass: 'hg', status: 'Active' },
+    { name: 'Tammy API', dotClass: 'dg', statusClass: 'hg', status: 'Active' },
   ];
 
   return (
@@ -519,7 +519,7 @@ function QuickActions() {
     { icon: '\uD83D\uDCE4', label: 'Export Data' },
     { icon: '\uD83C\uDFEB', label: 'Manage Schools' },
     { icon: '\uD83D\uDCB0', label: 'Payouts' },
-    { icon: '\uD83E\uDD16', label: 'T.A.M.i Config' },
+    { icon: '\uD83E\uDD16', label: 'Tammy Config' },
     { icon: '\uD83D\uDCDD', label: 'View Logs' },
     { icon: '\uD83D\uDCCA', label: 'Reports' },
   ];
