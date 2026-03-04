@@ -86,7 +86,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .s-pk .stat-val { color: #e84b8a; }
 .s-bl .stat-val { color: #3b82f6; }
 .s-pu .stat-val { color: #a855f7; }
-.stat-lbl { font-size: 11px; color: rgba(255,255,255,0.38); margin-top: 4px; }
+.stat-lbl { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px; }
 .stat-chg { font-size: 11px; font-weight: 700; margin-top: 7px; }
 .up { color: #22c55e; }
 .dn { color: #ef4444; }
@@ -95,7 +95,7 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 .card { background: #1a1840; border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; padding: 20px; }
 .card-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
 .card-title { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: #fff; }
-.card-sub { font-size: 11px; color: rgba(255,255,255,0.32); margin-top: 3px; }
+.card-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 3px; }
 .pill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
 .p-or2 { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.25); }
 .p-pk2 { background: rgba(232,75,138,0.15); color: #e84b8a; border: 1px solid rgba(232,75,138,0.25); }
