@@ -95,7 +95,7 @@ export default function TamiChat() {
       // Show instant frontend greeting
       setMessages([{
         role: 'assistant',
-        content: `Yo ${firstName}! What's good? I'm Tammy, your music coach.`
+        content: `Yo ${firstName}! What's good? I'm TAMi, your music coach.`
       }])
       // Then get real greeting from backend
       try {
@@ -114,7 +114,7 @@ export default function TamiChat() {
           if (autoPlay) speakText(reply)
         }
       } catch (err) {
-        console.error('Tammy greeting error:', err)
+        console.error('TAMi greeting error:', err)
       }
     }
     fetchGreeting()
@@ -170,7 +170,7 @@ export default function TamiChat() {
         if (autoPlay) speakText(reply)
       }
     } catch (err) {
-      console.error('Tammy chat error:', err)
+      console.error('TAMi chat error:', err)
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: "Sorry, I'm having trouble connecting right now. Try again in a sec!"
@@ -228,7 +228,7 @@ export default function TamiChat() {
         }}
         onMouseEnter={e => e.target.style.transform = 'scale(1.1)'}
         onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-        title="Chat with Tammy"
+        title="Chat with TAMi"
       >
         {'\u{1F3B5}'}
       </button>
@@ -334,14 +334,14 @@ export default function TamiChat() {
             boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
             border: '2px solid rgba(255,255,255,0.3)',
             overflow: 'hidden'
-          }}><img src="/tami-avatar.png" alt="Tammy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+          }}><img src="/tami-avatar.png" alt="TAMi" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
           <div>
             <div style={{
               color: 'white',
               fontSize: '20px',
               fontWeight: '700',
               letterSpacing: '-0.3px'
-            }}>Tammy</div>
+            }}>TAMi</div>
             <div style={{
               color: 'rgba(255,255,255,0.85)',
               fontSize: '13px',
@@ -573,7 +573,7 @@ export default function TamiChat() {
                 sendMessage()
               }
             }}
-            placeholder="Ask Tammy anything..."
+            placeholder="Ask TAMi anything..."
             style={{
               flex: 1,
               background: 'rgba(255,255,255,0.06)',
