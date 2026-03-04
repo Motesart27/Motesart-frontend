@@ -14,6 +14,7 @@ export default function TamiChat() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [autoPlay, setAutoPlay] = useState(true)
   const messagesEndRef = useRef(null)
+  const currentAudioRef = useRef(null)
 
   const studentName = user?.name || user?.email?.split('@')[0] || 'Friend'
 
@@ -70,6 +71,11 @@ export default function TamiChat() {
   useEffect(() => {
     if (!isOpen) {
       window.speechSynthesis?.cancel()
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause()
+        currentAudioRef.current.currentTime = 0
+        currentAudioRef.current = null
+      }
       setIsSpeaking(false)
     }
   }, [isOpen])
@@ -78,6 +84,10 @@ export default function TamiChat() {
   useEffect(() => {
     return () => {
       window.speechSynthesis?.cancel()
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause()
+        currentAudioRef.current = null
+      }
     }
   }, [])
 
@@ -130,14 +140,24 @@ export default function TamiChat() {
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
       .trim()
     if (!cleanText || cleanText.length > 3000) return
+
+    // Stop any currently playing audio first
+    window.speechSynthesis?.cancel()
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause()
+      currentAudioRef.current.currentTime = 0
+      currentAudioRef.current = null
+    }
+
     setIsSpeaking(true)
     if (window.puter && window.puter.ai) {
       window.puter.ai.txt2speech(cleanText, {
         voice: 'Joanna', engine: 'neural', language: 'en-US'
       }).then(audio => {
-        audio.onended = () => setIsSpeaking(false)
-        audio.onerror = () => setIsSpeaking(false)
-        audio.play().catch(() => setIsSpeaking(false))
+        currentAudioRef.current = audio
+        audio.onended = () => { setIsSpeaking(false); currentAudioRef.current = null }
+        audio.onerror = () => { setIsSpeaking(false); currentAudioRef.current = null }
+        audio.play().catch(() => { setIsSpeaking(false); currentAudioRef.current = null })
       }).catch(() => setIsSpeaking(false))
     } else {
       const synth = window.speechSynthesis
