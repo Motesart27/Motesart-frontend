@@ -63,12 +63,12 @@ export default function Login() {
         <div style={S.laserRing2} />
         <div style={S.logoRadialGlow} />
         <div style={S.logoCircle}>
-          <span style={{ fontSize: 60 }}>🎵</span>
+          <video src="/logo-anim.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       </div>
 
       <h1 style={S.appTitle}>School of <span style={S.accent}>Motesart</span></h1>
-      <p style={S.tagline}>Find the Note • Master Your Ear</p>
+      <p style={S.tagline}>Find the Note â¢ Master Your Ear</p>
 
       {/* Auth Card */}
       <div style={S.authCard}>
@@ -89,7 +89,7 @@ export default function Login() {
           <input style={S.input} type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
 
           <label style={S.label}>Password</label>
-          <input style={S.input} type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
+          <input style={S.input} type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" value={password} onChange={e => setPassword(e.target.value)} />
 
           {!isLogin && (
             <div>
@@ -97,7 +97,7 @@ export default function Login() {
               <div style={S.roleRow}>
                 {['Student', 'Parent', 'Teacher', 'Ambassador', 'Admin'].map(r => (
                   <button key={r} type="button" onClick={() => setRole(r)} style={role === r ? S.roleActive : S.roleInactive}>
-                    {r === 'Student' ? '🎵' : r === 'Teacher' ? '🎹' : r === 'Parent' ? '👨‍👩‍👧' : r === 'Ambassador' ? '🌍' : '⚙️'} {r}
+                    {r === 'Student' ? 'ðµ' : r === 'Teacher' ? 'ð¹' : r === 'Parent' ? 'ð¨âð©âð§' : r === 'Ambassador' ? 'ð' : 'âï¸'} {r}
                   </button>
                 ))}
               </div>
