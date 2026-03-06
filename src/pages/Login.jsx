@@ -63,7 +63,7 @@ export default function Login() {
         <div style={S.laserRing2} />
         <div style={S.logoRadialGlow} />
         <div style={S.logoCircle}>
-          <video src="/logo-anim.mp4" autoPlay loop muted playsInline style={{ width: '90%', height: '90%', objectFit: 'contain', borderRadius: '50%' }} />
+          <video src="/logo-anim.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
         </div>
       </div>
 
