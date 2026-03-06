@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 export default function StudentDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('academic')
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
+  const mob = useIsMobile()
   const initial = userName.charAt(0).toUpperCase()
 
   return (
@@ -46,7 +48,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth:1280, margin:'0 auto', padding:16 }}>
+      <div style={{ maxWidth: mob ? '100%' : 1280, margin:'0 auto', padding:16 }}>
         {mode === 'academic' ? <AcademicView navigate={navigate} /> : <GameView navigate={navigate} />}
       </div>
 
@@ -75,7 +77,7 @@ function Card({ title, children, headerRight }) {
 function AcademicView({ navigate }) {
   return (
     <>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12 }}>
         <Card title="DPM Score">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:24, flexWrap:'wrap' }}>
             <div style={{ position:'relative' }}>
@@ -84,7 +86,7 @@ function AcademicView({ navigate }) {
                 <circle cx="50" cy="50" r="42" fill="none" stroke="#14b8a6" strokeWidth="8" strokeDasharray="263.9" strokeDashoffset="240" strokeLinecap="round" transform="rotate(-90 50 50)"/>
               </svg>
               <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center' }}>
-                <div style={{ fontSize:22, fontWeight:800 }}>9%</div>
+                <div style={{ fontSize: mob ? 18 : 22, fontWeight:800 }}>9%</div>
                 <div style={{ fontSize:10, color:'#9ca3af' }}>DPM</div>
               </div>
             </div>
@@ -98,7 +100,7 @@ function AcademicView({ navigate }) {
               ))}
             </div>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginTop:16, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)' }}>
+          <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : '1fr 1fr 1fr', gap:8, marginTop:16, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)' }}>
             {[{v:'1%',l:'Drive',c:'#3b82f6'},{v:'27%',l:'Passion',c:'#f97316'},{v:'0%',l:'Motivation',c:'#22c55e'}].map(m => (
               <div key={m.l} style={{ textAlign:'center' }}>
                 <div style={{ fontSize:18, fontWeight:700, color:m.c }}>{m.v}</div>
@@ -123,7 +125,7 @@ function AcademicView({ navigate }) {
               </div>
             ))}
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:4, marginTop:12, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)' }}>
+          <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : 'repeat(4,1fr)', gap:4, marginTop:12, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)' }}>
             {[{i:'🎵',v:'0',l:'Minutes'},{i:'🎯',v:'0',l:'Sessions'},{i:'✓',v:'0%',l:'Accuracy'},{i:'🔥',v:'0',l:'Streak'}].map(s => (
               <div key={s.l} style={{ textAlign:'center' }}>
                 <div style={{ fontSize:14 }}>{s.i}</div>
@@ -135,7 +137,7 @@ function AcademicView({ navigate }) {
         </Card>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginTop:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : '1fr 1fr 1fr', gap:12, marginTop:12 }}>
         <Card title="Practice Goals">
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', background:'rgba(55,65,81,0.3)', borderRadius:8, marginBottom:12 }}>
             <span style={{ color:'#9ca3af', fontSize:13 }}>Weekly Goal</span>
@@ -167,7 +169,7 @@ function AcademicView({ navigate }) {
         </Card>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginTop:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : '1fr 1fr 1fr', gap:12, marginTop:12 }}>
         <Card title="Homework">
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             <div style={{ padding:10, borderRadius:8, border:'1px solid rgba(59,130,246,0.3)', background:'rgba(59,130,246,0.1)', display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
@@ -181,7 +183,7 @@ function AcademicView({ navigate }) {
           <button onClick={() => navigate('/homework')} style={{ width:'100%', padding:10, marginTop:8, background:'linear-gradient(135deg,rgba(37,99,235,0.2),rgba(79,70,229,0.2))', border:'1px solid rgba(59,130,246,0.3)', color:'#60a5fa', borderRadius:8, fontSize:12, fontWeight:600, cursor:'pointer' }}>View Full Homework →</button>
         </Card>
         <Card title="Achievements">
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6 }}>
+          <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : 'repeat(4,1fr)', gap:6 }}>
             {[{i:'🔥',l:'5 Streak',e:true},{i:'🔥🔥',l:'10 Streak',e:true},{i:'🕐',l:'1 Hour',e:false},{i:'🏆',l:'Level 3',e:false},{i:'🏆',l:'Level 4',e:false},{i:'🏅',l:'Master',e:false},{i:'🎯',l:'10 Sessions',e:false},{i:'⭐',l:'DPM 80+',e:false}].map((a,i) => (
               <div key={i} style={{ padding:'10px 6px', borderRadius:8, textAlign:'center', background: a.e ? 'linear-gradient(135deg,rgba(120,53,15,0.4),rgba(154,52,18,0.4))' : 'rgba(55,65,81,0.2)', border: a.e ? '1px solid rgba(234,179,8,0.4)' : '1px solid rgba(55,65,81,0.3)', opacity: a.e ? 1 : 0.4 }}>
                 <div style={{ fontSize:20 }}>{a.i}</div>
@@ -209,9 +211,9 @@ function AcademicView({ navigate }) {
 function GameView({ navigate }) {
   return (
     <>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12 }}>
         <Card title="🎮 Game Stats">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+          <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : '1fr 1fr 1fr', gap:8 }}>
             {[{i:'🔥',v:'0',l:'Best Streak',c:'#f97316'},{i:'💀',v:'0',l:'Lives Lost',c:'#a855f7'},{i:'⚡',v:'0',l:'On Fire Runs',c:'#14b8a6'}].map(s => (
               <div key={s.l} style={{ textAlign:'center' }}>
                 <div style={{ fontSize:14 }}>{s.i}</div>
@@ -222,7 +224,7 @@ function GameView({ navigate }) {
           </div>
         </Card>
         <Card title="🎯 DPM Game Scores">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+          <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : '1fr 1fr 1fr', gap:8 }}>
             {[{v:'0%',l:'Drive',c:'#3b82f6'},{v:'0%',l:'Passion',c:'#f97316'},{v:'0%',l:'Motivation',c:'#22c55e'}].map(s => (
               <div key={s.l} style={{ textAlign:'center' }}>
                 <div style={{ fontSize:18, fontWeight:700, color:s.c }}>{s.v}</div>
@@ -232,7 +234,7 @@ function GameView({ navigate }) {
           </div>
         </Card>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12, marginTop:12 }}>
         <Card title="Game Sessions">
           <p style={{ color:'#9ca3af', fontSize:12 }}>No game sessions yet. Hit Play to start!</p>
         </Card>
