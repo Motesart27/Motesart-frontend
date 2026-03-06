@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 const css = `
 .pt-page{min-height:100vh;background:#111827;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
@@ -55,6 +56,7 @@ const LOGS = [
 ]
 
 export default function PracticeTracking() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
   const [practiceType, setPracticeType] = useState('')
@@ -76,17 +78,17 @@ export default function PracticeTracking() {
       <div className="pt-main">
         <div className="pt-summary">
           <div className="pt-scard">
-            <div className="pt-stop"><span style={{fontSize:13,color:'#9ca3af'}}>This Week</span><span style={{fontSize:24}}>⏱️</span></div>
+            <div className="pt-stop"><span style={{fontSize:13,color:'#9ca3af'}}>This Week</span><span style={{fontSize: mob ? 18 : 24}}>⏱️</span></div>
             <div className="pt-sval">45</div><div className="pt-sdesc">minutes practiced</div>
             <div className="pt-prog-info"><span>75% of goal</span><span>60 min target</span></div>
             <div className="pt-prog-track"><div className="pt-prog-fill" style={{width:'75%'}}/></div>
           </div>
           <div className="pt-scard">
-            <div className="pt-stop"><span style={{fontSize:13,color:'#9ca3af'}}>Sessions</span><span style={{fontSize:24}}>🎯</span></div>
+            <div className="pt-stop"><span style={{fontSize:13,color:'#9ca3af'}}>Sessions</span><span style={{fontSize: mob ? 18 : 24}}>🎯</span></div>
             <div className="pt-sval">4</div><div className="pt-sdesc">practice sessions this week</div>
           </div>
           <div className="pt-scard">
-            <div className="pt-stop"><span style={{fontSize:13,color:'#9ca3af'}}>DPM Sessions</span><span style={{fontSize:24}}>🔥</span></div>
+            <div className="pt-stop"><span style={{fontSize:13,color:'#9ca3af'}}>DPM Sessions</span><span style={{fontSize: mob ? 18 : 24}}>🔥</span></div>
             <div className="pt-sval" style={{color:'#14b8a6'}}>3</div><div className="pt-sdesc">counts toward DPM score</div>
           </div>
         </div>
@@ -114,7 +116,7 @@ export default function PracticeTracking() {
         <div className="pt-modal">
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
             <span style={{fontSize:18,fontWeight:700}}>Log Practice Session</span>
-            <button style={{background:'none',border:'none',color:'#9ca3af',cursor:'pointer',fontSize:20}} onClick={()=>setShowModal(false)}>✕</button>
+            <button style={{background:'none',border:'none',color:'#9ca3af',cursor:'pointer',fontSize: mob ? 16 : 20}} onClick={()=>setShowModal(false)}>✕</button>
           </div>
           <div className="pt-form-group"><label className="pt-form-label">Practice Date *</label><input type="date" className="pt-form-input" defaultValue="2026-02-25"/></div>
           <div className="pt-form-group"><label className="pt-form-label">Practice Type *</label>
