@@ -63,7 +63,7 @@ export default function Login() {
         <div style={S.laserRing2} />
         <div style={S.logoRadialGlow} />
         <div style={S.logoCircle}>
-          <video src="/logo-anim.mp4" autoPlay loop muted playsInline style={{ width: '75%', height: '75%', objectFit: 'contain', borderRadius: '50%' }} />
+          <video src="/logo-anim.mp4" autoPlay loop muted playsInline style={{ width: '90%', height: '90%', objectFit: 'contain', borderRadius: '50%' }} />
         </div>
       </div>
 
@@ -149,11 +149,11 @@ const S = {
   glowTop: { position: 'absolute', top: -200, left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse,rgba(168,85,247,.15) 0%,transparent 70%)', pointerEvents: 'none' },
   glowBottom: { position: 'absolute', bottom: -100, left: '50%', transform: 'translateX(-50%)', width: 800, height: 300, background: 'radial-gradient(ellipse,rgba(59,130,246,.08) 0%,transparent 70%)', pointerEvents: 'none' },
   glowLeft: { position: 'absolute', top: '30%', left: -100, width: 400, height: 400, background: 'radial-gradient(circle,rgba(217,70,239,.06) 0%,transparent 70%)', pointerEvents: 'none' },
-  logoWrapper: { position: 'relative', marginBottom: 24, width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  laserRing1: { position: 'absolute', top: '50%', left: '50%', width: 125, height: 125, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#d946ef', borderRightColor: '#a855f7', animation: 'laserSpin 3s linear infinite', filter: 'drop-shadow(0 0 8px rgba(217,70,239,.6)) drop-shadow(0 0 20px rgba(168,85,247,.3))' },
-  laserRing2: { position: 'absolute', top: '50%', left: '50%', width: 135, height: 135, borderRadius: '50%', border: '1px solid transparent', borderBottomColor: '#06b6d4', borderLeftColor: '#8b5cf6', animation: 'laserSpin 5s linear infinite reverse', filter: 'drop-shadow(0 0 6px rgba(6,182,212,.4)) drop-shadow(0 0 15px rgba(139,92,246,.2))' },
-  logoRadialGlow: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 170, height: 170, borderRadius: '50%', background: 'radial-gradient(circle,rgba(168,85,247,.3) 0%,rgba(139,92,246,.1) 40%,transparent 70%)', filter: 'blur(15px)', pointerEvents: 'none', animation: 'glowPulse 4s ease-in-out infinite' },
-  logoCircle: { position: 'relative', width: 110, height: 110, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(168,85,247,.3),0 0 80px rgba(168,85,247,.15)', overflow: 'hidden', zIndex: 2 },
+  logoWrapper: { position: 'relative', marginBottom: 24, width: 170, height: 170, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  laserRing1: { position: 'absolute', top: '50%', left: '50%', width: 145, height: 145, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#d946ef', borderRightColor: '#a855f7', animation: 'laserSpin 3s linear infinite', filter: 'drop-shadow(0 0 8px rgba(217,70,239,.6)) drop-shadow(0 0 20px rgba(168,85,247,.3))' },
+  laserRing2: { position: 'absolute', top: '50%', left: '50%', width: 155, height: 155, borderRadius: '50%', border: '1px solid transparent', borderBottomColor: '#06b6d4', borderLeftColor: '#8b5cf6', animation: 'laserSpin 5s linear infinite reverse', filter: 'drop-shadow(0 0 6px rgba(6,182,212,.4)) drop-shadow(0 0 15px rgba(139,92,246,.2))' },
+  logoRadialGlow: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 190, height: 190, borderRadius: '50%', background: 'radial-gradient(circle,rgba(168,85,247,.3) 0%,rgba(139,92,246,.1) 40%,transparent 70%)', filter: 'blur(15px)', pointerEvents: 'none', animation: 'glowPulse 4s ease-in-out infinite' },
+  logoCircle: { position: 'relative', width: 130, height: 130, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(168,85,247,.3),0 0 80px rgba(168,85,247,.15)', overflow: 'hidden', zIndex: 2 },
   appTitle: { fontSize: 34, fontWeight: 700, marginBottom: 4, letterSpacing: -.5, textAlign: 'center', animation: 'fadeInUp .6s ease-out' },
   accent: { color: '#d946ef', textShadow: '0 0 30px rgba(217,70,239,.3)' },
   tagline: { color: 'rgba(255,255,255,.45)', fontSize: 14, marginBottom: 32, letterSpacing: 2, textAlign: 'center', textTransform: 'uppercase', animation: 'fadeInUp .6s ease-out .1s both' },
