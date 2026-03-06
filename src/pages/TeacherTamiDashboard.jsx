@@ -16,10 +16,10 @@ const STUDENTS = [
 const WYL_COLORS = { Auditory:'#a78bfa', Visual:'#2dd4bf', Kinesthetic:'#fbbf24', Reading:'#f97316' }
 
 const TAMI_INSIGHTS = [
-  { icon:'â ï¸', color:'#f87171', bg:'rgba(220,38,38,0.1)', border:'rgba(220,38,38,0.25)', title:'Emma Rodriguez needs intervention', body:'No practice in 14 days. Drive score dropped 12 points. Recommend immediate parent contact.' },
-  { icon:'ð¯', color:'#fbbf24', bg:'rgba(234,179,8,0.08)', border:'rgba(234,179,8,0.2)', title:'Tyler Kim â motivation breakthrough possible', body:'Passion score is rising despite low practice. Try game-mode challenges to convert interest into action.' },
-  { icon:'ð', color:'#34d399', bg:'rgba(6,95,70,0.1)', border:'rgba(6,95,70,0.25)', title:'Luna Chen ready for advanced material', body:'Consistently exceeds practice goals by 20%+. DPM at 92. Consider level acceleration.' },
-  { icon:'ð', color:'#2dd4bf', bg:'rgba(45,212,191,0.08)', border:'rgba(45,212,191,0.2)', title:'Class WYL profile â mostly Kinesthetic', body:'7 of 24 students learn best through doing. Increase hands-on exercises and ear training games.' },
+  { icon:'⚠️', color:'#f87171', bg:'rgba(220,38,38,0.1)', border:'rgba(220,38,38,0.25)', title:'Emma Rodriguez needs intervention', body:'No practice in 14 days. Drive score dropped 12 points. Recommend immediate parent contact.' },
+  { icon:'🎯', color:'#fbbf24', bg:'rgba(234,179,8,0.08)', border:'rgba(234,179,8,0.2)', title:'Tyler Kim — motivation breakthrough possible', body:'Passion score is rising despite low practice. Try game-mode challenges to convert interest into action.' },
+  { icon:'🚀', color:'#34d399', bg:'rgba(6,95,70,0.1)', border:'rgba(6,95,70,0.25)', title:'Luna Chen ready for advanced material', body:'Consistently exceeds practice goals by 20%+. DPM at 92. Consider level acceleration.' },
+  { icon:'📊', color:'#2dd4bf', bg:'rgba(45,212,191,0.08)', border:'rgba(45,212,191,0.2)', title:'Class WYL profile — mostly Kinesthetic', body:'7 of 24 students learn best through doing. Increase hands-on exercises and ear training games.' },
 ]
 
 const WEEKLY_DPM = [
@@ -59,16 +59,16 @@ export default function TeacherTamiDashboard() {
         .hover-row:hover { background:rgba(255,255,255,0.025) !important; cursor:pointer; }
       `}</style>
 
-      {/* ââ HEADER ââ */}
+      {/* ── HEADER ── */}
       <div style={{ background:'#0d1525', borderBottom:'1px solid rgba(255,255,255,0.07)', padding:'8px 20px', display:'flex', alignItems:'center', gap:10, position:'sticky', top:0, zIndex:200, flexWrap:'wrap' }}>
-        <div style={{ color:'#9ca3af', cursor:'pointer', fontSize:16 }} onClick={() => navigate('/teacher')}>â</div>
+        <div style={{ color:'#9ca3af', cursor:'pointer', fontSize:16 }} onClick={() => navigate('/teacher')}>←</div>
         <div style={{ width:40, height:40, borderRadius:'50%', background:'linear-gradient(135deg,#e84b8a,#f97316)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:800, color:'#fff', flexShrink:0, animation:'tamiGlow 3s ease infinite' }}>T</div>
         <div>
           <div style={{ fontSize:14, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', gap:6 }}>
             TAMi Dashboard
             <span style={{ fontSize:9, fontWeight:600, background:'linear-gradient(90deg,rgba(232,75,138,0.2),rgba(249,115,22,0.2))', color:'#f97316', padding:'2px 7px', borderRadius:4, border:'1px solid rgba(249,115,22,0.3)' }}>TEACHER AI</span>
           </div>
-          <div style={{ fontSize:10, color:'#6b7280', marginTop:1 }}>Prof. J. Motes Â· Piano &amp; Theory</div>
+          <div style={{ fontSize:10, color:'#6b7280', marginTop:1 }}>Prof. J. Motes · Piano &amp; Theory</div>
         </div>
         <div style={{ flex:1 }} />
         <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:11, color:'#34d399' }}>
@@ -78,16 +78,16 @@ export default function TeacherTamiDashboard() {
         <div
           onClick={() => navigate('/teacher')}
           style={{ padding:'6px 14px', borderRadius:8, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#9ca3af', fontSize:11, fontWeight:600, cursor:'pointer' }}
-        >â Teacher Dash</div>
+        >← Teacher Dash</div>
       </div>
 
-      {/* ââ PAGE ââ */}
+      {/* ── PAGE ── */}
       <div style={{ padding:20, maxWidth: mob ? '100%' : 1400, margin:'0 auto' }}>
 
         {/* ALERT BANNER */}
         <div style={{ background:'rgba(220,38,38,0.1)', border:'1px solid rgba(220,38,38,0.25)', borderRadius:10, padding:'10px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:10, animation:'fu .3s ease both' }}>
-          <span style={{ fontSize:16 }}>ð¨</span>
-          <span style={{ fontSize:12, color:'#f87171', fontWeight:600 }}>3 students are in Critical status â Emma Rodriguez hasn&apos;t practiced in 14 days</span>
+          <span style={{ fontSize:16 }}>🚨</span>
+          <span style={{ fontSize:12, color:'#f87171', fontWeight:600 }}>3 students are in Critical status — Emma Rodriguez hasn&apos;t practiced in 14 days</span>
           <button style={{ marginLeft:'auto', padding:'4px 12px', borderRadius:6, border:'1px solid rgba(220,38,38,0.4)', background:'rgba(220,38,38,0.2)', color:'#f87171', fontSize:11, fontWeight:600, cursor:'pointer' }}>Draft Parent Messages</button>
         </div>
 
@@ -125,7 +125,7 @@ export default function TeacherTamiDashboard() {
 
           {/* Weekly DPM Chart */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:18 }}>
-            <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>ð Class DPM This Week</div>
+            <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>📈 Class DPM This Week</div>
             <div style={{ fontSize:10, color:'#6b7280', marginBottom:16 }}>Average across all 24 students</div>
             <div style={{ display:'flex', alignItems:'flex-end', gap:8, height:100 }}>
               {WEEKLY_DPM.map((d, i) => (
@@ -152,7 +152,7 @@ export default function TeacherTamiDashboard() {
         {/* TAMi INSIGHTS */}
         <div style={{ marginBottom:14, animation:'fu .3s ease .1s both' }}>
           <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:10, display:'flex', alignItems:'center', gap:8 }}>
-            ð§  TAMi Insights
+            🧠 TAMi Insights
             <span style={{ fontSize:10, color:'#6b7280', background:'rgba(255,255,255,0.05)', padding:'2px 8px', borderRadius:8 }}>4 this week</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:10 }}>
@@ -171,7 +171,7 @@ export default function TeacherTamiDashboard() {
         {/* STUDENT FOCUS LIST */}
         <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden', marginBottom:14, animation:'fu .3s ease .15s both' }}>
           <div style={{ padding:'11px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)', fontSize:13, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            ð Student Focus â Priority Cases
+            🎓 Student Focus — Priority Cases
             <span style={{ fontSize:10, color:'#6b7280' }}>Click row for details</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'2fr 0.6fr 0.6fr 0.6fr 0.8fr 0.8fr 0.8fr', padding:'7px 16px', fontSize:10, fontWeight:600, color:'#6b7280', textTransform:'uppercase', letterSpacing:0.5, background:'rgba(255,255,255,0.01)' }}>
@@ -180,7 +180,7 @@ export default function TeacherTamiDashboard() {
           {STUDENTS.map(s => {
             const isActive = activeStudent === s.id
             const statusColors = { critical:'#f87171', atrisk:'#fb923c', watch:'#facc15', ontrack:'#34d399' }
-            const statusLabels = { critical:'â  Critical', atrisk:'ð At Risk', watch:'ð Watch', ontrack:'â On Track' }
+            const statusLabels = { critical:'⚠ Critical', atrisk:'🔔 At Risk', watch:'👀 Watch', ontrack:'✓ On Track' }
             return (
               <div key={s.id}>
                 <div
@@ -244,8 +244,8 @@ export default function TeacherTamiDashboard() {
                         {s.status === 'ontrack'  && `Excellent progress! Consider introducing advanced material or leadership opportunities.`}
                       </div>
                       <div style={{ display:'flex', gap:6, marginTop:10 }}>
-                        <button style={{ flex:1, padding:'6px', borderRadius:7, border:'1px solid rgba(232,75,138,0.3)', background:'rgba(232,75,138,0.1)', color:'#e84b8a', fontSize:10, fontWeight:600, cursor:'pointer' }}>ð¬ Message</button>
-                        <button style={{ flex:1, padding:'6px', borderRadius:7, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'#9ca3af', fontSize:10, fontWeight:600, cursor:'pointer' }}>ð Full Profile</button>
+                        <button style={{ flex:1, padding:'6px', borderRadius:7, border:'1px solid rgba(232,75,138,0.3)', background:'rgba(232,75,138,0.1)', color:'#e84b8a', fontSize:10, fontWeight:600, cursor:'pointer' }}>💬 Message</button>
+                        <button style={{ flex:1, padding:'6px', borderRadius:7, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'#9ca3af', fontSize:10, fontWeight:600, cursor:'pointer' }}>📊 Full Profile</button>
                       </div>
                     </div>
                   </div>
@@ -260,13 +260,13 @@ export default function TeacherTamiDashboard() {
 
           {/* WYL Profile */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:18 }}>
-            <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>ð§© WYL Learning Profiles</div>
+            <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>🧩 WYL Learning Profiles</div>
             <div style={{ fontSize:10, color:'#6b7280', marginBottom:14 }}>How your students learn best</div>
             {[
-              { type:'Kinesthetic', count:9, pct:37, color:'#fbbf24', desc:'Learn by doing â prefer practice & games' },
-              { type:'Auditory',    count:7, pct:29, color:'#a78bfa', desc:'Learn by listening â prefer play-along' },
-              { type:'Visual',      count:5, pct:21, color:'#2dd4bf', desc:'Learn by seeing â prefer notation & video' },
-              { type:'Reading',     count:3, pct:13, color:'#f97316', desc:'Learn by reading â prefer written theory' },
+              { type:'Kinesthetic', count:9, pct:37, color:'#fbbf24', desc:'Learn by doing — prefer practice & games' },
+              { type:'Auditory',    count:7, pct:29, color:'#a78bfa', desc:'Learn by listening — prefer play-along' },
+              { type:'Visual',      count:5, pct:21, color:'#2dd4bf', desc:'Learn by seeing — prefer notation & video' },
+              { type:'Reading',     count:3, pct:13, color:'#f97316', desc:'Learn by reading — prefer written theory' },
             ].map((w, i) => (
               <div key={i} style={{ marginBottom:12 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, marginBottom:3 }}>
@@ -283,7 +283,7 @@ export default function TeacherTamiDashboard() {
 
           {/* Practice Analytics */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:18 }}>
-            <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>ðµ Practice Analytics</div>
+            <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>🎵 Practice Analytics</div>
             <div style={{ fontSize:10, color:'#6b7280', marginBottom:14 }}>This week across all students</div>
             <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:10, marginBottom:14 }}>
               {[
@@ -299,7 +299,7 @@ export default function TeacherTamiDashboard() {
               ))}
             </div>
             <div style={{ padding:'10px 12px', background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)', borderRadius:8 }}>
-              <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, marginBottom:2 }}>ð¤ TAMi Analysis</div>
+              <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, marginBottom:2 }}>🤖 TAMi Analysis</div>
               <div style={{ fontSize:11, color:'#9ca3af', lineHeight:1.5 }}>Practice rate improved 12% vs last week. Ear training game sessions correlate with 23% higher DPM scores.</div>
             </div>
           </div>
