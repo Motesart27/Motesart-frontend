@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 const css = `
 .hw-page{min-height:100vh;background:linear-gradient(135deg,#111827,#111827,#1f2937);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
@@ -79,6 +80,7 @@ const SHEETS = [
 ]
 
 export default function HomeworkDashboard() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('assignments')
   const [filter, setFilter] = useState('all')
@@ -121,7 +123,7 @@ export default function HomeworkDashboard() {
             </div></div>}
             {activeTab==='classroom' && <div className="hw-card"><div className="hw-card-h"><span className="hw-card-t">Classroom</span></div><div className="hw-card-b">
               <div style={{padding:16,borderRadius:12,border:'1px solid rgba(147,51,234,.3)',background:'linear-gradient(135deg,rgba(88,28,135,.3),rgba(131,24,67,.3))',display:'flex',alignItems:'center',gap:16,marginBottom:24}}>
-                <div style={{width:56,height:56,borderRadius:'50%',background:'linear-gradient(135deg,#a855f7,#ec4899)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:700,flexShrink:0}}>J</div>
+                <div style={{width:56,height:56,borderRadius:'50%',background:'linear-gradient(135deg,#a855f7,#ec4899)',display:'flex',alignItems:'center',justifyContent:'center',fontSize: mob ? 16 : 20,fontWeight:700,flexShrink:0}}>J</div>
                 <div style={{flex:1}}><div style={{fontSize:16,fontWeight:700}}>Ms. Johnson</div><div style={{fontSize:13,color:'#9ca3af'}}>Music Theory 101</div></div>
                 <button style={{padding:'8px 16px',background:'#9333ea',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>💬 Message</button>
               </div>
