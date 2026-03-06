@@ -69,15 +69,14 @@ function TopNav() {
       <div className="nav-right">
         <span
           className="nav-user"
-          onClick={() => { logout(); navigate('/'); }}
-          style={{ cursor: 'pointer' }}
-          title="Click to logout"
+          style={{ cursor: 'default' }}
         >
-          Motesart {'\u00B7'} All Roles
+          {user?.name || 'User'} {'\u00B7'} All Roles
         </span>
-        <div className="bell">
-          {'\uD83D\uDD14'}<div className="bell-badge">4</div>
-        </div>
+        <button
+            onClick={() => { logout(); navigate('/'); }}
+            style={{ padding: '4px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", whiteSpace: 'nowrap' }}
+          >Logout</button>
       </div>
     </div>
   );
@@ -89,15 +88,16 @@ function TopNav() {
 // ═══════════════════════════════════════════════════════════════
 function ProfileHeader() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <div className="profile-header">
       <div className="back-btn" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>{'\u2190'}</div>
       <div className="p-avatar" style={{ overflow: 'hidden' }}>
-        <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+        <img src={user?.avatar || motesartAvatar} alt={user?.name || "User"} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
       </div>
       <div style={{ flex: 1 }}>
-        <div className="p-name">Motesart</div>
+        <div className="p-name">{user?.name || 'User'}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
           <span className="badge-admin">ADMIN</span>
         </div>
