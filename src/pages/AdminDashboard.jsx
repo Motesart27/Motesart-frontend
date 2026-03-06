@@ -122,6 +122,7 @@ function ProfileHeader() {
 // HERO SECTION
 // ═══════════════════════════════════════════════════════════════
 function HeroSection() {
+  const { user } = useAuth();
 
   const stats = [
     { value: '142', color: '#3b82f6', label: 'Total Signups' },
@@ -133,7 +134,7 @@ function HeroSection() {
   return (
     <div className="hero">
       <div className="hero-left">
-        <div className="hero-greeting">Good afternoon, Motesart {'\uD83C\uDF89'}</div>
+        <div className="hero-greeting">Good afternoon, {user?.name || 'User'} {'\uD83C\uDF89'}</div>
         <div className="ref-row">
           <span className="ref-label">Platform code:</span>
           <span className="ref-code" style={{ color: '#4ade80', borderColor: 'rgba(74,222,128,0.45)' }}>SOM-ADMIN</span>
