@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 const css = `
 .settings-page{min-height:100vh;background:#0d0f1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff}
@@ -44,6 +45,7 @@ const css = `
 `
 
 export default function SettingsPage() {
+  const mob = useIsMobile()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [contactMethod, setContactMethod] = useState('phone')
@@ -59,7 +61,7 @@ export default function SettingsPage() {
       <div className="set-header">
         <div className="set-header-left">
           <button className="set-back" onClick={()=>navigate('/dashboard')}>‹</button>
-          <h1 style={{fontSize:20,fontWeight:700}}>Settings</h1>
+          <h1 style={{fontSize: mob ? 16 : 20,fontWeight:700}}>Settings</h1>
         </div>
         <button className="set-logout" onClick={()=>{logout();navigate('/login')}}>Logout</button>
       </div>
