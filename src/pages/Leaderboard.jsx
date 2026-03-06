@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 const leaders = [
   { rank:1, name:'Renee', level:8, streak:14, points:'12,840', badge:'👑 Ambassador', badgeBg:'linear-gradient(135deg,#a855f7,#ec4899)', av:'R', avBg:'linear-gradient(135deg,#a855f7,#ec4899)' },
@@ -16,6 +17,7 @@ const leaders = [
 ]
 
 export default function Leaderboard() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
   const [timeFilter, setTimeFilter] = useState('All Time')
   const [scopeFilter, setScopeFilter] = useState('Global')
@@ -42,7 +44,7 @@ export default function Leaderboard() {
         {/* User Card */}
         <div style={{ marginBottom:24, padding:16, background:'linear-gradient(135deg,rgba(19,78,74,.4),rgba(22,78,99,.4))', border:'1px solid rgba(20,184,166,.3)', borderRadius:16, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:16 }}>
-            <div style={{ width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#14b8a6,#06b6d4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, fontWeight:700, border:'2px solid rgba(20,184,166,.5)' }}>M</div>
+            <div style={{ width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#14b8a6,#06b6d4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: mob ? 17 : 22, fontWeight:700, border:'2px solid rgba(20,184,166,.5)' }}>M</div>
             <div><div style={{ fontSize:18, fontWeight:700 }}>Motesart</div><div style={{ fontSize:13, color:'#5eead4' }}>Your Position</div></div>
           </div>
           <div><div style={{ fontSize:30, fontWeight:700, textAlign:'right' }}>#4</div><div style={{ fontSize:13, color:'#9ca3af' }}>8,450 pts</div></div>
