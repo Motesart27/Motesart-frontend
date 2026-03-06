@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate } from 'react-router-dom'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
@@ -106,7 +107,7 @@ function Piano({ keys, octaves, pressed, onKeyPress }) {
 
   return (
     <div style={{
-      width:'100%', maxWidth:960, position:'relative', height:150,
+      width:'100%', maxWidth: mob ? '100%' : 960, position:'relative', height: mob ? 110 : 150,
       background:'linear-gradient(180deg,#1a2744,#0f172a)',
       borderRadius:'0 0 12px 12px',
       border:'2px solid #2d3f5e',
@@ -218,7 +219,7 @@ function playTone(freq, dur = 0.5) {
 const css = `
 .gp{min-height:100vh;background:linear-gradient(180deg,#0f172a,#1e293b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column}
 .gp-top{padding:8px 12px;background:rgba(15,23,42,.98);border-bottom:2px solid rgba(59,130,246,.3);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
-.gp-top-inner{max-width:1024px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.gp-top-inner{max-width: mob ? '100%' : 1024px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .gp-pill-pts{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid rgba(234,179,8,.3);background:linear-gradient(135deg,rgba(234,179,8,.2),rgba(234,179,8,.1));color:#fbbf24}
 .gp-lives{display:flex;gap:2px;font-size:16px}
 .gp-bpm{background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;border:none;border-radius:9999px;padding:4px 10px;font-size:12px;font-weight:700}
@@ -231,7 +232,7 @@ const css = `
 .gp-prog-bar{width:64px;height:10px;background:#374151;border-radius:9999px;overflow:hidden;border:1px solid #4b5563}
 .gp-prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7);border-radius:9999px;transition:width .3s}
 .gp-mid{padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px}
-.gp-staff-wrap{width:100%;max-width:640px;background:rgba(30,41,59,.8);border:2px solid rgba(100,116,139,.4);border-radius:12px;padding:16px 12px 10px}
+.gp-staff-wrap{width:100%;max-width: mob ? '100%' : 640px;background:rgba(30,41,59,.8);border:2px solid rgba(100,116,139,.4);border-radius:12px;padding:16px 12px 10px}
 .gp-staff-outer{position:relative;height:130px}
 .gp-staff-line{position:absolute;left:52px;right:8px;height:2px;background:rgba(148,163,184,.5);border-radius:1px}
 .gp-ledger{position:absolute;height:2px;background:rgba(148,163,184,.5);border-radius:1px;width:26px}
@@ -266,7 +267,7 @@ const css = `
 .gp-lvl-badge{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border-radius:10px;padding:8px 14px;text-align:center;box-shadow:0 4px 12px rgba(37,99,235,.3)}
 .gp-lvl-num{font-size:24px;font-weight:900}
 .gp-lvl-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
-.gp-piano-wrap{width:100%;max-width:960px;padding:0 4px}
+.gp-piano-wrap{width:100%;max-width: mob ? '100%' : 960px;padding:0 4px}
 .gp-answer{background:rgba(30,41,59,.8);border:1px solid rgba(59,130,246,.3);border-radius:8px;padding:6px 16px;display:flex;align-items:center;gap:8px}
 .gp-footer{padding:8px 12px;border-top:1px solid #1e293b;background:rgba(15,23,42,.95);display:flex;justify-content:center;gap:8px}
 .gp-fbtn{padding:6px 16px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
@@ -276,10 +277,10 @@ const css = `
 .gp-modal-bg.show{display:flex}
 .gp-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)}
 .gp-modal{position:relative;border-radius:16px;width:100%;max-height:90vh;overflow-y:auto}
-.gp-htp{background:#1e293b;border:1px solid #334155;max-width:448px;padding:24px;color:#e2e8f0}
+.gp-htp{background:#1e293b;border:1px solid #334155;max-width: mob ? '100%' : 448px;padding:24px;color:#e2e8f0}
 .gp-htp-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
 .gp-htp-badge{width:28px;height:28px;border-radius:6px;background:#334155;color:#e2e8f0;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.gp-go-modal{background:#1e293b;border:1px solid #334155;max-width:440px;padding:28px;text-align:center}
+.gp-go-modal{background:#1e293b;border:1px solid #334155;max-width: mob ? '100%' : 440px;padding:28px;text-align:center}
 .gp-go-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .gp-go-stat{background:rgba(31,41,55,.5);border:1px solid rgba(55,65,81,.5);border-radius:10px;padding:12px;text-align:center}
 .gp-go-actions{display:flex;gap:8px;margin-top:4px}
@@ -332,6 +333,7 @@ function Confetti() {
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function GamePage() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
   const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 
@@ -650,9 +652,9 @@ export default function GamePage() {
           <Confetti />
           <div className="gp-levelup-overlay">
             <div className="gp-levelup-card">
-              <div style={{fontSize:52,marginBottom:4}}>🎉</div>
+              <div style={{fontSize: mob ? 32 : 52,marginBottom:4}}>🎉</div>
               <div style={{fontSize:13,fontWeight:700,color:'#fbbf24',textTransform:'uppercase',letterSpacing:2,marginBottom:8}}>Level Up!</div>
-              <div style={{fontSize:48,fontWeight:900,background:'linear-gradient(135deg,#fbbf24,#f97316)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:4}}>
+              <div style={{fontSize: mob ? 28 : 48,fontWeight:900,background:'linear-gradient(135deg,#fbbf24,#f97316)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:4}}>
                 {pendingLevel}
               </div>
               <div style={{fontSize:14,color:'#94a3b8',marginBottom:20}}>
@@ -670,7 +672,7 @@ export default function GamePage() {
               </div>
               <button
                 onClick={dismissLevelUp}
-                style={{width:'100%',padding:14,border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',background:'linear-gradient(135deg,#fbbf24,#f97316)',color:'#fff',boxShadow:'0 4px 16px rgba(251,191,36,.4)'}}
+                style={{width:'100%',padding:14,border:'none',borderRadius:12,fontSize: mob ? 13 : 15,fontWeight:700,cursor:'pointer',background:'linear-gradient(135deg,#fbbf24,#f97316)',color:'#fff',boxShadow:'0 4px 16px rgba(251,191,36,.4)'}}
               >
                 Let's Go! 🎹
               </button>
@@ -698,7 +700,7 @@ export default function GamePage() {
           <div className={`gp-streak-ring ${streak > 0 ? 'animated' : ''}`}
             style={{borderColor:streakStyle.border, background:streakStyle.bg, color:streakStyle.color}}>
             {streakStyle.emoji && <span className="gp-streak-emoji">{streakStyle.emoji}</span>}
-            <span style={{fontSize:17,fontWeight:900}}>{streak}</span>
+            <span style={{fontSize: mob ? 14 : 17,fontWeight:900}}>{streak}</span>
             <span style={{fontSize:7,fontWeight:700,textTransform:'uppercase',letterSpacing:1}}>Streak</span>
           </div>
           {streakStyle.label && <div className="gp-streak-label" style={{color:streakStyle.color}}>{streakStyle.label}</div>}
@@ -793,7 +795,7 @@ export default function GamePage() {
             <div className="gp-lvl-lbl">Level</div>
           </div>
           <div>
-            <div style={{fontSize:15,fontWeight:700}}>C Major Scale</div>
+            <div style={{fontSize: mob ? 13 : 15,fontWeight:700}}>C Major Scale</div>
             <div style={{fontSize:11,color:'#64748b'}}>Tap the keys to answer</div>
           </div>
         </div>
@@ -810,7 +812,7 @@ export default function GamePage() {
         {answers.length > 0 && (
           <div className="gp-answer">
             <span style={{fontSize:12,fontWeight:600,color:'#60a5fa'}}>Your answer:</span>
-            <span style={{fontSize:15,fontFamily:'monospace',fontWeight:700,color:'#93c5fd'}}>
+            <span style={{fontSize: mob ? 13 : 15,fontFamily:'monospace',fontWeight:700,color:'#93c5fd'}}>
               {answers.map(i => SCALE_NOTES[i % 8].name).join(' → ')}
             </span>
           </div>
@@ -846,7 +848,7 @@ export default function GamePage() {
             <h3 style={{fontWeight:700,marginBottom:8,fontSize:14,color:'#f87171'}}>❤️ Lives</h3>
             <p style={{fontSize:13,color:'#fca5a5',margin:0,lineHeight:1.5}}>Start with 3 lives. Wrong answers cost 1 life. Game over at 0! Get a 5-streak to recover a life (cap: 6).</p>
           </div>
-          <button style={{width:'100%',padding:14,border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',background:'linear-gradient(135deg,#3b82f6,#a855f7)',color:'#fff'}} onClick={()=>setShowHtp(false)}>
+          <button style={{width:'100%',padding:14,border:'none',borderRadius:12,fontSize: mob ? 13 : 15,fontWeight:700,cursor:'pointer',background:'linear-gradient(135deg,#3b82f6,#a855f7)',color:'#fff'}} onClick={()=>setShowHtp(false)}>
             Got it! Let's Play 🎹
           </button>
         </div>
