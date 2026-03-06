@@ -61,7 +61,7 @@ export const ProfileHeader = ({ onTamiClick }) => {
     <div className="profile-header">
       <div className="back-btn" onClick={() => window.history.back()}>←</div>
       <div style={{ flex: 1 }}>
-        <div className="p-name"{user?.name || 'User'}t</div>
+        <div className="p-name">{user?.name || 'User'}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
           <span className="badge-amb">AMBASSADOR</span>
           <span className="badge-musician">🎵 Musician</span>
