@@ -203,3 +203,24 @@ body { background: #12102a; font-family: 'DM Sans', sans-serif; color: #fff; min
 /* GRID LAYOUTS */
 .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .topnav { padding: 0 12px; height: 48px; }
+  .topnav .nav-tabs { gap: 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .topnav .nav-tabs button { font-size: 11px; padding: 6px 8px; white-space: nowrap; }
+  .stats-row { grid-template-columns: 1fr 1fr !important; }
+  .risk-row { grid-template-columns: 1fr 1fr !important; }
+  .grid-2col { grid-template-columns: 1fr !important; }
+  .grid-3col { grid-template-columns: 1fr !important; }
+  .card-base { padding: 12px; }
+  .admin-content { padding: 12px !important; }
+  .admin-main { padding-top: 52px; }
+  body { overflow-x: hidden; }
+}
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr !important; }
+  .risk-row { grid-template-columns: 1fr !important; }
+  .topnav .nav-tabs button { font-size: 10px; padding: 4px 6px; }
+}
