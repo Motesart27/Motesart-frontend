@@ -64,16 +64,20 @@ export default function RegistrationPage() {
   const [role, setRole] = useState('Student')
   const [avatar, setAvatar] = useState(0)
   const [exp, setExp] = useState('Beginner')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   const dots = Array.from({length:7}).map((_,i) => i < step ? 'done' : i === step ? 'active' : 'inactive')
   const go = (dir) => setStep(s => Math.max(0, Math.min(6, s + dir)))
 
   const finish = async () => {
     try {
-      const user = await api.register({ name:'New User', email:'user@example.com', role })
+      const user = await api.register({ name: `${firstName} ${lastName}`.trim() || 'New User', email: email || 'user@example.com', role, avatar: AVATARS[avatar]?.emoji || '' })
       login(user)
     } catch {
-      login({ name:'New User', email:'user@example.com', role })
+      login({ name: `${firstName} ${lastName}`.trim() || 'New User', email: email || 'user@example.com', role, avatar: AVATARS[avatar]?.emoji || '' })
     }
     navigate('/dashboard')
   }
@@ -91,9 +95,9 @@ export default function RegistrationPage() {
 
         {step===0 && <>
           <div className="reg-step-title">Set up your profile</div><div className="reg-step-sub">Tell us a bit about yourself</div>
-          <div className="reg-field-row"><div className="reg-field"><label>First Name *</label><input placeholder="John"/></div><div className="reg-field"><label>Last Name *</label><input placeholder="Doe"/></div></div>
-          <div className="reg-field"><label>Email *</label><input placeholder="you@email.com"/></div>
-          <div className="reg-field"><label>Password *</label><input type="password" placeholder="Create a password"/></div>
+          <div className="reg-field-row"><div className="reg-field"><label>First Name *</label><input placeholder="John" value={firstName} onChange={e=>setFirstName(e.target.value)}/></div><div className="reg-field"><label>Last Name *</label><input placeholder="Doe" value={lastName} onChange={e=>setLastName(e.target.value)}/></div></div>
+          <div className="reg-field"><label>Email *</label><input placeholder="you@email.com" value={email} onChange={e=>setEmail(e.target.value)}/></div>
+          <div className="reg-field"><label>Password *</label><input type="password" placeholder="Create a password" value={password} onChange={e=>setPassword(e.target.value)}/></div>
           <button className="reg-btn reg-btn-p" style={{width:'100%',marginTop:6}} onClick={()=>go(1)}>Continue â</button>
         </>}
 
