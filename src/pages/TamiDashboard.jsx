@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 export default function TamiDashboard() {
+  const mob = useIsMobile()
   const { user } = useAuth()
   const navigate = useNavigate()
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
@@ -34,10 +36,10 @@ export default function TamiDashboard() {
       </div>
 
       {/* MAIN */}
-      <div style={{ maxWidth:1280, margin:'0 auto', padding:16, display:'flex', flexDirection:'column', gap:12 }}>
+      <div style={{ maxWidth: mob ? '100%' : 1280, margin:'0 auto', padding:16, display:'flex', flexDirection:'column', gap:12 }}>
 
         {/* Row 1: DPM + WYL */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+        <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12 }}>
           <TCard title="DPM Breakdown">
             <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:24, flexWrap:'wrap' }}>
               <div style={{ position:'relative' }}>
@@ -46,7 +48,7 @@ export default function TamiDashboard() {
                   <circle cx="50" cy="50" r="42" fill="none" stroke="#14b8a6" strokeWidth="8" strokeDasharray="263.9" strokeDashoffset="240" strokeLinecap="round" transform="rotate(-90 50 50)"/>
                 </svg>
                 <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center' }}>
-                  <div style={{ fontSize:22, fontWeight:800 }}>9%</div>
+                  <div style={{ fontSize: mob ? 18 : 22, fontWeight:800 }}>9%</div>
                   <div style={{ fontSize:10, color:'#9ca3af' }}>Overall</div>
                 </div>
               </div>
@@ -67,7 +69,7 @@ export default function TamiDashboard() {
                 ))}
               </div>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginTop:16, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)', textAlign:'center' }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : 'repeat(4,1fr)', gap:8, marginTop:16, paddingTop:12, borderTop:'1px solid rgba(55,65,81,0.5)', textAlign:'center' }}>
               {[{v:'0',l:'Days Practiced'},{v:'1',l:'Game Sessions'},{v:'0%',l:'Homework Done'},{v:'9%',l:'Overall DPM'}].map(s => (
                 <div key={s.l}><div style={{ fontSize:16, fontWeight:700, color:'#14b8a6' }}>{s.v}</div><div style={{ fontSize:9, color:'#9ca3af', marginTop:2 }}>{s.l}</div></div>
               ))}
@@ -75,7 +77,7 @@ export default function TamiDashboard() {
           </TCard>
 
           <TCard title="WYL Profile · Way You Learn">
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12 }}>
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {[{l:'Kinesthetic',v:90,badge:'Primary',c:'#f97316'},{l:'Auditory',v:75,badge:'Strong',c:'#14b8a6'},{l:'Visual',v:60,badge:'Active',c:'#3b82f6'},{l:'Reading/Writing',v:20,badge:'Low',c:'#6b7280',dim:true}].map(w => (
                   <div key={w.l} style={{ opacity: w.dim ? 0.5 : 1 }}>
@@ -109,9 +111,9 @@ export default function TamiDashboard() {
         </div>
 
         {/* Row 2: Practice + Game */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+        <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12 }}>
           <TCard title="Practice Analytics">
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginBottom:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr 1fr', gap:8, marginBottom:12 }}>
               {[{l:'This Week',v:'0 min',sub:'0 sessions'},{l:'Weekly Goal',v:'60 min',sub:'0% complete'},{l:'Streak',v:'0 days',sub:'Best: 0'}].map(s => (
                 <div key={s.l} style={{ textAlign:'center', padding:10, background:'rgba(55,65,81,0.3)', borderRadius:8 }}>
                   <div style={{ fontSize:9, color:'#9ca3af', marginBottom:4 }}>{s.l}</div>
@@ -132,7 +134,7 @@ export default function TamiDashboard() {
           </TCard>
 
           <TCard title="Game Performance · Find the Note">
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:10, marginBottom:12 }}>
               <div style={{ padding:12, background:'rgba(55,65,81,0.3)', borderRadius:8, textAlign:'center' }}>
                 <div style={{ fontSize:9, color:'#9ca3af', marginBottom:6 }}>Find the Note</div>
                 <div style={{ display:'inline-block', padding:'2px 10px', background:'rgba(249,115,22,0.2)', border:'1px solid rgba(249,115,22,0.4)', borderRadius:12, fontSize:11, fontWeight:700, color:'#fb923c', marginBottom:6 }}>Level 1</div>
