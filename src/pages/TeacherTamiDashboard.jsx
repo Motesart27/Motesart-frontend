@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 const STUDENTS = [
   { id:1,  name:'Emma Rodriguez',   initials:'ER',  instrument:'Violin',    dpm:25,  drive:18, passion:25, motivation:32, weeklyMin:0,   goalMin:150, status:'critical', avBg:'#dc2626', trend:'down',  wyl:'Auditory',   lastPractice:'14 days ago', hwRate:0 },
@@ -27,6 +28,7 @@ const WEEKLY_DPM = [
 ]
 
 export default function TeacherTamiDashboard() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
   const [activeStudent, setActiveStudent] = useState(null)
   const [tamiInput, setTamiInput] = useState('')
@@ -80,7 +82,7 @@ export default function TeacherTamiDashboard() {
       </div>
 
       {/* ââ PAGE ââ */}
-      <div style={{ padding:20, maxWidth:1400, margin:'0 auto' }}>
+      <div style={{ padding:20, maxWidth: mob ? '100%' : 1400, margin:'0 auto' }}>
 
         {/* ALERT BANNER */}
         <div style={{ background:'rgba(220,38,38,0.1)', border:'1px solid rgba(220,38,38,0.25)', borderRadius:10, padding:'10px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:10, animation:'fu .3s ease both' }}>
@@ -153,7 +155,7 @@ export default function TeacherTamiDashboard() {
             ð§  TAMi Insights
             <span style={{ fontSize:10, color:'#6b7280', background:'rgba(255,255,255,0.05)', padding:'2px 8px', borderRadius:8 }}>4 this week</span>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+          <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:10 }}>
             {TAMI_INSIGHTS.map((ins, i) => (
               <div key={i} style={{ background:ins.bg, border:`1px solid ${ins.border}`, borderRadius:12, padding:'12px 14px', display:'flex', gap:10 }}>
                 <span style={{ fontSize:18, flexShrink:0 }}>{ins.icon}</span>
@@ -207,7 +209,7 @@ export default function TeacherTamiDashboard() {
 
                 {/* Expanded Detail Panel */}
                 {isActive && (
-                  <div style={{ padding:'14px 16px 16px', background:'rgba(255,255,255,0.02)', borderTop:'1px solid rgba(255,255,255,0.04)', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+                  <div style={{ padding:'14px 16px 16px', background:'rgba(255,255,255,0.02)', borderTop:'1px solid rgba(255,255,255,0.04)', display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr 1fr', gap:12 }}>
                     <div>
                       <div style={{ fontSize:10, color:'#6b7280', fontWeight:600, marginBottom:8, textTransform:'uppercase', letterSpacing:0.5 }}>DPM Breakdown</div>
                       {[
@@ -254,7 +256,7 @@ export default function TeacherTamiDashboard() {
         </div>
 
         {/* WYL PROFILE + PRACTICE ANALYTICS */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, animation:'fu .3s ease .2s both' }}>
+        <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:14, animation:'fu .3s ease .2s both' }}>
 
           {/* WYL Profile */}
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:18 }}>
@@ -283,7 +285,7 @@ export default function TeacherTamiDashboard() {
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:18 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:4 }}>ðµ Practice Analytics</div>
             <div style={{ fontSize:10, color:'#6b7280', marginBottom:14 }}>This week across all students</div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:10, marginBottom:14 }}>
               {[
                 { num:'88m',  label:'Avg Weekly Practice',  color:'#2dd4bf' },
                 { num:'72%',  label:'HW Completion Rate',   color:'#34d399' },
@@ -291,7 +293,7 @@ export default function TeacherTamiDashboard() {
                 { num:'3',    label:'Zero Practice',        color:'#f87171' },
               ].map((s, i) => (
                 <div key={i} style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:10, padding:'12px', textAlign:'center' }}>
-                  <div style={{ fontSize:22, fontWeight:800, color:s.color, lineHeight:1 }}>{s.num}</div>
+                  <div style={{ fontSize: mob ? 17 : 22, fontWeight:800, color:s.color, lineHeight:1 }}>{s.num}</div>
                   <div style={{ fontSize:9, color:'#6b7280', marginTop:3, textTransform:'uppercase', letterSpacing:0.3 }}>{s.label}</div>
                 </div>
               ))}
