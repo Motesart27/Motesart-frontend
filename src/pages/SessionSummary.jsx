@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import useIsMobile from '../hooks/useIsMobile.js'
 
 const css = `
 .ss-page{min-height:100vh;background:linear-gradient(135deg,#111827,#111827,#1f2937);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
@@ -46,10 +47,11 @@ const LEADERS = [
 ]
 
 export default function SessionSummary() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
   return (
     <div className="ss-page"><style>{css}</style>
-      <div className="ss-header"><h1 style={{fontSize:24,fontWeight:700}}>Session Complete!</h1><p style={{fontSize:13,color:'#9ca3af',marginTop:4}}>Game Mode • Find the Note</p></div>
+      <div className="ss-header"><h1 style={{fontSize: mob ? 18 : 24,fontWeight:700}}>Session Complete!</h1><p style={{fontSize:13,color:'#9ca3af',marginTop:4}}>Game Mode • Find the Note</p></div>
       <div className="ss-main">
         <div className="ss-section"><div className="ss-perf">
           <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#14b8a6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="62.8"/></svg><div className="ss-ring-val">75%</div><div className="ss-ring-label">Accuracy</div></div>
