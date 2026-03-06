@@ -3,6 +3,7 @@ import TamiChat from '../components/TamiChat';
 import tamiImg from './assets/amb-image-1.png';
 import avatarImg from './assets/amb-image-2.png';
 import './AmbassadorDashboard.css';
+import { useAuth } from '../context/AuthContext.jsx';
 
 // Sub-components
 export const TopNav = ({ activeTab, setActiveTab, onIntelClick, onStudentsClick }) => {
@@ -44,7 +45,7 @@ export const TopNav = ({ activeTab, setActiveTab, onIntelClick, onStudentsClick 
         ))}
       </div>
       <div className="nav-right">
-        <span className="nav-user">Motesart · Musician Ambassador</span>
+        <span className="nav-user">{user?.name || 'User'} · Musician Ambassador</span>
         <div className="bell">
           🔔
           <div className="bell-badge">3</div>
@@ -60,7 +61,7 @@ export const ProfileHeader = ({ onTamiClick }) => {
     <div className="profile-header">
       <div className="back-btn" onClick={() => window.history.back()}>←</div>
       <div style={{ flex: 1 }}>
-        <div className="p-name">Motesart</div>
+        <div className="p-name"{user?.name || 'User'}t</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
           <span className="badge-amb">AMBASSADOR</span>
           <span className="badge-musician">🎵 Musician</span>
@@ -108,7 +109,7 @@ export const OrbitalHero = () => {
         <div className="orbit-ring ring2" />
         <div className="orbit-ring ring3" />
         <div className="orb-center">
-          <img src={avatarImg} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+          <img src={avatarImg} alt={user?.name || "User"} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
         </div>
         {stats.map((stat) => (
           <div key={stat.id} className={`orb-stat ${stat.animation}`}>
@@ -123,7 +124,7 @@ export const OrbitalHero = () => {
       </div>
 
       <div className="orbital-info">
-        <div className="oi-greeting">Good afternoon, Motesart 🎵</div>
+        <div className="oi-greeting">Good afternoon, {user?.name || 'User'} 🎵</div>
         <div className="oi-sub">Your referral impact is in the top 12% of all ambassadors this month.</div>
         <div className="ref-row">
           <span className="ref-label">Your code:</span>
@@ -458,7 +459,7 @@ export const IntelligenceOverlay = ({ isOpen, onClose, onTamiClick }) => {
         </button>
         <div className="intel-title-block">
           <div className="intel-title">🧠 Intelligence Dashboard</div>
-          <div className="intel-sub">Motesart · Ambassador Intelligence Profile</div>
+          <div className="intel-sub">{user?.name || 'User'} · Ambassador Intelligence Profile</div>
         </div>
         <div className="intel-tami-pill" onClick={onTamiClick}>
           <div className="i-online" />
@@ -473,7 +474,7 @@ export const IntelligenceOverlay = ({ isOpen, onClose, onTamiClick }) => {
           <div>
             <div className="ii-label">T.A.M.i Intelligence Analysis</div>
             <div className="ii-text">
-              Motesart's teaching style is <strong style={{ color: '#a78bfa' }}>highly adaptive and motivational</strong> — best matched to beginners and intermediate learners aged 10–25.
+              {user?.name || 'User'}'s teaching style is <strong style={{ color: '#a78bfa' }}>highly adaptive and motivational</strong> — best matched to beginners and intermediate learners aged 10–25.
               His communication fingerprint shows strong <strong style={{ color: '#22c55e' }}>energetic coaching energy</strong> with natural musical authority. Recommend short-form video content
               (Reels) to maximize reach. Voice mimic profile is ready for preview. 🎯
             </div>
@@ -954,7 +955,7 @@ export const StudentsOverlay = ({ isOpen, onClose, onTamiClick }) => {
         </button>
         <div className="intel-title-block">
           <div className="intel-title">🎓 Students Dashboard</div>
-          <div className="intel-sub">Motesart · Your Referred Students</div>
+          <div className="intel-sub">{user?.name || 'User'} · Your Referred Students</div>
         </div>
         <div className="intel-tami-pill" onClick={onTamiClick}>
           <div className="i-online" />
@@ -1050,6 +1051,7 @@ export const StudentsOverlay = ({ isOpen, onClose, onTamiClick }) => {
 
 // Main Component
 const AmbassadorDashboard = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [intelOpen, setIntelOpen] = useState(false);
   const [studentsOpen, setStudentsOpen] = useState(false);
