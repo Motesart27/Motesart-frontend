@@ -1527,10 +1527,31 @@ body {
   .amb-content { padding: 12px !important; }
   .amb-main { padding-top: 52px; }
   .amb-sidebar { width: 100% !important; position: relative !important; }
+
+  /* Hero orbital section - stack vertically */
+  .orbital-section { flex-direction: column !important; gap: 16px; padding: 10px 0; }
+  .orbital-wrap { width: 260px !important; height: 260px !important; }
+  .orbital-info { padding-left: 0 !important; text-align: center; max-width: 100% !important; }
+  .oi-greeting { font-size: 22px !important; }
+
+  /* Type cards grid - 2 columns on mobile */
+  .type-cards { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .type-card { padding: 14px !important; }
+
+  /* Big stats and analytics */
+  .big-stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .analytics-row { grid-template-columns: 1fr !important; gap: 12px !important; }
+
+  /* Prevent horizontal overflow */
   body { overflow-x: hidden; }
 }
+
 @media (max-width: 480px) {
   .amb-stats-row { grid-template-columns: 1fr !important; }
   .amb-grid-4col { grid-template-columns: 1fr !important; }
   .amb-nav-tabs button { font-size: 10px; padding: 4px 6px; }
+  .orbital-wrap { width: 200px !important; height: 200px !important; }
+  .oi-greeting { font-size: 18px !important; }
+  .type-cards { grid-template-columns: 1fr !important; }
+  .big-stats { grid-template-columns: 1fr !important; }
 }
