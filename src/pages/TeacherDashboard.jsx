@@ -46,6 +46,7 @@ const STATUS_STYLES = {
 }
 
 export default function TeacherDashboard() {
+  const mob = useIsMobile()
   const navigate = useNavigate()
 
   // roster state
@@ -99,6 +100,7 @@ export default function TeacherDashboard() {
     <div style={{ fontFamily:"'Inter',-apple-system,sans-serif", background:'#0a0e1a', color:'#e2e8f0', minHeight:'100vh', fontSize:13, paddingBottom:80 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+import useIsMobile from '../hooks/useIsMobile.js'
         @keyframes fu { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.4} }
         @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
@@ -115,7 +117,7 @@ export default function TeacherDashboard() {
         <div style={overlayStyle} onClick={() => setShowAddStudent(false)}>
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize:16, fontWeight:700, color:'#fff', marginBottom:16 }}>➕ Add New Student</div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12, marginBottom:12 }}>
               {[
                 { label:'Full Name', key:'name', placeholder:'e.g. Emma Rodriguez', type:'text' },
                 { label:'Email', key:'email', placeholder:'student@email.com', type:'email' },
@@ -160,7 +162,7 @@ export default function TeacherDashboard() {
               <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Title</div>
               <input value={newAssignment.title} onChange={e => setNewAssignment(p => ({...p, title:e.target.value}))} placeholder="e.g. Practice C Major Scale" style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }} />
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:10 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:12, marginBottom:10 }}>
               <div>
                 <div style={{ fontSize:10, color:'#6b7280', marginBottom:4 }}>Assign To</div>
                 <select value={newAssignment.assignTo} onChange={e => setNewAssignment(p => ({...p, assignTo:e.target.value}))} style={{ width:'100%', background:'#1a2438', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 10px', color:'#fff', fontSize:12, outline:'none' }}>
@@ -251,7 +253,7 @@ export default function TeacherDashboard() {
       </div>
 
       {/* ── PAGE ── */}
-      <div style={{ padding:20, maxWidth:1400, margin:'0 auto' }}>
+      <div style={{ padding:20, maxWidth: mob ? '100%' : 1400, margin:'0 auto' }}>
 
         {/* 1. COMPACT STAT BAR */}
         <div style={{ background:'linear-gradient(135deg,rgba(124,58,237,0.12),rgba(45,212,191,0.06))', border:'1px solid rgba(124,58,237,0.18)', borderRadius:12, padding:'12px 20px', marginBottom:16, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap', animation:'fu .3s ease both' }}>
@@ -269,7 +271,7 @@ export default function TeacherDashboard() {
               { num:avgDPM+'%',      label:'Avg DPM',   color:'#f87171' },
             ].map((q, i) => (
               <div key={i} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:20, fontWeight:800, lineHeight:1, color:q.color }}>{q.num}</div>
+                <div style={{ fontSize: mob ? 16 : 20, fontWeight:800, lineHeight:1, color:q.color }}>{q.num}</div>
                 <div style={{ fontSize:9, color:'#6b7280', marginTop:2 }}>{q.label}</div>
               </div>
             ))}
@@ -315,11 +317,11 @@ export default function TeacherDashboard() {
           </div>
 
           <div className={`roster-body${rosterOpen ? '' : ' collapsed'}`}>
-            <div style={{ display:'grid', gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 100px', padding:'8px 16px', fontSize:10, fontWeight:600, color:'#6b7280', textTransform:'uppercase', letterSpacing:0.5, background:'rgba(255,255,255,0.01)' }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '2.5fr 1fr 1fr 1fr 1fr 100px', padding:'8px 16px', fontSize:10, fontWeight:600, color:'#6b7280', textTransform:'uppercase', letterSpacing:0.5, background:'rgba(255,255,255,0.01)' }}>
               <div>Student</div><div>DPM</div><div>Practice</div><div>Homework</div><div>Status</div><div>Actions</div>
             </div>
             {displayed.map(s => (
-              <div key={s.id} className="row-hover" style={{ display:'grid', gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 100px', padding:'10px 16px', alignItems:'center', borderTop:'1px solid rgba(255,255,255,0.04)' }}>
+              <div key={s.id} className="row-hover" style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '2.5fr 1fr 1fr 1fr 1fr 100px', padding:'10px 16px', alignItems:'center', borderTop:'1px solid rgba(255,255,255,0.04)' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                   <div style={{ width:32, height:32, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:800, color:'#fff', background:s.avBg, flexShrink:0 }}>{s.initials}</div>
                   <div>
@@ -349,7 +351,7 @@ export default function TeacherDashboard() {
         </div>
 
         {/* 4. SCHEDULE + HOMEWORK */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14, animation:'fu .3s ease .15s both' }}>
+        <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:14, marginBottom:14, animation:'fu .3s ease .15s both' }}>
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden' }}>
             <div style={{ padding:'11px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)', fontSize:13, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
               📅 Today's Schedule <span style={{ fontSize:10, color:'#6b7280' }}>5 lessons</span>
@@ -386,7 +388,7 @@ export default function TeacherDashboard() {
                   { num:4,  label:'Overdue',   color:'#f87171', bg:'rgba(220,38,38,0.08)',   border:'rgba(220,38,38,0.2)' },
                 ].map((h, i) => (
                   <div key={i} style={{ flex:1, textAlign:'center', background:h.bg, border:`1px solid ${h.border}`, borderRadius:10, padding:'10px 6px' }}>
-                    <div style={{ fontSize:20, fontWeight:800, lineHeight:1, marginBottom:3, color:h.color }}>{h.num}</div>
+                    <div style={{ fontSize: mob ? 16 : 20, fontWeight:800, lineHeight:1, marginBottom:3, color:h.color }}>{h.num}</div>
                     <div style={{ fontSize:9, color: h.label==='Overdue' ? '#f87171' : '#6b7280', fontWeight:500, textTransform:'uppercase', letterSpacing:0.3 }}>{h.label}</div>
                   </div>
                 ))}
@@ -411,7 +413,7 @@ export default function TeacherDashboard() {
         </div>
 
         {/* 5. DPM HEALTH + RISK BREAKDOWN */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, animation:'fu .3s ease .2s both' }}>
+        <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:14, animation:'fu .3s ease .2s both' }}>
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:20 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:14 }}>🎯 Class DPM Health</div>
             <div style={{ display:'flex', alignItems:'center', gap:20, flexWrap:'wrap' }}>
@@ -452,7 +454,7 @@ export default function TeacherDashboard() {
 
           <div style={{ background:'#131c2e', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:20 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:14 }}>📊 Risk Breakdown</div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr' : '1fr 1fr', gap:10 }}>
               {[
                 { key:'critical', num:counts.critical, label:'⚠ Critical', color:'#f87171', bg:'rgba(220,38,38,0.1)',  border:'rgba(220,38,38,0.25)' },
                 { key:'atrisk',   num:counts.atrisk,   label:'🔔 At Risk',  color:'#fb923c', bg:'rgba(217,119,6,0.1)',  border:'rgba(217,119,6,0.25)' },
